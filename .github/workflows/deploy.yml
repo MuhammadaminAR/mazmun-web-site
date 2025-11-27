@@ -2,7 +2,7 @@ name: CI/CD MazmunWEB
 
 on:
   push:
-    branches: [ "master" ]   # master ga push bo'lsa ishga tushadi
+    branches: [ "master" ]   # master ga push bo'lsa ishga tushadii
   workflow_dispatch:          # Actions dan qo'lda ham ishga tushirish mumkin
 
 jobs:
