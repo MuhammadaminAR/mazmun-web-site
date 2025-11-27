@@ -2,7 +2,7 @@ name: CI/CD MazmunWEB
 
 on:
   push:
-    branches: [ "master" ]   # master ga push bo'lsa ishga tushadii
+    branches: [ "master" ]   # master ga push bo'lsa ishga tushadi
   workflow_dispatch:          # Actions dan qo'lda ham ishga tushirish mumkin
 
 jobs:
@@ -31,14 +31,14 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H 72.61.136.31 >> ~/.ssh/known_hosts
 
       - name: Copy JAR to server
         run: |
           set -e
-          scp -i ~/.ssh/id_rsa "target/MazmunWebLogin-0.0.1-SNAPSHOT.jar" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/mazmun/mazmunweb/MazmunWebLogin-0.0.1-SNAPSHOT.jar"
+          scp -v -i ~/.ssh/id_rsa target/MazmunWebLogin-0.0.1-SNAPSHOT.jar mazmun@72.61.136.31:/home/mazmun/mazmunweb/MazmunWebLogin-0.0.1-SNAPSHOT.jar
 
       - name: Restart service on server
         run: |
           set -e
-          ssh -i ~/.ssh/id_rsa "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" "sudo systemctl restart mazmunweb && sudo systemctl status mazmunweb --no-pager"
+          ssh -v -i ~/.ssh/id_rsa mazmun@72.61.136.31 "sudo systemctl restart mazmunweb && sudo systemctl status mazmunweb --no-pager"
