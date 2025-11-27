@@ -30,9 +30,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Copy JAR to server
-        run: |
-          scp -i ~/.ssh/id_rsa target/MazmunWebLogin-0.0.1-SNAPSHOT.jar \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/mazmun/mazmunweb/MazmunWebLogin-0.0.1-SNAPSHOT.jar
+        run: scp -i ~/.ssh/id_rsa target/MazmunWebLogin-0.0.1-SNAPSHOT.jar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/mazmun/mazmunweb/MazmunWebLogin-0.0.1-SNAPSHOT.jar
 
       - name: Restart service on server
         run: |
