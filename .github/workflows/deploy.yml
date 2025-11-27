@@ -41,4 +41,4 @@ jobs:
       - name: Restart service on server
         run: |
           set -e
-          ssh -v -i ~/.ssh/id_rsa mazmun@72.61.136.31 "sudo systemctl restart mazmunweb && sudo systemctl status mazmunweb --no-pager"
+          ssh -v -i ~/.ssh/id_rsa mazmun@72.61.136.31 "sudo -n /usr/bin/systemctl restart mazmunweb && sudo -n /usr/bin/systemctl status mazmunweb --no-pager"
