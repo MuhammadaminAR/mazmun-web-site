@@ -1,0 +1,1272 @@
+<!doctype html>
+<html lang="uz">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mazmun — Project</title>
+
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===== VARS / GLOBAL ===== */
+        :root{
+            --brand:#1e7bff; --soft:#f8f9fb; --rounded:22px;
+            /* CTA vars */
+            --cta-grad: linear-gradient(135deg,#1f78ff 0%, #2a55ff 60%, #2144ff 100%);
+            --cta-blue: #1f78ff;
+            --cta-soft: rgba(255,255,255,.14);
+
+            /* navbar sizes */
+            --nav-top:12px;      /* distance from top */
+            --nav-h:64px;        /* desktop navbar height approx */
+            --sheet-w: 380px;    /* mobile sheet width */
+        }
+        @media (max-width: 991.98px){
+            :root{ --nav-h:72px; }
+        }
+
+        html,body{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+        *,*::before,*::after{ box-sizing:border-box; }
+        body{
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            color:#111; overflow-x:hidden;
+            /* space for fixed navbar */
+            padding-top: calc(var(--nav-h) + var(--nav-top) + 16px);
+        }
+
+        .section{padding: min(7vw,72px) 0;}
+        .container-narrow{max-width:1000px;}
+        .shadow-smooth{ box-shadow: 0 10px 28px rgba(18,38,63,.08), 0 2px 8px rgba(18,38,63,.06); }
+        .rounded-22{ border-radius: var(--rounded, 22px); }
+        .rounded-18{ border-radius: 18px; }
+
+        /* ===== NAVBAR (fixed + blur) ===== */
+        .navbar{
+            --bs-navbar-padding-y:0;
+        }
+
+        /* Asosiy blurli konteyner */
+        .navbar-blur{
+            position:fixed;
+            top:12px;
+            left:50%;
+            transform:translateX(-50%);
+            width:min(1200px,94vw);
+            z-index:9999;
+            padding:.65rem 1rem;
+            border-radius:14px;
+            background:rgba(255,255,255,.86);
+            backdrop-filter:saturate(140%) blur(10px);
+            box-shadow:0 10px 30px rgba(0,0,0,.08);
+            line-height:1;
+            flex-wrap:nowrap;
+        }
+
+        .navbar-blur .navbar-brand img{
+            height:34px;
+            width:auto;
+        }
+
+        .navbar-blur .nav-link{
+            font-weight:600;
+            color:#0f172a;
+        }
+
+        /* ===== Toggler: chip-like button + custom icon ===== */
+
+        .navbar-blur .navbar-toggler{
+            border:0;
+            outline:0;
+            width:46px;
+            height:42px;
+            display:grid;
+            place-items:center;
+            border-radius:12px;
+            background:#fff;
+            box-shadow:0 6px 16px rgba(16,24,40,.08);
+            padding:0;
+        }
+
+        .navbar-blur .navbar-toggler:focus{
+            box-shadow:0 0 0 3px rgba(30,123,255,.15);
+        }
+
+        /* Ichidagi custom burger */
+        .navbar-blur .navbar-toggler-icon{
+            width:22px;
+            height:16px;
+            background:none;
+            position:relative;
+            display:block;
+        }
+
+        /* Yuqori va pastki chiziqlar (pseudo) + o‘rta chiziq (child span) */
+        .navbar-blur .navbar-toggler-icon::before,
+        .navbar-blur .navbar-toggler-icon::after,
+        .navbar-blur .navbar-toggler-icon span{
+            content:"";
+            position:absolute;
+            left:0;
+            right:0;
+            height:2px;
+            border-radius:999px;
+            background:#111827;
+            transition:all .18s ease;
+        }
+
+        .navbar-blur .navbar-toggler-icon::before{
+            top:0;
+        }
+
+        .navbar-blur .navbar-toggler-icon::after{
+            bottom:0;
+        }
+
+        .navbar-blur .navbar-toggler-icon span{
+            top:50%;
+            transform:translateY(-50%);
+        }
+
+        /* Ochilganda X animatsiya */
+        .navbar-toggler:not(.collapsed) .navbar-toggler-icon::before{
+            top:50%;
+            transform:translateY(-50%) rotate(45deg);
+        }
+
+        .navbar-toggler:not(.collapsed) .navbar-toggler-icon::after{
+            top:50%;
+            bottom:auto;
+            transform:translateY(-50%) rotate(-45deg);
+        }
+
+        .navbar-toggler:not(.collapsed) .navbar-toggler-icon span{
+            opacity:0;
+        }
+
+        /* ===== MOBILE (max 991.98px) — floating panel, smooth, no glitch ===== */
+
+        @media (max-width: 991.98px){
+            .navbar-blur{
+                padding:.55rem .8rem;
+            }
+
+            /* Panel bazaviy: absolute card ko‘rinishida */
+            #navMain{
+                position:absolute;
+                right:8px;
+                top:calc(100% + 10px);
+                width:min(92vw,380px);
+                background:rgba(255,255,255,.96);
+                backdrop-filter:saturate(150%) blur(12px);
+                border-radius:18px;
+                box-shadow:0 16px 40px rgba(15,23,42,.16);
+                padding:10px;
+                overflow:hidden;
+                z-index:9998;
+            }
+
+            /* Yopiq holat — height animatsiyasiz, faqat opacity/translate */
+            #navMain.collapse{
+                display:block;                /* Bootstrap defaultini chetlab o‘tish */
+                opacity:0;
+                transform:translateY(6px);
+                pointer-events:none;
+            }
+
+            /* Ochilgan holat */
+            #navMain.collapse.show{
+                opacity:1;
+                transform:translateY(0);
+                pointer-events:auto;
+                transition:opacity .18s ease-out, transform .18s ease-out;
+            }
+
+            /* Collapsing holati uchun ham shu logika (sakrashsiz) */
+            #navMain.collapsing{
+                opacity:0;
+                transform:translateY(6px);
+                pointer-events:none;
+                height:auto !important;
+                transition:opacity .18s ease-out, transform .18s ease-out;
+            }
+
+            /* Vertical menu */
+            .navbar-blur .navbar-nav{
+                flex-direction:column;
+                align-items:stretch;
+                gap:.25rem;
+            }
+
+            .navbar-blur .nav-item{
+                width:100%;
+            }
+
+            .navbar-blur .nav-link{
+                padding:.85rem 12px;
+                border-radius:12px;
+                color:#0b1220;
+            }
+
+            .navbar-blur .nav-link:hover{
+                background:#f4f6fb;
+            }
+
+            /* CTA (Aloqa) full width */
+            .navbar-blur .btn{
+                width:100%;
+                justify-content:center;
+                padding:.8rem 1rem;
+                border-radius:999px;
+                font-weight:600;
+            }
+        }
+
+        /* ===== DESKTOP (min 992px) — classic inline menu ===== */
+
+        @media (min-width: 992px){
+            /* Burgerni yashiramiz */
+            .navbar .navbar-toggler{
+                display:none !important;
+            }
+
+            /* Collapse doimiy ko‘rinadigan, inline holat */
+            #navMain{
+                position:static;
+                width:auto;
+                background:transparent;
+                box-shadow:none;
+                padding:0;
+                opacity:1;
+                transform:none;
+                pointer-events:auto;
+                display:flex !important;
+                flex-basis:auto !important;
+                align-items:center;
+            }
+
+            #navMain.collapse,
+            #navMain.collapse.show,
+            #navMain.collapsing{
+                position:static;
+                width:auto;
+                background:transparent;
+                box-shadow:none;
+                padding:0;
+                opacity:1;
+                transform:none;
+                pointer-events:auto;
+                display:flex !important;
+                height:auto !important;
+            }
+
+            .navbar-blur .navbar-nav{
+                flex-direction:row;
+                align-items:center;
+                gap:.5rem;
+            }
+
+            .navbar-blur .nav-link{
+                padding:.4rem .75rem;
+                border-radius:999px;
+            }
+
+            .navbar-blur .nav-link:hover{
+                background:rgba(148,163,253,.09);
+            }
+
+            .navbar-blur .btn{
+                width:auto;
+                padding:.55rem 1.2rem;
+            }
+        }
+
+
+        /* ===== PAGE TITLE ===== */
+        .eyebrow{
+            color:var(--brand); font-weight:800; letter-spacing:.06em; text-transform:uppercase; font-size:.8rem;
+        }
+        .display-title{ font-weight:800; font-size:clamp(28px,4.2vw,48px); line-height:1.15; }
+
+        /* ===== HERO IMAGE ===== */
+        .hero-media{ position:relative; border-radius:18px; overflow:hidden; }
+        .hero-media img{
+            width:100%; height:520px; object-fit:cover; object-position:center; display:block;
+        }
+        .hero-media::after{
+            content:""; position:absolute; inset:0; pointer-events:none;
+            background: repeating-linear-gradient(-45deg, rgba(0,0,0,.06) 0 2px, transparent 2px 18px);
+            mix-blend-mode:multiply;
+        }
+        @supports not (aspect-ratio: 1){
+            /* fallback if you switch to aspect-ratio later */
+        }
+
+        /* ===== INFO BADGES ===== */
+        .info-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:16px; }
+        @media (max-width:992px){ .info-grid{ grid-template-columns:repeat(2,1fr); } }
+        @media (max-width:576px){ .info-grid{ grid-template-columns:1fr; } }
+        .info-card{
+            background:#fff; border:1px solid #eef1f6; border-radius:18px; padding:18px;
+            display:flex; gap:12px; align-items:flex-start; box-shadow:0 12px 28px rgba(0,0,0,.06);
+        }
+        .info-ico{
+            width:42px; height:42px; border-radius:12px; display:grid; place-items:center;
+            background:#e8f1ff; color:var(--brand); font-size:1.1rem; flex:0 0 42px;
+        }
+        .info-cap{ color:#6b7280; font-size:.86rem; margin-bottom:2px; }
+        .info-val{ font-weight:700; }
+
+        /* ===== CONTENT ===== */
+        .leadish{ color:#1f2937; font-size:1.05rem; }
+        .bullets{ margin:14px 0 0 0; padding-left:0; list-style:none; }
+        .bullets li{ padding-left:26px; position:relative; margin:.5rem 0; }
+        .bullets li::before{
+            content:"\f26e"; font-family:"bootstrap-icons"; position:absolute; left:0; top:2px; color:#20c997; font-size:1.05rem;
+        }
+
+        /* ===== 4-image grid ===== */
+        .img-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:18px; }
+        @media (max-width:768px){ .img-grid{ grid-template-columns:1fr; } }
+        .img-tile{ position:relative; overflow:hidden; border-radius:18px; box-shadow:0 12px 28px rgba(0,0,0,.06); }
+        .img-tile img{
+            width:100%; height:280px; object-fit:cover; object-position:center; display:block;
+        }
+        .img-tile::after{
+            content:""; position:absolute; inset:0;
+            background: repeating-linear-gradient(-45deg, rgba(0,0,0,.06) 0 2px, transparent 2px 18px);
+            mix-blend-mode:multiply;
+        }
+
+        /* ===== OUR APPROACH IMAGE ===== */
+        .approach-media{ border-radius:18px; overflow:hidden; box-shadow:0 12px 28px rgba(0,0,0,.06); }
+        .approach-media img{ width:100%; height:420px; object-fit:cover; object-position:center; display:block; }
+
+        /* ===== PROJECTS CAROUSEL (horizontal scroll) ===== */
+        .h-scroll{
+            display:grid; grid-auto-flow:column; grid-auto-columns:minmax(240px,1fr);
+            gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:10px;
+        }
+        .h-scroll>*{ scroll-snap-align:start; }
+        .proj-card{
+            position:relative; overflow:hidden; border:0; border-radius:18px;
+            box-shadow:0 12px 28px rgba(0,0,0,.09); background:#fff;
+            transition: box-shadow .18s ease, transform .18s ease;
+        }
+        .proj-card:hover{ transform: translateY(-1px); box-shadow:0 16px 36px rgba(0,0,0,.12); }
+        .proj-thumb{ height:190px; width:100%; object-fit:cover; object-position:center; display:block; }
+        .proj-overlay{
+            position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:10px;
+            background:rgba(0,0,0,.45); opacity:0; transition:opacity .25s ease;
+        }
+        .proj-card:hover .proj-overlay{ opacity:1; }
+
+        /* ===== CTA (blue) ===== */
+        .cta-section{ background:#f7f9ff; }
+        .cta-wrap{ background:var(--cta-grad); border-radius:22px; box-shadow:0 18px 42px rgba(32,64,210,.22); overflow:hidden; color:#fff; }
+        .cta-title{ font-weight:800; line-height:1.2; font-size:clamp(28px,4.2vw,46px); letter-spacing:.2px; }
+        .cta-btn{
+            --ring: rgba(255,255,255,.35);
+            gap:.75rem; padding:.9rem 1.2rem; background:#fff; color:#0f172a; border-radius:999px; font-weight:600;
+            box-shadow:0 10px 22px rgba(13,18,33,.18);
+            text-decoration:none; transition:transform .18s ease, box-shadow .18s ease, background .18s ease; position:relative;
+        }
+        .cta-btn:hover{ transform:translateY(-1px); box-shadow:0 14px 28px rgba(13,18,33,.24); }
+        .cta-btn i{ background:var(--cta-blue); color:#fff; width:34px; height:34px; display:inline-grid; place-items:center; border-radius:50%; transition:transform .18s ease, background .18s ease; }
+        .cta-btn:hover i{ transform:translate(.5px,-.5px); background:#143bff; }
+        .cta-features{ list-style:none; padding:0; margin:0; }
+        .cta-features li{ display:flex; align-items:flex-start; gap:.6rem; font-size:clamp(14px,1.7vw,16px); margin:.35rem 0; opacity:.95; }
+        .cta-features i{ color:#cce1ff; font-size:1.1rem; margin-top:.15rem; filter:drop-shadow(0 2px 6px rgba(0,0,0,.15)); }
+        .cta-media{ position:relative; border-radius:22px; overflow:hidden; border:3px solid var(--cta-soft);
+            box-shadow:0 12px 28px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.15); }
+        .cta-media:before{ content:""; position:absolute; inset:-30% -10% auto -10%; height:70%; pointer-events:none;
+            background:radial-gradient(60% 60% at 20% 20%, rgba(255,255,255,.35), transparent 55%); filter:blur(28px); }
+        .cta-media img{ display:block; width:100%; height:auto; }
+        @media (max-width: 991.98px){ .cta-wrap{ border-radius:18px; } .cta-media{ margin-top:.5rem; } }
+        /* ===== FOOTER ===== */
+        .footer-top{ background:#f5f7fb; padding:48px 0; }
+        .footer-bottom{ background:white; color:black; padding:20px 0; margin-top:24px; border-radius:16px; }
+        .footer-link{ color:inherit; text-decoration:none; }
+        .footer-link:hover{ text-decoration:underline; }
+
+        /* Footer overflow fix (wrap + ms-auto on mobile) */
+        .footer-bottom .container{ display:flex; flex-wrap:wrap; gap:12px; }
+        .footer-bottom .container .ms-auto{
+            margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+        }
+        @media (max-width:576px){
+            .footer-bottom .container{ flex-direction:column; align-items:flex-start; }
+            .footer-bottom .container .ms-auto{ margin-left:0!important; width:100%; gap:10px; }
+        }
+
+        /* ===== Markdown-friendly area (ONLY inside .project-content) ===== */
+        .project-content h2, .project-content h3, .project-content h4{ font-weight:700; margin-top:24px; }
+        .project-content p{ margin:12px 0; }
+        .project-content blockquote{
+            border-left:4px solid #1e7bff; padding-left:14px; margin:18px 0; color:#444; font-style:italic;
+        }
+        .project-content ul{ margin:10px 0 0 0; padding-left:20px; }
+        .project-content code{ background:#f5f7fb; padding:.15rem .35rem; border-radius:6px; }
+        .project-content pre{ background:#0b1220; color:#e6edf3; padding:14px; border-radius:10px; overflow:auto; }
+        .project-content a{ color:#1e7bff; text-decoration:underline; }
+
+
+    /*   CODE TEXT STYLES */
+        /* === Project page code-block: qora fon + yashil matn (terminal uslub) === */
+        .rt-code {
+            background: #000 !important;
+            color: #39ff14 !important;              /* terminal green */
+            padding: 14px 16px !important;
+            border-radius: 12px !important;
+            overflow: auto !important;
+            margin: 12px 0 !important;
+            font: 500 0.95rem/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace !important;
+        }
+
+        /* pre ichidagi har qanday narsa (code/span) inline-pill bo'lib ketmasin */
+        .rt-code > code,
+        .rt-code * {
+            background: transparent !important;
+            color: #39ff14 !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            white-space: pre !important;
+            tab-size: 2;
+        }
+
+        /* Inline code (`...`) avvalgidek qolsin */
+        :not(pre) > code {
+            background: #e5e7eb;
+            color: #111827;
+            padding: .15em .35em;
+            border-radius: .35rem;
+            font-size: .95em;
+        }
+
+        /* Agar highlight.js/prism bor bo'lsa, uni ham neytrallashtiramiz */
+        .rt-code code.hljs,
+        .rt-code code[class*="language-"] {
+            background: transparent !important;
+            color: #39ff14 !important;
+        }
+
+
+
+    /*    video,img*/
+        /* ==== MEDIA (images + videos) ==== */
+        .rt-img, .rt-video {
+            width: 100%;
+            max-width: 720px;         /* default ixcham limit */
+            margin: 1rem auto;
+            border-radius: 12px;
+        }
+
+        /* Images */
+        .rt-img { overflow: hidden; }
+        .rt-img img{
+            display:block; width:100%; height:auto;
+            max-height:70vh; object-fit:contain; border-radius:12px;
+        }
+        .rt-img figcaption{
+            text-align:center; font-size:.9rem; color:#6b7280; margin-top:.4rem;
+        }
+
+        /* Videos (YouTube/Vimeo) */
+        .rt-video{
+            aspect-ratio:16/9; background:#000; overflow:hidden;
+            box-shadow:0 6px 20px rgba(0,0,0,.12);
+        }
+        .rt-video iframe{ width:100%; height:100%; border:0; display:block; }
+        /* Eski hacksni bekor qilish ehtiyot choralari */
+        .rt-video{ padding-bottom:0 !important; height:auto !important; position:static !important; }
+        .rt-video iframe{ position:static !important; }
+
+        /* Modifiers (ixtiyoriy) */
+        .rt-media-sm{ max-width:480px !important; }
+        .rt-media-md{ max-width:640px !important; }
+        .rt-media-lg{ max-width:960px !important; }
+        .rt-media-full{ max-width:100% !important; }
+        .rt-video.r219{ aspect-ratio:21/9; } /* kino vibe */
+        .rt-video.square{ aspect-ratio:1/1; }
+
+        /* Task list */
+        ul.tasklist{ list-style:none; padding-left:0; margin:.75rem 0; }
+        ul.tasklist li.task{ margin:.35rem 0; }
+        ul.tasklist li.task input{ margin-right:.5rem; }
+
+        /* Callouts */
+        .callout{ border-radius:12px; padding:.75rem 1rem; margin:1rem 0; border:1px solid transparent; }
+        .callout .co-title{ font-weight:600; margin-bottom:.25rem; }
+        .callout.info{    background:#eef6ff; border-color:#bfdbfe; }
+        .callout.warning{ background:#fff7ed; border-color:#fed7aa; }
+        .callout.success{ background:#ecfdf5; border-color:#a7f3d0; }
+        .callout.note{    background:#f8fafc; border-color:#e2e8f0; }
+
+        /* Footnotes */
+        .footnotes{ border-top:1px solid #e5e7eb; margin-top:1.5rem; padding-top:.75rem; }
+        .footnotes ol{ margin:.5rem 0 0 1.25rem; }
+        .footnotes .fn-back{ text-decoration:none; margin-left:.35rem; }
+
+        /* Code block (terminal-style) */
+        .rt-code{
+            background:#000; color:#39ff14; padding:14px 16px;
+            border-radius:12px; overflow:auto; margin:12px 0;
+            font:500 .95rem/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+        }
+        .rt-code > code, .rt-code *{
+            background:transparent; color:#39ff14; padding:0; border-radius:0; box-shadow:none; white-space:pre; tab-size:2;
+        }
+
+        /* Highlight */
+        mark{ background:#fff3a3; padding:0 .15em; border-radius:.2em; }
+
+        /* Mobile */
+        @media (max-width:640px){
+            .rt-img, .rt-video{ max-width:100%; }
+        }
+
+        /*FONTS*/
+        /* Asosiy qism — Inter Tight Semibold */
+
+        /* Aksent qism — Playfair Display Semibold Italic */
+        .hero-title .hero-accent{
+            font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+            font-weight: 600;          /* Semibold */
+            font-style: italic;        /* Italic */
+            display: inline-block;
+        }
+
+        /* Agar avval .fw-bold (700) turib qolsa, pastdagini qo‘shib qo‘ying */
+        .hero-title{ font-weight: 600 !important; }
+
+
+        .hero-line{
+            margin: 0;
+            line-height: 1.2;
+            color: #0f172a; /* yoki oq bannerda #fff */
+        }
+
+        /* 1-qism: Playfair Display — Semibold Italic */
+        .hero-accent{
+            display: inline-block;
+            font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+            font-weight: 600;
+            font-style: italic;
+            /* Figma'ga yaqin (bir oz kichikroq) */
+            font-size: clamp(34px, 3.2vw, 44px);
+            letter-spacing: 0; /* kerak bo'lsa sozlang */
+        }
+
+        /* 2-qism: Inter Tight — Semibold, keyingi satrga tushadi */
+        .hero-rest{
+            display: inline;
+            font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-weight: 600;
+            font-style: normal;
+            font-size: clamp(34px, 3.2vw, 44px);
+            letter-spacing: 0; /* kerak bo'lsa -0.01em */
+        }
+        .no-wrap { white-space: nowrap; }
+
+        .stat-value{
+            font-family:"Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-weight:750;        /* “Inter – Solid” ko‘rinishi */
+            font-size:clamp(32px, 6vw, 64px);
+            line-height:1;
+            letter-spacing:-0.01em; /* raqamlarni zichroq ko‘rsatish */
+            color:var(--ink);
+        }
+        .stat-card{
+            font-family:"Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-weight:600;        /* “Inter – Solid” ko‘rinishi */
+            font-size:clamp(32px, 6vw, 64px);
+            line-height:1;
+            letter-spacing:-0.01em; /* raqamlarni zichroq ko‘rsatish */
+            color:var(--ink);
+        }
+
+
+    </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-blur">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/home" id="navHome">
+            <!-- Logotip -->
+            <img src="/files/logo.png" alt="Mazmun">
+        </a>
+
+        <button class="navbar-toggler collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navMain"
+                aria-controls="navMain"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"><span></span></span>
+        </button>
+
+        <div id="navMain" class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                <li class="nav-item"><a class="nav-link fw-semibold" href="/home">Bosh sahifa</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="/posts">Yangiliklar</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="/projects">Loyihalar</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="/about">Biz haqimizda</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="/services">Xizmatlar</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="/price-list">Narxlar</a></li>
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-primary rounded-pill d-inline-flex align-items-center" href="/contact">
+                        Aloqa <i class="bi bi-arrow-up-right ms-1"></i>
+                    </a>
+                </li>
+                <li id="liPanel" class="nav-item ms-lg-2 d-none">
+                    <a id="panelBtn" class="btn btn-dark rounded-pill d-inline-flex align-items-center" href="#">
+                        <i class="bi bi-shield-lock me-1"></i> Admin Panel
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== PAGE HEADING ===== -->
+<section class="section" style="padding-top:120px;">
+    <div class="container">
+        <div class="text-center">
+            <h1 id="projectTitle" class="display-title">Digital Transformation with Streamlined Operations</h1>
+        </div>
+    </div>
+</section>
+
+<!-- ===== HERO IMAGE + INFO ===== -->
+<section class="pb-0">
+    <div class="container">
+        <div class="hero-media">
+            <img id="projectMainImage" src="/files/team.jpg" alt="Project">
+        </div>
+
+        <div class="info-grid mt-3">
+            <div class="info-card">
+                <div class="info-ico"><i class="bi bi-person"></i></div>
+                <div><div class="info-cap">Client</div><div id="clientName" class="info-val">Liora Health</div></div>
+            </div>
+            <div class="info-card">
+                <div class="info-ico"><i class="bi bi-geo-alt"></i></div>
+                <div><div class="info-cap">Location</div><div id="projectLocation" class="info-val">Denver, Colorado, USA</div></div>
+            </div>
+            <div class="info-card">
+                <div class="info-ico"><i class="bi bi-intersect"></i></div>
+                <div><div class="info-cap">Service</div><div id="serviceName" class="info-val">Digital Transformation Strategy</div></div>
+            </div>
+            <div class="info-card">
+                <div class="info-ico"><i class="bi bi-clock-history"></i></div>
+                <div><div class="info-cap">Duration</div><div id="duration" class="info-val">10 Months</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== OVERVIEW + HOW STARTED + 4 IMAGES ===== -->
+<section class="section project-content">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <h3>Overview</h3>
+                <div id="overview" class="leadish">
+                    Liora Health, a mid-sized healthcare provider, was struggling with outdated manual systems and fragmented
+                    communication across departments. Despite offering quality care, inefficiencies created bottlenecks.
+                </div>
+
+                <h3 class="mt-4">How We Started</h3>
+                <div id="howStarted" class="leadish">
+                    We specialize in uncovering operational inefficiencies and replacing them with strategies that enable growth,
+                    scalability, and customer trust.
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="img-grid">
+                    <div class="img-tile"><img id="g1" src="/files/team.jpg" alt=""></div>
+                    <div class="img-tile"><img id="g2" src="/files/team.jpg" alt=""></div>
+                    <div class="img-tile"><img id="g3" src="/files/team.jpg" alt=""></div>
+                    <div class="img-tile"><img id="g4" src="/files/team.jpg" alt=""></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== OUR APPROACH ===== -->
+<section class="section pt-0 project-content">
+    <div class="container">
+        <h3>Our Approach</h3>
+        <div id="approach" class="leadish">
+            We worked hand-in-hand with the leadership team to design a digital-first plan integrating technology
+            with operational strategy to streamline workflows and enhance engagement.
+        </div>
+        <div class="approach-media mt-3">
+            <img id="approachImage" src="https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1600&auto=format&fit=crop" alt="">
+        </div>
+    </div>
+</section>
+
+<!-- ===== FINAL THOUGHTS ===== -->
+<section class="section pt-0 project-content">
+    <div class="container">
+        <h3>Final Thoughts</h3>
+        <div id="finalThoughts" class="leadish">
+            Transformation is about aligning systems, people, and strategy to create lasting impact.
+        </div>
+    </div>
+</section>
+
+<!-- ===== RECENT PROJECTS (home-page dagi h-scroll) ===== -->
+<section class="section" style="background:#f6f8fb;">
+    <div class="container">
+        <h2 class="fw-bold mb-3">Mijozlarimizga qanday <span class="text-italic">yordam</span> berdik</h2>
+
+        <div class="h-scroll" id="projectsRow">
+            <!-- JS bilan to‘ldiriladi -->
+            <template id="projectTpl">
+                <article class="proj-card card">
+                    <img class="proj-thumb" src="" alt="">
+                    <div class="card-body">
+                        <h5 class="mb-0 proj-title">Project title</h5>
+                    </div>
+                    <div class="proj-overlay">
+                        <a class="btn btn-light btn-sm rounded-pill" target="_blank">Overview</a>
+                        <a class="btn btn-primary btn-sm rounded-pill btn-detail">Batafsil</a>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CTA BLUE (home style) ===== -->
+<section class="cta-section py-5">
+    <div class="container">
+        <div class="cta-wrap row g-0 align-items-center">
+            <div class="col-lg-6 p-4 p-md-5">
+                <div class="badge text-bg-light text-primary fw-semibold mb-3 shadow-sm">[ CTA ]</div>
+                <h2 class="hero-line" style="color: white">
+                    <span class="hero-rest fs-1"> Tizim, metodika va </span>
+                    <span class="hero-rest fs-1">brend - birgalikda</span>
+                    <span class="hero-accent fs-1">kuchli natija</span>
+                </h2>
+                <a href="/contact#consulting" class="cta-btn">
+                    <span>Konsultatsiya olish</span>
+                    <i class="bi bi-arrow-up-right"></i>
+                </a>
+                <ul class="cta-features mt-4">
+                    <li><i class="bi bi-check2-circle"></i> O‘quv reja & setka tayyorlash</li>
+                    <li><i class="bi bi-check2-circle"></i> Maktabingiza mos reja va paketlar</li>
+                    <li><i class="bi bi-check2-circle"></i> Litsenziya va hujjatlar to‘plami</li>
+                </ul>
+            </div>
+            <div class="col-lg-6 p-4 p-md-5">
+                <div class="cta-media">
+                    <img src="/files/cta.jpg" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER (home-page bilan bir xil) ===== -->
+<footer class="footer-top">
+    <div class="container">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-6">
+                <h5 class="mb-2">Telegram sahifamizda</h5>
+                <div class="text-muted">Haftalik maslahatlar, amaliy tajribalar va bepul video darslar berib boriladi</div>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <a id="btnSubscribeTG" class="btn btn-primary rounded-pill">
+                    Obuna bo‘lish <i class="bi bi-telegram ms-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row gy-4">
+            <div class="col-12 col-lg-4">
+                <div class="mb-2 small text-muted">Email</div>
+                <div class="fw-semibold">mazmunedu@gmail.com</div>
+                <div class="mt-3 small text-muted">Manzil</div>
+                <div class="fw-semibold">Toshkent shahar, Chilonzor 11 daha, 35</div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="fw-bold mb-2">Main Pages</h6>
+                <div><a class="footer-link" href="#">Bosh sahifa</a></div>
+                <div><a class="footer-link" href="/projects">Loyihalar</a></div>
+                <div><a class="footer-link" href="/services">Xizmatlar</a></div>
+                <div><a class="footer-link" href="/posts">Yangiliklar</a></div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="fw-bold mb-2">Company</h6>
+                <div><a class="footer-link" href="/contact">Aloqa</a></div>
+                <div><a class="footer-link" href="/about">Mazmun haqida</a></div>
+                <div><a class="footer-link" href="/about#team">Jamoa</a></div>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="fw-bold mb-2">Resurslar</h6>
+                <div><a class="footer-link" href="/home#webinar-video">Vebinarlar</a></div>
+                <div><a class="footer-link" href="/contact#faq">FAQ</a></div>
+                <div><a class="footer-link" href="/privacy">Maxfiylik siyosati</a></div>
+            </div>
+        </div>
+
+        <div class="footer-bottom mt-4">
+            <div class="container d-flex flex-wrap align-items-center gap-3">
+                <img src="/files/logo.png" height="22" alt="Mazmun">
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <a class="footer-link" href="https://t.me/mazmun_edu" target="_blank">Telegram</a>
+                    <a class="footer-link" href="https://www.instagram.com/mazmun_edu" target="_blank">Instagram</a>
+                    <a class="footer-link" href="https://www.facebook.com/mazmunedu" target="_blank">Facebook</a>
+                    <a class="footer-link" href="https://www.linkedin.com/company/mazmunedu/posts/?feedView=all" target="_blank">LinkedIn</a>
+                    <span class="mx-2">|</span>
+                    <a class="footer-link" href="/terms">Foydalanish shartlari</a>
+                </div>
+            </div>
+            <div class="container small mt-2" style="opacity:.85;">© 2025 MazmunEDU MCHJ. Barcha huquqlar himoyalangan.</div>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    /* ======= CONFIG (home-page dagi bilan mos) ======= */
+    const TELEGRAM_BOT_URL = 'https://t.me/mazmun_edu_bot';
+    const TELEGRAM_CHANNEL = 'https://t.me/mazmun_edu';
+    const API_PROJECTS     = '/api/projects?size=10';
+    const API_PROJECT_ONE  = (slug)=> `/api/projects/${encodeURIComponent(slug)}`;
+
+    /* ======= R2 media URL helper (home-page dagi bilan aynan bir xil) ======= */
+    function getMediaUrl(media) {
+        if (!media) return '/files/team.jpg';
+        if (typeof media === 'string') {
+            if (/^https?:\/\//i.test(media)) return media;   // absolute
+            if (media.startsWith('/'))        return media;   // relative (/api/media/123/view)
+            return `/api/media/url?key=${encodeURIComponent(media)}`; // object key
+        }
+        if (typeof media === 'number') return `/api/media/${media}/view`;
+        if (media?.url)      return media.url;
+        if (media?.key)      return `/api/media/url?key=${encodeURIComponent(media.key)}`;
+        if (media?.imageKey) return `/api/media/url?key=${encodeURIComponent(media.imageKey)}`;
+        if (media?.mediaKey) return `/api/media/url?key=${encodeURIComponent(media.mediaKey)}`;
+        if (media?.id)       return `/api/media/${media.id}/view`;
+        if (media?.photoId)  return `/api/media/${media.photoId}/view`;
+        if (media?.mediaId)  return `/api/media/${media.mediaId}/view`;
+        return '/files/team.jpg';
+    }
+
+    /* ======= NAVBAR / FOOTER linklar ======= */
+    document.getElementById('navHome')?.addEventListener('click', e => e.preventDefault());
+    document.getElementById('btnSubscribeTG')?.addEventListener('click', e => { e.preventDefault(); window.open(TELEGRAM_CHANNEL,'_blank'); });
+
+    /* ======= URL param (slug) ======= */
+    function getParam(name){ const u = new URL(location.href); return u.searchParams.get(name); }
+
+    /* ======= DEFAULT DATA (design ko‘rish uchun) ======= */
+    const DEFAULT_PROJECT = {
+        title: "Digital Transformation with Streamlined Operations",
+        mainImage: "https://images.unsplash.com/photo-1587613753831-70c1d2825874?q=80&w=1600&auto=format&fit=crop",
+        client: "Liora Health",
+        location: "Denver, Colorado, USA",
+        service: "Digital Transformation Strategy",
+        duration: "10 Months",
+        overview: "Liora Health was struggling with outdated manual systems and fragmented communication.",
+        howStarted: "We uncovered operational inefficiencies and replaced them with scalable strategies.",
+        gallery: [
+            "https://images.unsplash.com/photo-1529336953121-c9e4c4f3e3fd?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1531539134685-27f27b0c0d19?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1200&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1200&auto=format&fit=crop"
+        ],
+        approach: "We integrated technology with operational strategy to streamline workflows.",
+        approachImage: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1600&auto=format&fit=crop",
+        finalThoughts: "Align systems, people, and strategy to create lasting impact."
+    };
+
+    /* ======= Markdown renderer + helpers ======= */
+    function esc(s=''){
+        return String(s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+    }
+    function normalizeApostrophes(s=''){
+        return s
+            .replace(/\r/g,'')
+            .replace(/[‘’`]/g,"'")
+            .replace(/["“”]/g,'"');
+    }
+    function autoLinkOutsideTags(html=''){
+        // very lightweight autolink (safe for our simple blocks)
+        return html.replace(/(^|[^"'=]>|\s)(https?:\/\/[^\s<]+)(?=$|\s|<)/g, (_, pre, url)=> {
+            const safePre = pre.endsWith('>') ? pre : pre;
+            return `${safePre}<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a>`;
+        });
+    }
+
+    function renderRichText(raw=''){
+        if(!raw) return '';
+
+        // ; dan keyin list belgisi kelsa yangi satr
+        raw = raw.replace(/;\s*(?=[—–\-*]\s)/g, ';\n');
+
+        /* 0) Code fence (```) bloklarini vaqtincha chiqarib yuboramiz */
+        const codeBlocks = [];
+        raw = raw.replace(/```([\s\S]*?)```/g, (_, code)=>{
+            const idx = codeBlocks.push(code) - 1;
+            return `\uE000CODE${idx}\uE000`;
+        });
+
+        /* 0.5) Footnote definitions: [^id]: text  */
+        const footnotesMap = {};
+        raw = raw.replace(/^\s*\[\^([^\]\n]+)\]:\s+(.+?)\s*$/gm, (m, id, txt)=>{
+            footnotesMap[id] = (footnotesMap[id]||[]).concat(txt.trim());
+            return '';
+        });
+
+        /* 1) Images: ![alt](url)  */
+        const images = [];
+        raw = raw.replace(/!\[([^\]]*?)\]\((https?:\/\/[^\s)]+)\)/g, (_, alt, src)=>{
+            const i = images.push({ alt: alt||'', src }) - 1;
+            return `\uE000IMG${i}\uE000`;
+        });
+
+        /* 1.1) Markdown LINK-lar ([matn](url)) */
+        const links = [];
+        raw = raw.replace(/\[([^\]\n]+?)\]\((https?:\/\/[^\s)]+)\)/g, (_, txt, url)=>{
+            const i = links.push({ txt, url }) - 1;
+            return `\uE000LNK${i}\uE000`;
+        });
+
+        /* 1.2) Video embed: YouTube/Vimeo yalang URL (alohida qatorda) */
+        const videos = [];
+        raw = raw.replace(/^(?:https?:\/\/[^\s]+)\s*$/gm, (line)=>{
+            const url = line.trim();
+            const yt = /(?:youtu\.be\/([A-Za-z0-9_-]{6,})|youtube\.com\/.*[?&]v=([A-Za-z0-9_-]{6,}))/i.exec(url);
+            const vm = /vimeo\.com\/(\d+)/i.exec(url);
+            if (yt) { const id = yt[1] || yt[2]; videos.push({type:'youtube', id}); return `\uE000VID${videos.length-1}\uE000`; }
+            if (vm) { const id = vm[1];         videos.push({type:'vimeo',  id}); return `\uE000VID${videos.length-1}\uE000`; }
+            return line;
+        });
+
+        /* 1.3) Callouts
+           ::: info|warning|success|note
+           content...
+           ::: */
+        const callouts = [];
+        raw = raw.replace(/^\s*:::\s*(info|warning|success|note)\s*\n([\s\S]*?)^\s*:::\s*$/gm, (m, kind, body)=>{
+            const i = callouts.push({ kind, body: body.trim() }) - 1;
+            return `\uE000CAL${i}\uE000`;
+        });
+
+        /* 2a) ESCAPED blockquote: satr boshida \> bo'lsa literal */
+        const gtLines = [];
+        raw = raw.replace(/^\s*\\>(.*)$/gm, (_, rest='')=>{
+            const i = gtLines.push(rest) - 1;
+            return `\uE000GTL${i}\uE000`;
+        });
+
+        /* 2b) Blockquote — NESTED qo‘llab-quvvatlash */
+        const quotes = [];
+        raw = raw.replace(/(?:^\s*>\s?.+(?:\n|$))+?/gm, (block)=>{
+            const lines = block.replace(/\n$/, '').split('\n');
+            const qLines = lines.map(ln=>{
+                const m = ln.match(/^\s*(>+)\s?(.*)$/);
+                return m ? { level: m[1].length, text: m[2]||'' } : null;
+            }).filter(Boolean);
+            const i = quotes.push(qLines) - 1;
+            return `\uE000BQ${i}\uE000`;
+        });
+
+        /* 3) Apostroflarni normallashtiramiz */
+        raw = normalizeApostrophes(raw);
+
+        /* 4) Escape */
+        let text = esc(raw);
+
+        /* 5) Inline code */
+        text = text.replace(/`([^`\n]+?)`/g, (_, x)=>{
+            return `<code>${String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</code>`;
+        });
+
+        /* 5.1) Highlight: ==text== */
+        text = text.replace(/==([^=\n][\s\S]*?)==/g, '<mark>$1</mark>');
+
+        /* 6) Bold/Italic */
+        text = text
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+            .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+            .replace(/_([^_]+)_/g, '<em>$1</em>');
+
+        /* 7) Headings (#, ##, ### faqat # dan keyin bo'shliq bo'lsa) */
+        text = text
+            .replace(/^###\s+(.+)$/gm, '<h4>$1</h4>')
+            .replace(/^##\s+(.+)$/gm, '<h3>$1</h3>')
+            .replace(/^#\s+(.+)$/gm,  '<h2>$1</h2>');
+
+        /* 8) Bulleted lists */
+        text = text.replace(
+            /(?:^|\n)((?:\s*[—–\-*]\s+.+(?:\n|$))+)/g,
+            (m, block)=>{
+                const items = block.trim().split(/\n/)
+                    .map(l=> l.replace(/^\s*[—–\-*]\s+/, '').trim())
+                    .filter(Boolean).map(li=> `<li>${li}</li>`).join('');
+                return `\n<ul>${items}</ul>\n`;
+            }
+        );
+
+        /* 8.1) Checklist / Task list: - [ ] / - [x] */
+        text = text.replace(
+            /(?:^|\n)((?:\s*-\s\[(?: |x|X)\]\s+.+(?:\n|$))+)/g,
+            (m, block)=>{
+                const items = block.trim().split(/\n/).map(l=>{
+                    const mm = l.match(/^\s*-\s\[( |x|X)\]\s+(.+)$/);
+                    if(!mm) return '';
+                    const checked = /x/i.test(mm[1]);
+                    const label = mm[2].trim();
+                    return `<li class="task"><label><input type="checkbox" ${checked?'checked':''} disabled> <span>${label}</span></label></li>`;
+                }).join('');
+                return `\n<ul class="tasklist">${items}</ul>\n`;
+            }
+        );
+
+        /* 8.5) Literal '\>' ni qaytarish */
+        text = text.replace(/\uE000GTL(\d+)\uE000/g, (_, i)=>{
+            const rest = normalizeApostrophes(gtLines[+i] || '');
+            return `&gt;${esc(rest)}`;
+        });
+
+        /* 9) Paragraflar */
+        text = text.replace(/\r/g,'').replace(/\t/g,'  ');
+        const blocks = text
+            .split(/\n{2,}/)
+            .map(b=> b.trim())
+            .filter(Boolean)
+            .map(b=> /^<(h2|h3|h4|ul|ol|blockquote|pre|table|figure|div class="callout"|div class='callout')/i.test(b) ? b : `<p>${b.replace(/\n/g,'<br>')}</p>`);
+        let html = blocks.join('\n');
+
+        /* 10) LINK/IMG/Vid tiklash */
+        // helper: URL rasmmi yoki Google imgresmi?
+        function extractImageSrc(url){
+            try{
+                const u = new URL(url);
+                if (/\.(png|jpe?g|webp|gif|bmp|svg)(?:\?|#|$)/i.test(u.pathname)) return url;
+                const imgurl = u.searchParams.get('imgurl') || u.searchParams.get('imgrefurl') || u.searchParams.get('mediaurl');
+                if (imgurl) return imgurl;
+                return null;
+            }catch{ return null; }
+        }
+
+        // IMG (markdown ![]())
+        html = html.replace(/\uE000IMG(\d+)\uE000/g, (_, i)=>{
+            const im = images[+i] || {alt:'',src:''};
+            const alt = esc(im.alt||'');
+            const src0 = im.src||'';
+            const src = esc(extractImageSrc(src0) || src0);
+            return `<figure class="rt-img"><img loading="lazy" src="${src}" alt="${alt}">${alt?`<figcaption>${alt}</figcaption>`:''}</figure>`;
+        });
+
+        // LINK — agar rasm bo'lsa rasmga aylantiramiz, bo‘lmasa oddiy <a>
+        html = html.replace(/\uE000LNK(\d+)\uE000/g, (_, i)=>{
+            const L = links[+i] || {txt:'',url:''};
+            const alt = esc(L.txt||'');
+            const srcCandidate = extractImageSrc(L.url);
+            if (srcCandidate){
+                const src = esc(srcCandidate);
+                return `<figure class="rt-img"><img loading="lazy" src="${src}" alt="${alt}">${alt?`<figcaption>${alt}</figcaption>`:''}</figure>`;
+            }
+            return `<a href="${esc(L.url)}" target="_blank" rel="noopener noreferrer">${esc(L.txt)}</a>`;
+        });
+
+        // Nested blockquote tiklash
+        function renderNestedQuotes(qLines){
+            if(!qLines || !qLines.length) return '';
+            let out = '', level = 0;
+            const open = n=>{ for(let i=0;i<n;i++){ out += '<blockquote>'; level++; } };
+            const close= n=>{ for(let i=0;i<n;i++){ out += '</blockquote>'; level--; } };
+            qLines.forEach(({level:lv, text})=>{
+                if (lv>level) open(lv-level); else if (lv<level) close(level-lv);
+                out += `<p>${esc(normalizeApostrophes(text)).replace(/\n/g,'<br>')}</p>`;
+            });
+            if (level>0) close(level);
+            return out;
+        }
+        html = html.replace(/\uE000BQ(\d+)\uE000/g, (_, i)=> renderNestedQuotes(quotes[+i]||[]));
+
+        // Code fence
+        html = html.replace(/\uE000CODE(\d+)\uE000/g, (_, i)=> {
+            const code = String(codeBlocks[i]||'')
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            return `<pre class="rt-code"><code>${code}</code></pre>`;
+        });
+
+        // Callouts
+        html = html.replace(/\uE000CAL(\d+)\uE000/g, (_, i)=>{
+            const c = callouts[+i] || {kind:'info', body:''};
+            const body = esc(normalizeApostrophes(c.body)).replace(/\n/g,'<br>');
+            return `<div class="callout ${c.kind}"><div class="co-title">${c.kind.toUpperCase()}</div><div class="co-body">${body}</div></div>`;
+        });
+
+        // Video embed
+        html = html.replace(/\uE000VID(\d+)\uE000/g, (_, i)=>{
+            const v = videos[+i];
+            if(!v) return '';
+            if (v.type==='youtube')
+                return `<div class="rt-video"><iframe src="https://www.youtube.com/embed/${esc(v.id)}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+            if (v.type==='vimeo')
+                return `<div class="rt-video"><iframe src="https://player.vimeo.com/video/${esc(v.id)}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+            return '';
+        });
+
+        // Footnote references
+        let footnoteOrder = [];
+        html = html.replace(/\[\^([^\]\s]+)\]/g, (_, id)=>{
+            footnoteOrder.push(id);
+            const safe = esc(id);
+            return `<sup id="fnref-${safe}" class="footnote-ref"><a href="#fn-${safe}">[${safe}]</a></sup>`;
+        });
+
+        // Autolink — eng oxirida
+        html = autoLinkOutsideTags(html);
+
+        // Footnotes section
+        if (footnoteOrder.length) {
+            const seen = new Set();
+            const ordered = footnoteOrder.filter(id=> (seen.has(id)?false:(seen.add(id), true)));
+            const list = ordered.map(id=>{
+                const text = (footnotesMap[id]||['[missing]']).join(' ');
+                return `<li id="fn-${esc(id)}"><span>${esc(text)}</span> <a class="fn-back" href="#fnref-${esc(id)}">↩</a></li>`;
+            }).join('');
+            html += `\n<section class="footnotes"><ol>${list}</ol></section>`;
+        }
+
+        return html;
+    }
+
+
+    /* ======= RENDER ======= */
+    function renderProject(p){
+        document.getElementById("projectTitle").textContent = p.title || '—';
+        document.getElementById("projectMainImage").src     = p.mainImage ? getMediaUrl(p.mainImage) : DEFAULT_PROJECT.mainImage;
+
+        document.getElementById("clientName").textContent     = p.client || '—';
+        document.getElementById("projectLocation").textContent= p.location || '—';
+        document.getElementById("serviceName").textContent    = p.service || '—';
+        document.getElementById("duration").textContent       = p.duration || '—';
+
+        // ✅ Markdown-enabled fields
+        document.getElementById("overview").innerHTML     = renderRichText(p.overview || DEFAULT_PROJECT.overview);
+        document.getElementById("howStarted").innerHTML   = renderRichText(p.howStarted || DEFAULT_PROJECT.howStarted);
+
+
+        const gallery = (p.gallery && p.gallery.length ? p.gallery : DEFAULT_PROJECT.gallery);
+        ["g1","g2","g3","g4"].forEach((id,idx)=>{ const el=document.getElementById(id); if(el && gallery[idx]) el.src = getMediaUrl(gallery[idx]); });
+
+        document.getElementById("approach").innerHTML = renderRichText(p.approach || DEFAULT_PROJECT.approach);
+        document.getElementById("approachImage").src = p.approachImage ? getMediaUrl(p.approachImage) : DEFAULT_PROJECT.approachImage;
+
+        document.getElementById("finalThoughts").innerHTML = renderRichText(p.finalThoughts || DEFAULT_PROJECT.finalThoughts);
+    }
+
+    /* ======= LOAD ONE PROJECT by slug ======= */
+    (async function loadProject(){
+        const slug = getParam('slug') || 'dx-streamlined';
+        try{
+            const {data} = await axios.get(API_PROJECT_ONE(slug));
+            const imgs    = Array.isArray(data.images) ? data.images : [];
+            const bySlot  = slot => imgs.filter(x => x.slot === slot).sort((a,b)=> (a.sortOrder??0)-(b.sortOrder??0));
+            const cover   = bySlot('COVER')[0];
+            const gallery = bySlot('GALLERY').map(x => x.url);
+            const apprImg = bySlot('APPROACH')[0];
+
+            // start/end dan duration chiqarib berish (bor bo‘lsa)
+            function calcDuration(sd, ed){
+                if(!sd || !ed) return data.duration || '';
+                try{
+                    const s = new Date(sd), e = new Date(ed);
+                    const months = (e.getFullYear()-s.getFullYear())*12 + (e.getMonth()-s.getMonth());
+                    if(months > 0) return months + ' months';
+                    const days = Math.max(1, Math.round((e-s)/86400000));
+                    return days + ' days';
+                }catch{ return data.duration || ''; }
+            }
+
+            const p = {
+                title: data.title,
+                mainImage: (cover?.url || data.coverUrl),
+                client: data.clientName || data.client || '',
+                location: data.location || '',
+                service: data.service || data.serviceName || '',
+                duration: calcDuration(data.startDate, data.endDate),
+                overview: data.overview || data.description || '',
+                howStarted: data.howStarted || data.howWeStarted || '',
+                gallery,
+                approach: data.approach || '',
+                approachImage: apprImg?.url,
+                finalThoughts: data.finalThoughts || data.conclusion || ''
+            };
+            renderProject(p);
+        }catch(err){
+            if (err.response && err.response.status === 404) {
+                location.href = '/error/404';
+            } else {
+                // ixtiyoriy: /error/5xx.html
+                location.href = '/error/5xx';
+            }
+            console.warn('Error Page');
+        }
+    })();
+
+    /* ======= LOAD RECENT PROJECTS (home-page dagi kabi) ======= */
+    (async function loadProjects(){
+        const row = document.getElementById('projectsRow');
+        const tpl = document.getElementById('projectTpl');
+        try{
+            const {data} = await axios.get(API_PROJECTS);
+            const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+
+            items.forEach(p=>{
+                const node = tpl.content.cloneNode(true);
+                const coverSrc = getMediaUrl(p.coverUrl || p.cover || p.media || p.imageKey || p.coverKey || p.photo);
+
+                node.querySelector('.proj-thumb').src = coverSrc;
+                node.querySelector('.proj-thumb').alt = p.title || 'Project';
+                node.querySelector('.proj-title').textContent = p.title || '—';
+                node.querySelector('.btn-detail').href = `/project?slug=${encodeURIComponent(p.slug || p.id)}`;
+
+                const overA = node.querySelector('.proj-overlay a.btn-light');
+                if (p.overviewUrl) overA.href = p.overviewUrl; else overA.removeAttribute('href');
+
+                row.appendChild(node);
+            });
+
+            if(!row.children.length)
+                row.insertAdjacentHTML('beforeend','<div class="text-muted">Loyihalar hali qo‘shilmagan.</div>');
+        }catch(e){
+            console.error(e);
+            row.insertAdjacentHTML('beforeend','<div class="text-danger">Loyihalar yuklanmadi.</div>');
+        }
+    })();
+</script>
+</body>
+</html>

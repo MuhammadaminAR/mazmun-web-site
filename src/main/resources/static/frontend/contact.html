@@ -1,0 +1,1049 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aloqa — Mazmun</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <style>
+    /* ====== GLOBAL / VARS ====== */
+    :root{
+      --brand:#1e7bff; --soft:#f5f7fb; --rounded:22px;
+
+      /* Office section vars */
+      --page-max: 1200px;
+      --gutter: 24px;
+      --radius: 22px;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --bg-soft: #f6f7fb;
+      --ink: #0b0f19;
+      --muted: #6b7280;
+      --badge: #0d6efd;
+
+      /* Navbar sizing */
+      --nav-pad-y: 10px;      /* vertical padding inside navbar */
+      --nav-min-h: 64px;      /* predictable min height of the navbar */
+
+      /* CTA vars */
+      --cta-grad: linear-gradient(135deg,#1f78ff 0%, #2a55ff 60%, #2144ff 100%);
+      --cta-blue: #1f78ff;
+      --cta-soft: rgba(255,255,255,.14);
+    }
+
+    /* Android font-boosting off */
+    html, body, .navbar-blur{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    *, *::before, *::after { box-sizing:border-box; }
+
+    body{background:#fff;}
+    .section{padding:72px 0;}
+    .rounded-22{border-radius:22px;}
+    .shadow-smooth{box-shadow:0 12px 35px rgba(24,39,75,.08);}
+    .text-italic{font-family:"Inter",Inter,serif;font-style:italic;}
+
+    /* Give room for fixed navbar on phones/tablets */
+    @media (max-width: 991.98px){
+      body{ padding-top: 96px; }
+    }
+
+    /* ===== NAVBAR (fixed + blur) ===== */
+    .navbar{
+      --bs-navbar-padding-y:0;
+    }
+
+    /* Asosiy blurli konteyner */
+    .navbar-blur{
+      position:fixed;
+      top:12px;
+      left:50%;
+      transform:translateX(-50%);
+      width:min(1200px,94vw);
+      z-index:9999;
+      padding:.65rem 1rem;
+      border-radius:14px;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:saturate(140%) blur(10px);
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+      line-height:1;
+      flex-wrap:nowrap;
+    }
+
+    .navbar-blur .navbar-brand img{
+      height:34px;
+      width:auto;
+    }
+
+    .navbar-blur .nav-link{
+      font-weight:600;
+      color:#0f172a;
+    }
+
+    /* ===== Toggler: chip-like button + custom icon ===== */
+
+    .navbar-blur .navbar-toggler{
+      border:0;
+      outline:0;
+      width:46px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border-radius:12px;
+      background:#fff;
+      box-shadow:0 6px 16px rgba(16,24,40,.08);
+      padding:0;
+    }
+
+    .navbar-blur .navbar-toggler:focus{
+      box-shadow:0 0 0 3px rgba(30,123,255,.15);
+    }
+
+    /* Ichidagi custom burger */
+    .navbar-blur .navbar-toggler-icon{
+      width:22px;
+      height:16px;
+      background:none;
+      position:relative;
+      display:block;
+    }
+
+    /* Yuqori va pastki chiziqlar (pseudo) + o‘rta chiziq (child span) */
+    .navbar-blur .navbar-toggler-icon::before,
+    .navbar-blur .navbar-toggler-icon::after,
+    .navbar-blur .navbar-toggler-icon span{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      height:2px;
+      border-radius:999px;
+      background:#111827;
+      transition:all .18s ease;
+    }
+
+    .navbar-blur .navbar-toggler-icon::before{
+      top:0;
+    }
+
+    .navbar-blur .navbar-toggler-icon::after{
+      bottom:0;
+    }
+
+    .navbar-blur .navbar-toggler-icon span{
+      top:50%;
+      transform:translateY(-50%);
+    }
+
+    /* Ochilganda X animatsiya */
+    .navbar-toggler:not(.collapsed) .navbar-toggler-icon::before{
+      top:50%;
+      transform:translateY(-50%) rotate(45deg);
+    }
+
+    .navbar-toggler:not(.collapsed) .navbar-toggler-icon::after{
+      top:50%;
+      bottom:auto;
+      transform:translateY(-50%) rotate(-45deg);
+    }
+
+    .navbar-toggler:not(.collapsed) .navbar-toggler-icon span{
+      opacity:0;
+    }
+
+    /* ===== MOBILE (max 991.98px) — floating panel, smooth, no glitch ===== */
+
+    @media (max-width: 991.98px){
+      .navbar-blur{
+        padding:.55rem .8rem;
+      }
+
+      /* Panel bazaviy: absolute card ko‘rinishida */
+      #navMain{
+        position:absolute;
+        right:8px;
+        top:calc(100% + 10px);
+        width:min(92vw,380px);
+        background:rgba(255,255,255,.96);
+        backdrop-filter:saturate(150%) blur(12px);
+        border-radius:18px;
+        box-shadow:0 16px 40px rgba(15,23,42,.16);
+        padding:10px;
+        overflow:hidden;
+        z-index:9998;
+      }
+
+      /* Yopiq holat — height animatsiyasiz, faqat opacity/translate */
+      #navMain.collapse{
+        display:block;                /* Bootstrap defaultini chetlab o‘tish */
+        opacity:0;
+        transform:translateY(6px);
+        pointer-events:none;
+      }
+
+      /* Ochilgan holat */
+      #navMain.collapse.show{
+        opacity:1;
+        transform:translateY(0);
+        pointer-events:auto;
+        transition:opacity .18s ease-out, transform .18s ease-out;
+      }
+
+      /* Collapsing holati uchun ham shu logika (sakrashsiz) */
+      #navMain.collapsing{
+        opacity:0;
+        transform:translateY(6px);
+        pointer-events:none;
+        height:auto !important;
+        transition:opacity .18s ease-out, transform .18s ease-out;
+      }
+
+      /* Vertical menu */
+      .navbar-blur .navbar-nav{
+        flex-direction:column;
+        align-items:stretch;
+        gap:.25rem;
+      }
+
+      .navbar-blur .nav-item{
+        width:100%;
+      }
+
+      .navbar-blur .nav-link{
+        padding:.85rem 12px;
+        border-radius:12px;
+        color:#0b1220;
+      }
+
+      .navbar-blur .nav-link:hover{
+        background:#f4f6fb;
+      }
+
+      /* CTA (Aloqa) full width */
+      .navbar-blur .btn{
+        width:100%;
+        justify-content:center;
+        padding:.8rem 1rem;
+        border-radius:999px;
+        font-weight:600;
+      }
+    }
+
+    /* ===== DESKTOP (min 992px) — classic inline menu ===== */
+
+    @media (min-width: 992px){
+      /* Burgerni yashiramiz */
+      .navbar .navbar-toggler{
+        display:none !important;
+      }
+
+      /* Collapse doimiy ko‘rinadigan, inline holat */
+      #navMain{
+        position:static;
+        width:auto;
+        background:transparent;
+        box-shadow:none;
+        padding:0;
+        opacity:1;
+        transform:none;
+        pointer-events:auto;
+        display:flex !important;
+        flex-basis:auto !important;
+        align-items:center;
+      }
+
+      #navMain.collapse,
+      #navMain.collapse.show,
+      #navMain.collapsing{
+        position:static;
+        width:auto;
+        background:transparent;
+        box-shadow:none;
+        padding:0;
+        opacity:1;
+        transform:none;
+        pointer-events:auto;
+        display:flex !important;
+        height:auto !important;
+      }
+
+      .navbar-blur .navbar-nav{
+        flex-direction:row;
+        align-items:center;
+        gap:.5rem;
+      }
+
+      .navbar-blur .nav-link{
+        padding:.4rem .75rem;
+        border-radius:999px;
+      }
+
+      .navbar-blur .nav-link:hover{
+        background:rgba(148,163,253,.09);
+      }
+
+      .navbar-blur .btn{
+        width:auto;
+        padding:.55rem 1.2rem;
+      }
+    }
+
+
+    /* ===== Office Location ===== */
+    .container-ml{
+      max-width: var(--page-max);
+      margin-inline: auto;
+      padding-inline: clamp(12px, 3vw, 24px);
+    }
+    .section-office{ background: var(--bg-soft); padding: clamp(28px, 4vw, 56px) 0; }
+    .office-grid{ display:grid; grid-template-columns:1fr 1fr; gap: var(--gutter); }
+
+    .office-left{ display:grid; grid-template-rows:auto auto; gap: var(--gutter); }
+    .office-head h2{
+      margin:0 0 10px 0; font-weight:800; color:var(--ink); line-height:1.1;
+      font-size:clamp(30px,5.2vw,58px);
+    }
+    .office-head h2 .ita{ font-style:italic; font-weight:700; }
+    .office-head p{ margin:6px 0 0 0; color:var(--muted); font-size:clamp(15px,1.7vw,18px); }
+
+    .cards-row{
+      display:grid; grid-template-columns:1fr 1fr; gap:var(--gutter);
+      transform: translateY(-50px);           /* desktop only; canceled on mobile */
+    }
+    .loc-card{
+      background:#fff; border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:clamp(14px,2.2vw,20px);
+      display:grid; grid-template-columns:auto 1fr; align-items:start; gap:12px;
+      min-height:120px;
+    }
+    .loc-icon{
+      inline-size:36px; block-size:36px; border-radius:10px;
+      background:rgba(13,110,253,.12);
+      display:grid; place-items:center; color:var(--badge); font-size:18px;
+    }
+    .loc-title{ font-weight:700; color:var(--ink); margin-bottom:6px; font-size:clamp(16px,2vw,20px); }
+    .loc-meta{ color:var(--muted); font-size:clamp(14px,1.6vw,16px); line-height:1.35; }
+
+    .office-right{ display:grid; grid-template-rows:auto 1fr; gap:var(--gutter); }
+    .right-top{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gutter); }
+
+    .img-tile{
+      position:relative; border-radius:var(--radius); overflow:hidden;
+      box-shadow:var(--shadow); aspect-ratio:16/11;
+    }
+    .img-tile img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    .img-tile iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+
+    .img-badge{
+      position:absolute; top:9px; left:6px;
+      background:rgba(0,0,0,.7); color:#fff; font-weight:700;
+      border-radius:999px; font-size:14px; line-height:1; padding:8px 12px;
+      backdrop-filter:saturate(140%) blur(4px);
+    }
+    .img-wide{
+      border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
+      aspect-ratio:16/9; transform: translateY(-20px);
+    }
+    .img-wide img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* Prevent overlap on tablets/phones */
+    @media (max-width: 1024px){
+      .office-grid{ grid-template-columns:1fr; }
+      .office-right{ order:2; }
+      .office-left{ order:1; }
+      .cards-row{ transform:none; }
+      .img-wide{ transform:none; }
+    }
+
+    /* ===== Form ===== */
+    .card-soft{background:#f7f9fc;border:1px solid #eef0f4;border-radius:20px;}
+    .form-control, textarea.form-control{border-radius:14px;border:1px solid #e7ebf2;background:#fff;}
+    .btn-pill{border-radius:999px;padding:.9rem 1.15rem;font-weight:600;}
+    .btn-brand{
+      background: var(--brand);
+      color: #fff;
+      border: 1px solid var(--brand);
+      transition: all .15s ease;
+    }
+    .btn-brand:hover,
+    .btn-brand:focus-visible {
+      background: #fff;        /* hoverda oq */
+      color: #0b0f19;           /* matn qora */
+      border-color: var(--brand);
+    }
+    .contact-mini .row>div{margin-bottom:14px;}
+    .contact-mini .ic{
+      display:inline-flex;width:40px;height:40px;border-radius:10px;
+      align-items:center;justify-content:center;background:#eef4ff;color:#2b6bff;margin-right:10px;
+    }
+
+    /* ===== FAQ ===== */
+    .faq .q{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:18px 0;border-bottom:1px solid #eef0f4;cursor:pointer;
+    }
+    .faq .q .circle{
+      width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+      background:#eef4ff;color:#2b6bff;font-weight:700;
+    }
+    .faq .a{display:none;color:#4d5566;padding:10px 0 18px;}
+    .faq .item.open .a{display:block;}
+    .faq .item.open .circle{background:#e9f1ff;color:#1e66ff;}
+
+    /* ===== CTA ===== */
+    .cta-section{ background:#f7f9ff; }
+    .cta-wrap{ background:var(--cta-grad); border-radius:22px; box-shadow:0 18px 42px rgba(32,64,210,.22); overflow:hidden; color:#fff; }
+    .cta-title{ font-weight:800; line-height:1.2; font-size:clamp(28px,4.2vw,46px); letter-spacing:.2px; }
+    .cta-btn{
+      --ring: rgba(255,255,255,.35);
+      gap:.75rem; padding:.9rem 1.2rem; background:#fff; color:#0f172a; border-radius:999px; font-weight:600;
+      box-shadow:0 10px 22px rgba(13,18,33,.18);
+      text-decoration:none; transition:transform .18s ease, box-shadow .18s ease, background .18s ease; position:relative;
+    }
+    .cta-btn:hover{ transform:translateY(-1px); box-shadow:0 14px 28px rgba(13,18,33,.24); }
+    .cta-btn i{ background:var(--cta-blue); color:#fff; width:34px; height:34px; display:inline-grid; place-items:center; border-radius:50%; transition:transform .18s ease, background .18s ease; }
+    .cta-btn:hover i{ transform:translate(.5px,-.5px); background:#143bff; }
+    .cta-features{ list-style:none; padding:0; margin:0; }
+    .cta-features li{ display:flex; align-items:flex-start; gap:.6rem; font-size:clamp(14px,1.7vw,16px); margin:.35rem 0; opacity:.95; }
+    .cta-features i{ color:#cce1ff; font-size:1.1rem; margin-top:.15rem; filter:drop-shadow(0 2px 6px rgba(0,0,0,.15)); }
+    .cta-media{ position:relative; border-radius:22px; overflow:hidden; border:3px solid var(--cta-soft);
+      box-shadow:0 12px 28px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.15); }
+    .cta-media:before{ content:""; position:absolute; inset:-30% -10% auto -10%; height:70%; pointer-events:none;
+      background:radial-gradient(60% 60% at 20% 20%, rgba(255,255,255,.35), transparent 55%); filter:blur(28px); }
+    .cta-media img{ display:block; width:100%; height:auto; }
+    @media (max-width: 991.98px){ .cta-wrap{ border-radius:18px; } .cta-media{ margin-top:.5rem; } }
+
+    /* ===== Footer ===== */
+    .footer-top{ background:#f5f7fb; padding:48px 0; }
+    .footer-bottom{ background:white; color:black; padding:20px 0; margin-top:24px; border-radius:16px; }
+    .footer-link{ color:inherit; text-decoration:none; }
+    .footer-link:hover{ text-decoration:underline; }
+
+    /* Fix overflow of “Changelog / Terms” links */
+    .footer-bottom .container{ display:flex; flex-wrap:wrap; gap:12px; }
+    .footer-bottom .container > img{ flex:0 0 auto; }
+    .footer-bottom .container .ms-auto{
+      margin-left:auto;
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    @media (max-width: 576px){
+      .footer-bottom .container{
+        flex-direction:column; align-items:flex-start;
+      }
+      .footer-bottom .container .ms-auto{
+        margin-left:0 !important;
+        width:100%;
+        gap:10px;
+      }
+    }
+
+    /* keep grid tidy on phones */
+    @media (max-width:991.98px){
+      .office-grid{grid-template-columns:1fr;gap:16px;}
+      .office-grid .big,.office-grid .right-top,.office-grid .right-bottom{grid-column:auto;}
+    }
+
+    /* Ensure layers don't cover the navbar/collapse */
+    .section-office,
+    .office-grid,
+    .cards-row,
+    .img-tile,
+    .img-wide{ position: relative; z-index: 0; }
+    .img-badge{ z-index: 1; }
+
+    /* ===== Font Styles (universal) ===== */
+
+    .hero-line{
+      margin: 0;
+      line-height: 1.2;
+      color: #0f172a; /* oq bannerda #fff ishlating */
+    }
+
+    /* 1-qism: Playfair Display — Semibold Italic */
+    .hero-accent{
+      display: inline-block;
+      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      font-style: italic;
+      font-size: clamp(60px, 3.2vw, 80px);
+      letter-spacing: 0;
+    }
+
+    /* 2-qism: Inter Tight — Semibold (default: yangi satr) */
+    .hero-rest{
+      display: block; /* default: keyingi satr */
+      font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-weight: 600;
+      font-style: normal;
+      font-size: clamp(60px, 3.2vw, 80px);
+      letter-spacing: 0; /* kerak bo'lsa -0.01em */
+    }
+
+    /* --- Inline/nowrap qoidalar --- */
+
+    /* 1) Bir qatorda ushlab turish uchun konteyner */
+    .no-wrap{ white-space: nowrap; }
+
+    /* .no-wrap ichida ikkisi ham inline bo'lsin */
+    .hero-line .no-wrap .hero-rest,
+    .hero-line .no-wrap .hero-accent{
+      display: inline;
+    }
+
+    /* 2) Mayda utilitalar: majburan inline yoki blok qilish */
+    .hero-inline{ display: inline !important; }   /* "Office", "Location" kabi holatlar */
+    .hero-break{ display: block !important; }     /* majburan yangi satr */
+
+    /* 3) Kichik variant (ixtiyoriy): o'lchamni meros qildirish uchun
+       .hero-rest--inherit ni qo'ysangiz, h1..h6/.h1..h6/Bootstrap fs-* ta'sir qiladi */
+    .hero-rest--inherit{ font-size: inherit !important; }
+
+    .hero-rest-message{
+      display: inline; /* default: keyingi satr */
+      font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-weight: 200;
+      font-style: normal;
+      font-size: clamp(52px, 3.2vw, 40px);
+      letter-spacing: 0; /* kerak bo'lsa -0.01em */
+    }
+
+    .hero-accent-message{
+      display: inline;
+      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+      font-weight: 200;
+      font-style: italic;
+      font-size: clamp(52px, 3.2vw, 40px);
+      letter-spacing: 0;
+    }
+    .hero-rest-cta{
+      display: inline; /* default: keyingi satr */
+      font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-weight: 200;
+      font-style: normal;
+      font-size: clamp(52px, 3.2vw, 40px);
+      letter-spacing:0; /* kerak bo'lsa -0.01em */
+      color: white;
+    }
+
+    .hero-accent-cta{
+      display: inline;
+      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+      font-weight: 200;
+      font-style: italic;
+      font-size: clamp(52px, 3.2vw, 40px);
+      letter-spacing: 0;
+      color: white;
+    }
+
+
+
+
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-blur">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="/home" id="navHome">
+      <!-- Logotip -->
+      <img src="/files/logo.png" alt="Mazmun">
+    </a>
+
+    <button class="navbar-toggler collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navMain"
+            aria-controls="navMain"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"><span></span></span>
+    </button>
+
+    <div id="navMain" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/home">Bosh sahifa</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/posts">Yangiliklar</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/projects">Loyihalar</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/about">Biz haqimizda</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/services">Xizmatlar</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/price-list">Narxlar</a></li>
+        <li class="nav-item ms-lg-2">
+          <a class="btn btn-primary rounded-pill d-inline-flex align-items-center" href="/contact">
+            Aloqa <i class="bi bi-arrow-up-right ms-1"></i>
+          </a>
+        </li>
+        <li id="liPanel" class="nav-item ms-lg-2 d-none">
+          <a id="panelBtn" class="btn btn-dark rounded-pill d-inline-flex align-items-center" href="#">
+            <i class="bi bi-shield-lock me-1"></i> Admin Panel
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main style="padding-top:95px">
+
+  <!-- ===== Office Location (updated, UZ) ===== -->
+  <section class="section-office">
+    <div class="container-ml">
+      <div class="office-grid">
+        <!-- Chap: sarlavha + matn + kartalar -->
+        <div class="office-left">
+          <div class="office-head">
+            <div class="small" style="color:#6b7280; margin-bottom:8px">[Ofis manzili]</div>
+            <h2 class="hero-line">
+              <span class="no-wrap">
+              <span class="hero-rest">Mazmun</span>
+              <span class="hero-accent hero-inline">Edu</span>
+              </span>
+            </h2>
+            <p>
+              Ofisimiz Toshkent shahrida joylashgan. Uchrashuvlar oldindan
+              kelishilgan holda onlayn yoki oflayn o‘tkaziladi
+            </p>
+          </div>
+
+          <div class="cards-row">
+            <!-- Card 1 -->
+            <div class="loc-card">
+              <div class="loc-icon"><i class="bi bi-people-fill"></i></div>
+              <div>
+                <div class="loc-title">Manzil</div>
+                <div class="loc-meta">
+                  Toshkent shahar, Chilonzor 11-daha,
+                  <br>
+                  35-uy
+                </div>
+              </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="loc-card">
+              <div class="loc-icon"><i class="bi bi-geo-alt-fill"></i></div>
+              <div>
+                <div class="loc-title">Jamoa</div>
+                <div class="loc-meta">
+                  O‘zbekistonning turli hududlaridagi xususiy maktablar bilan
+                  onlayn hamkorlik qilamiz.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- O‘ng: 2 ta rasm (yuqorida) + 1 ta katta rasm (pastda) -->
+        <div class="office-right">
+          <div class="right-top">
+            <!-- 1) Google Map tile -->
+            <figure class="img-tile">
+              <span class="img-badge">Manzil &ndash; Toshkent</span>
+              <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2998.449550104898!2d69.18265937587275!3d41.27731957131407!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38ae890032f656f3%3A0xc3f7a74572d0b669!2sMazmun%20Edu!5e0!3m2!1sen!2s!4v1764259223281!5m2!1sen!2s"
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                      aria-label="Mazmun manzili"
+              ></iframe>
+            </figure>
+
+            <!-- 2) Ofis / jamoa rasmi -->
+            <figure class="img-tile">
+              <span class="img-badge">Ofis va uchrashuvlar</span>
+              <img src="/files/team-meeting.jpg" alt="Mazmun jamoasi bilan uchrashuv">
+            </figure>
+          </div>
+
+          <!-- 3) Pastdagi keng rasm: hamkor maktablar -->
+          <figure class="img-wide">
+            <span class="img-badge">20+ hamkor maktablar bilan uchrashuv</span>
+            <img src="/files/discussion.png" alt="Hamkor maktablar rahbarlari bilan uchrashuv">
+          </figure>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== Contact Form (UPDATED, UZ) ===== -->
+  <section id="consulting" class="section">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="small text-muted mb-2">[Murojaat]</div>
+          <h2 class="hero-line">
+            <span class="no-wrap">
+              <span class="hero-rest-message">Bizga </span>
+              <span class="hero-accent-message hero-inline">murojaat qiling</span>
+            </span>
+          </h2>
+          <p class="lead" style="color:#4d5566">
+            Savol, taklif yoki hamkorlik bo‘yicha yozing — odatda 1 ish kuni
+            ichida siz bilan bog‘lanamiz.
+          </p>
+
+          <div class="contact-mini mt-3">
+            <div class="row">
+              <div class="col-12 d-flex align-items-center">
+                <div class="ic"><i class="bi bi-envelope-fill"></i></div>
+                <div>
+                  <div class="small text-muted">Email</div>
+                  <a class="fw-semibold footer-link" href="mailto:info@mazmunedu.uz">info@mazmunedu.uz</a>
+                </div>
+              </div>
+              <div class="col-12 d-flex align-items-center">
+                <div class="ic"><i class="bi bi-telephone-fill"></i></div>
+                <div>
+                  <div class="small text-muted">Telefon</div>
+                  <a class="footer-link fw-semibold" href="tel:+998901234567">+998 90 123 45 67</a>
+                </div>
+              </div>
+              <div class="col-12 d-flex align-items-center">
+                <div class="ic"><i class="bi bi-geo-alt-fill"></i></div>
+                <div>
+                  <div class="small text-muted">Manzil</div>
+                  <a id="lnkMap" class="footer-link fw-semibold" target="_blank">Google xaritada ko‘rish</a>
+                </div>
+              </div>
+              <div class="col-12 d-flex align-items-center">
+                <div class="ic"><i class="bi bi-telegram"></i></div>
+                <div>
+                  <div class="small text-muted">Telegram</div>
+                  <a id="lnkTG" class="footer-link fw-semibold" target="_blank">@mazmun_edu_bot</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- form -->
+        <div class="col-lg-6">
+          <div class="card-soft p-3 p-md-4">
+            <form id="contactForm" novalidate>
+              <div class="mb-3">
+                <label class="small text-muted">Ism familiya</label>
+                <input class="form-control" name="fullName" placeholder="Ism Familiyangiz" required maxlength="160">
+              </div>
+              <div class="mb-3">
+                <label class="small text-muted">Aloqa (telefon yoki @username)</label>
+                <input class="form-control" name="contact" placeholder="+998 90 123 45 67 yoki @username" required maxlength="160">
+              </div>
+              <div class="mb-3">
+                <label class="small text-muted">Murojaat matni</label>
+                <textarea rows="5" class="form-control" name="message" placeholder="Qisqacha murojaatingizni yozing" required></textarea>
+              </div>
+
+              <!-- Honeypot (spamni kamaytirish uchun) -->
+              <input type="text" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;opacity:0;">
+
+              <button id="btnSend" class="btn btn-brand btn-pill w-100" type="submit">
+                Konsultatsiyaga yozilish <i class="bi bi-arrow-up-right ms-1"></i>
+              </button>
+              <div id="formNote" class="small mt-2 text-success d-none">
+                Xabar yuborildi. Tez orada jamoamiz siz bilan bog‘lanadi.
+              </div>
+              <div id="formErr" class="small mt-2 text-danger d-none">
+                Xatolik yuz berdi. Iltimos, birozdan keyin qaytadan urinib ko‘ring.
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== FAQ (UZ) ===== -->
+  <section id="faq" class="section" style="background:#fafbff">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <h2 class="hero-line">
+            <span class="hero-rest-message">Ko‘p so‘raladigan</span>
+            <span class="hero-accent-message">savollar</span>
+          </h2>
+          <div class="card-soft p-3 mt-3">
+            <div class="fw-semibold mb-1">Savolingiz qoldimi?</div>
+            <div class="text-muted small mb-3">
+              Qisqa qo‘ng‘iroq orqali maktabingiz uchun qaysi xizmat mosligini birgalikda aniqlab olamiz.
+            </div>
+            <a id="btnMakeCall" class="btn btn-primary btn-pill">
+              Qo‘ng‘iroqni rejalashtirish <i class="bi bi-arrow-up-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="faq">
+            <div class="item">
+              <div class="q">
+                <span>Qaysi turdagi maktablar bilan ishlaysiz?</span>
+                <span class="circle">+</span>
+              </div>
+              <div class="a">
+                Xususiy va davlat maktablari, o‘quv markazlari hamda yangi ochilayotgan ta’lim loyihalari bilan ishlaymiz.
+              </div>
+            </div>
+
+            <div class="item open">
+              <div class="q">
+                <span>Maktabim uchun qaysi xizmat mosligini qanday bilsam bo‘ladi?</span>
+                <span class="circle">–</span>
+              </div>
+              <div class="a">
+                Avval qisqa konsultatsiya o‘tkazamiz, vaziyat va maqsadlaringizni tinglaymiz.
+                Shundan so‘ng sizga eng mos paket yoki individual yechimni tavsiya qilamiz.
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="q">
+                <span>Standart paketmi yoki moslashtirilgan yechimlarmi taklif qilasiz?</span>
+                <span class="circle">+</span>
+              </div>
+              <div class="a">
+                Ikkalasi ham bor: tayyor paketlarimiz mavjud, lekin har bir maktab uchun
+                ichki tizim va sharoitga moslab alohida reja ishlab chiqamiz.
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="q">
+                <span>Natijani qanday o‘lchaysiz?</span>
+                <span class="circle">+</span>
+              </div>
+              <div class="a">
+                Dars sifati, jamoa ishi, ota-onalar bilan aloqa va moliyaviy ko‘rsatkichlar
+                bo‘yicha aniq KPI va mezonlar kelishib olinadi, jarayon davomida ular bo‘yicha tahlil qilinadi.
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="q">
+                <span>Konsalting jarayonini qanday boshlaymiz?</span>
+                <span class="circle">+</span>
+              </div>
+              <div class="a">
+                Aloqa bo‘limi orqali ariza qoldirasiz yoki Telegram’dan yozasiz.
+                Biz siz bilan bog‘lanib, dastlabki uchrashuv sanasini va keyingi qadamlarni kelishib olamiz.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========== CTA BLUE (konsultatsiya) ========== -->
+  <section class="cta-section py-5">
+    <div class="container">
+      <div class="cta-wrap row g-0 align-items-center">
+        <!-- Left content -->
+        <div class="col-lg-6 p-4 p-md-5">
+          <h2 class="hero-line" style="color: white">
+            <span class="hero-rest fs-1"> Tizim, metodika va </span>
+            <span class="hero-rest d-block fs-1">brend - birgalikda</span>
+            <span class="hero-accent fs-1">kuchli natija</span>
+          </h2>
+
+          <!-- Button -->
+          <a href="/contact#consulting"
+             class="cta-btn d-inline-flex align-items-center">
+            <span>Konsultatsiya olish</span>
+            <i class="bi bi-arrow-up-right"></i>
+          </a>
+
+          <!-- Feature list -->
+          <ul class="cta-features mt-4">
+            <li><i class="bi bi-check2-circle"></i> O‘quv reja & setka tayyorlash</li>
+            <li><i class="bi bi-check2-circle"></i> Maktabingiza mos reja va paketlar</li>
+            <li><i class="bi bi-check2-circle"></i> Litsenziya va hujjatlar to‘plami</li>
+          </ul>
+        </div>
+
+        <!-- Right image -->
+        <div class="col-lg-6 p-4 p-md-5">
+          <div class="cta-media">
+            <img
+                    src="/files/cta.jpg"
+                    alt="Consultation"
+                    class="img-fluid"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER (reuse) ===== -->
+<footer class="footer-top">
+  <div class="container">
+    <div class="row align-items-center mb-4">
+      <div class="col-md-6">
+        <h5 class="mb-2">Telegram sahifamizda</h5>
+        <div class="text-muted">Haftalik maslahatlar, amaliy tajribalar va bepul video darslar berib boriladi</div>
+      </div>
+      <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a id="btnSubscribeTG" class="btn btn-primary rounded-pill">Obuna bo‘lish <i class="bi bi-telegram ms-1"></i></a>
+      </div>
+    </div>
+
+    <div class="row gy-4">
+      <div class="col-12 col-lg-4">
+        <div class="mb-2 small text-muted">Email</div>
+        <div class="fw-semibold">mazmunedu@gmail.com</div>
+        <div class="mt-3 small text-muted">Manzil</div>
+        <div class="fw-semibold">Toshkent shahar, Chilonzor 11 daha, 35</div>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h6 class="fw-bold mb-2">Main Pages</h6>
+        <div><a class="footer-link" href="/home">Bosh sahifa</a></div>
+        <div><a class="footer-link" href="/projects">Loyihalar</a></div>
+        <div><a class="footer-link" href="/services">Xizmatlar</a></div>
+        <div><a class="footer-link" href="/posts">Yangiliklar</a></div>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h6 class="fw-bold mb-2">Company</h6>
+        <div><a class="footer-link" href="/contact">Aloqa</a></div>
+        <div><a class="footer-link" href="/about">Mazmun haqida</a></div>
+        <div><a class="footer-link" href="/about#team">Jamoa</a></div>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h6 class="fw-bold mb-2">Resurslar</h6>
+        <div><a class="footer-link" href="/home#webinar-video">Vebinarlar</a></div>
+        <div><a class="footer-link" href="/contact#faq">FAQ</a></div>
+        <div><a class="footer-link" href="/privacy">Maxfiylik siyosati</a></div>
+      </div>
+    </div>
+
+    <div class="footer-bottom mt-4">
+      <div class="container d-flex flex-wrap align-items-center gap-3">
+        <img src="/files/logo.png" height="22" alt="Mazmun">
+        <div class="ms-auto d-flex align-items-center gap-3">
+          <a class="footer-link" href="https://t.me/mazmun_edu" target="_blank">Telegram</a>
+          <a class="footer-link" href="https://www.instagram.com/mazmun_edu" target="_blank">Instagram</a>
+          <a class="footer-link" href="https://www.facebook.com/mazmunedu" target="_blank">Facebook</a>
+          <a class="footer-link" href="https://www.linkedin.com/company/mazmunedu/posts/?feedView=all" target="_blank">LinkedIn</a>
+          <span class="mx-2">|</span>
+          <a class="footer-link" href="/terms">Foydalanish shartlari</a>
+        </div>
+      </div>
+      <div class="container small mt-2" style="opacity:.85;">© 2025 MazmunEDU MCHJ. Barcha huquqlar himoyalangan.</div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+  (() => {
+    // ====== Config ======
+    const TELEGRAM_BOT_URL = 'https://t.me/mazmun_edu_bot';
+    const MAP_URL = 'https://maps.app.goo.gl/WD8WTeGypZ2H2bXD7';
+    // Safe-assign helpers
+    const $ = (sel) => document.querySelector(sel);
+    const setHref = (id, href, textCb) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.href = href;
+        if (typeof textCb === 'function') el.textContent = textCb(href);
+      }
+    };
+
+    setHref('lnkTG', TELEGRAM_BOT_URL, (u)=>u.replace('https://t.me/','@'));
+    setHref('btnMakeCall', TELEGRAM_BOT_URL);
+    setHref('btnGetStarted', TELEGRAM_BOT_URL);
+    const btnSub = document.getElementById('btnSubscribeTG');
+    if (btnSub) btnSub.onclick = () => window.open(TELEGRAM_BOT_URL,'_blank');
+    setHref('lnkMap', MAP_URL);
+
+    // ====== FAQ toggle ======
+    document.querySelectorAll('.faq .item .q').forEach(q=>{
+      q.addEventListener('click', ()=>{
+        const item = q.parentElement;
+        const open = item.classList.contains('open');
+        document.querySelectorAll('.faq .item').forEach(i=>{
+          i.classList.remove('open');
+          const c = i.querySelector('.circle'); if (c) c.textContent = '+';
+        });
+        if(!open){
+          item.classList.add('open');
+          const c = q.querySelector('.circle'); if (c) c.textContent = '–';
+        }
+      });
+    });
+
+    // ====== Contact submit (real API, single handler) ======
+    const formEl = document.getElementById('contactForm');
+    if (!formEl) return;
+
+    formEl.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+
+      const form = new FormData(formEl);
+
+      // Honeypot (spam boti to'ldirsa — yubormaymiz)
+      if ((form.get('website') || '').trim() !== '') return;
+
+      const payload = {
+        fullName: (form.get('fullName') || '').trim(),
+        contact:  (form.get('contact')  || '').trim(),
+        message:  (form.get('message')  || '').trim()
+      };
+
+      const note = document.getElementById('formNote');
+      const err  = document.getElementById('formErr');
+      const btn  = document.getElementById('btnSend') || formEl.querySelector('button[type="submit"]');
+
+      if (note) note.classList.add('d-none');
+      if (err)  err.classList.add('d-none');
+
+      // Minimal front-validatsiya
+      if(!payload.fullName || !payload.contact || !payload.message){
+        if (err){
+          err.textContent = 'Iltimos, barcha maydonlarni to‘ldiring.';
+          err.classList.remove('d-none');
+        }
+        return;
+      }
+
+      try{
+        if (btn){ btn.disabled = true; btn.innerHTML = 'Yuborilmoqda…'; }
+
+        // Backend endpoint (Spring REST)
+        await axios.post('/api/public/messages', payload);
+
+        formEl.reset();
+        if (note){
+          note.textContent = 'Xabar yuborildi. Rahmat!';
+          note.classList.remove('d-none');
+          setTimeout(()=>note.classList.add('d-none'), 3500);
+        }
+      }catch(ex){
+        console.error(ex);
+        if (err){
+          err.textContent = 'Xatolik yuz berdi. Keyinroq urinib ko‘ring.';
+          err.classList.remove('d-none');
+          setTimeout(()=>err.classList.add('d-none'), 4000);
+        }
+      }finally{
+        if (btn){ btn.disabled = false; btn.innerHTML = 'Send Message <i class="bi bi-arrow-up-right ms-1"></i>'; }
+      }
+    });
+  })();
+</script>
+</body>
+</html>

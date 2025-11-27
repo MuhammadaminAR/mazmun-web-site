@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mazmun — Foydalanish shartlari</title>
+  <meta name="description" content="MazmunEDU MCHJ sayt va xizmatlaridan foydalanish shartlari">
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root{ --brand:#1e6bff; --ink:#0f172a; --muted:#64748b; --bg:#f5f7fb; }
+    html,body{ font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol", sans-serif; color:var(--ink); }
+    a{text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Top navbar */
+    .app-nav{border-bottom:1px solid #eef2ff;background:#fff}
+    .brand{font-weight:800;letter-spacing:.2px;color:var(--ink)}
+    .brand:hover{text-decoration:none;color:var(--brand)}
+
+    /* Hero */
+    .hero{ background:var(--bg); border-bottom:1px solid #eef2ff; }
+    .hero .badge{ background:rgba(30,107,255,.08); color:var(--brand); border:1px solid rgba(30,107,255,.18); }
+
+    /* Cards & titles */
+    .section-card{ background:#fff; border:1px solid #eef2ff; border-radius:14px; padding:1.25rem 1.25rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+    .section-card h2{
+      font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight:800; /* Inter Bold feel */
+      margin-bottom:.75rem; scroll-margin-top: 86px;
+      line-height:1.25;
+    }
+
+    /* TOC */
+    .toc-sticky{ position:sticky; top:90px; }
+    .toc .nav-link{
+      color:var(--muted); padding:.35rem 0; border-left:2px solid transparent;
+      font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-weight:600; /* bo‘lim nomlari Inter bold (semibold/600 ko‘rinish) */
+    }
+    .toc .nav-link.active{ color:var(--ink); border-color:var(--brand); }
+
+    .last-updated{ color:var(--muted); }
+  </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#tocNav" data-bs-offset="100" tabindex="0">
+
+<!-- Top Navbar with Home link -->
+<nav class="app-nav">
+  <div class="container d-flex align-items-center py-2">
+    <a href="/home" class="brand d-inline-flex align-items-center">
+      <i class="bi bi-mortarboard-fill me-2"></i> Mazmun
+    </a>
+    <div class="ms-auto">
+      <a class="btn btn-sm btn-outline-primary rounded-pill" href="/home">
+        <i class="bi bi-house-door me-1"></i> Bosh sahifa
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero py-5">
+  <div class="container">
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="/home">Bosh sahifa</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Foydalanish shartlari</li>
+      </ol>
+    </nav>
+
+    <span class="badge rounded-pill mb-3">Huquqiy</span>
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      <div>
+        <h1 class="display-6 fw-bold mb-2">Foydalanish shartlari</h1>
+        <p class="last-updated mb-0">Oxirgi yangilanish: <span id="lastUpdated">28-oktabr 2025</span></p>
+      </div>
+      <div class="text-muted small mt-3 mt-md-0">
+        <i class="bi bi-shield-check me-1"></i> MazmunEDU MCHJ
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Content -->
+<main class="py-4">
+  <div class="container">
+    <div class="row g-4">
+      <aside class="col-lg-4 col-xl-3">
+        <div class="toc-sticky">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h6 class="fw-bold text-uppercase small text-muted mb-3">Bo‘limlar</h6>
+              <nav id="tocNav" class="nav flex-column toc">
+                <a class="nav-link" href="#kirish">1. Kirish</a>
+                <a class="nav-link" href="#tariflar">2. Ta’riflar</a>
+                <a class="nav-link" href="#qabul">3. Shartlarni qabul qilish</a>
+                <a class="nav-link" href="#xizmatlar">4. Xizmatlar tavsifi</a>
+                <a class="nav-link" href="#hisob">5. Hisob va xavfsizlik</a>
+                <a class="nav-link" href="#tolov">6. To‘lov va qaytarish</a>
+                <a class="nav-link" href="#ip">7. Intellektual mulk</a>
+                <a class="nav-link" href="#acceptable">8. Foydalanuvchi majburiyatlari</a>
+                <a class="nav-link" href="#privacy">9. Maxfiylik va cookie</a>
+                <a class="nav-link" href="#disclaimer">10. Kafolatlardan voz kechish</a>
+                <a class="nav-link" href="#liability">11. Mas’uliyat cheklovi</a>
+                <a class="nav-link" href="#force">12. Force majeure</a>
+                <a class="nav-link" href="#changes">13. O‘zgarishlar</a>
+                <a class="nav-link" href="#law">14. Qonunchilik va nizolar</a>
+                <a class="nav-link" href="#contact">15. Aloqa</a>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="col-lg-8 col-xl-9">
+        <div id="kirish" class="section-card">
+          <h2>1. Kirish</h2>
+          <p>Ushbu “Foydalanish shartlari” (“Shartlar”) <strong>MazmunEDU MCHJ</strong> (“Biz”)ning <a href="/home">Sayti</a> va xizmatlaridan foydalanish qoidalarini belgilaydi. Saytdan foydalanish orqali siz Shartlarni qabul qilgan bo‘lasiz. Rozilik bo‘lmasa, Saytdan foydalanmang.</p>
+        </div>
+
+        <div id="tariflar" class="section-card mt-3">
+          <h2>2. Ta’riflar</h2>
+          <ul>
+            <li><strong>Sayt</strong> — mazmunedu.uz va subdomenlar.</li>
+            <li><strong>Xizmatlar</strong> — konsalting, trening/webinarlar, raqamli materiallar.</li>
+            <li><strong>Foydalanuvchi</strong> — Saytdan foydalanuvchi jismoniy/yuridik shaxs.</li>
+            <li><strong>Kontent</strong> — matn, grafik, video, slaydlar va boshqalar.</li>
+          </ul>
+        </div>
+
+        <div id="qabul" class="section-card mt-3">
+          <h2>3. Shartlarni qabul qilish</h2>
+          <p>Shartlar vaqti-vaqti bilan yangilanadi. Yangilangan sana sahifa yuqorisida ko‘rsatiladi. Saytdan foydalanishda davom etish — yangilangan shartlarni qabul qilish demak.</p>
+        </div>
+
+        <div id="xizmatlar" class="section-card mt-3">
+          <h2>4. Xizmatlar tavsifi</h2>
+          <ul>
+            <li>Konsalting paketlari (onlayn/oflayn).</li>
+            <li>Trening va webinarlar, metodik materiallar.</li>
+            <li>Buyurtmaga ko‘ra tayyorlanadigan deliverable’lar.</li>
+          </ul>
+          <p>Xizmat tarkibi va narxi alohida taklif/kelishuvlarda yoki Saytda e’lon qilinadi.</p>
+        </div>
+
+        <div id="hisob" class="section-card mt-3">
+          <h2>5. Hisob va xavfsizlik</h2>
+          <ul>
+            <li>Login/parol maxfiyligi foydalanuvchining zimmasida.</li>
+            <li>Hisobdan qilingan harakatlar uchun foydalanuvchi javobgar.</li>
+            <li>Shubhali faollik bo‘lsa, <a href="mailto:info@mazmunedu.uz">info@mazmunedu.uz</a> ga xabar bering.</li>
+          </ul>
+        </div>
+
+        <div id="tolov" class="section-card mt-3">
+          <h2>6. To‘lov va qaytarish</h2>
+          <ul>
+            <li>To‘lovlar invois, Click/Payme yoki shartnoma asosida.</li>
+            <li>Oflayn trening: tadbirdan <strong>72 soat</strong> oldin bekor — 70% qaytariladi; <strong>24 soat</strong> ichida — qaytarilmaydi.</li>
+            <li>Onlayn kurs: boshlanmagan bo‘lsa <strong>24 soat</strong> ichida 100% qaytariladi.</li>
+          </ul>
+          <p>Maxsus loyiha/deliverable’lar bo‘yicha qaytarish shartlari alohida shartnomada belgilanadi.</p>
+        </div>
+
+        <div id="ip" class="section-card mt-3">
+          <h2>7. Intellektual mulk</h2>
+          <ul>
+            <li>Saytdagi materiallar <strong>MazmunEDU MCHJ</strong>ga tegishli.</li>
+            <li>Ruxsatsiz ko‘paytirish, tarqatish, sotish taqiqlanadi.</li>
+            <li>Mijoz uchun tayyorlangan maxsus ishlarga doir huquqlar shartnomada belgilanadi.</li>
+          </ul>
+        </div>
+
+        <div id="acceptable" class="section-card mt-3">
+          <h2>8. Foydalanuvchi majburiyatlari</h2>
+          <ul>
+            <li>Noqonuniy kontent joylashtirmaslik, spam qilmaslik.</li>
+            <li>Xizmatni buzish yoki cheklovni aylanib o‘tishga urinish taqiqlanadi.</li>
+            <li>Uchinchi shaxs huquqlarini buzmaslik.</li>
+          </ul>
+        </div>
+
+        <div id="privacy" class="section-card mt-3">
+          <h2>9. Maxfiylik va cookie</h2>
+          <p>Shaxsiy ma’lumotlarimiz <a href="/privacy">Maxfiylik siyosati</a>ga muvofiq qayta ishlanadi. Cookie’lardan foydalanamiz — batafsil siyosatda.</p>
+        </div>
+
+        <div id="disclaimer" class="section-card mt-3">
+          <h2>10. Kafolatlardan voz kechish</h2>
+          <p>Xizmatlar “qanday bo‘lsa — shunday” tamoyili asosida taqdim etiladi. Saytdagi materiallar ta’limiy maqsadlarda bo‘lib, huquqiy/meditsina/moliya maslahati emas.</p>
+        </div>
+
+        <div id="liability" class="section-card mt-3">
+          <h2>11. Mas’uliyat cheklovi</h2>
+          <p>Bevosita/bilvosita zararlar, yo‘qotilgan foyda uchun javobgarlik cheklangan. Umumiy javobgarlik foydalanuvchi tomonidan to‘langan summadan oshmaydi.</p>
+        </div>
+
+        <div id="force" class="section-card mt-3">
+          <h2>12. Force majeure</h2>
+          <p>Tabiiy ofat, urush, davlat cheklovlari, aloqa uzilishlari kabi nazoratimizdan tashqaridagi holatlarda majburiyatlar vaqtincha to‘xtatilishi mumkin.</p>
+        </div>
+
+        <div id="changes" class="section-card mt-3">
+          <h2>13. O‘zgarishlar</h2>
+          <p>Shartlarni yangilash huquqi saqlanadi. Yangilangan sana sahifa yuqorisida ko‘rsatiladi.</p>
+        </div>
+
+        <div id="law" class="section-card mt-3">
+          <h2>14. Qonunchilik va nizolar</h2>
+          <p>O‘zbekiston Respublikasi qonunchiligi qo‘llaniladi. Nizolar — dastlab muzokara, so‘ng Toshkent shahri sudlarida.</p>
+        </div>
+
+        <div id="contact" class="section-card mt-3">
+          <h2>15. Aloqa</h2>
+          <address class="mb-0">
+            <strong>MazmunEDU MCHJ</strong><br>
+            Toshkent shahar, Chilonzor 11-daha, 35<br>
+            E-mail: <a href="mailto:info@mazmunedu.uz">info@mazmunedu.uz</a>
+          </address>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- Global footer here -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Optional: klaviatura bilan tez qaytish (H) -->
+<script>
+  document.addEventListener('keydown', (e)=>{
+    if(e.key.toLowerCase()==='h' && !/input|textarea|select/i.test(document.activeElement.tagName)){
+      window.location.href = '/home';
+    }
+  });
+</script>
+</body>
+</html>

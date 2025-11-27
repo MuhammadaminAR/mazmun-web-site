@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mazmun — Yangiliklar</title>
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== VARS / GLOBAL ===== */
+    :root{
+      --brand:#1e7bff;
+      --soft:#f8f9fb;
+      --rounded:22px;
+      --nav-top:12px;          /* navbar offset */
+      --nav-h:64px;            /* desktop navbar taxminiy balandligi */
+      --sticky-top: 84px;      /* filter sticky uchun (desktop) */
+
+      /* CTA vars */
+      --cta-grad: linear-gradient(135deg,#1f78ff 0%, #2a55ff 60%, #2144ff 100%);
+      --cta-blue: #1f78ff;
+      --cta-soft: rgba(255,255,255,.14);
+    }
+    @media (max-width: 991.98px){
+      :root{ --nav-h:72px; --sticky-top: 96px; }
+    }
+
+    html,body{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    *,*::before,*::after{ box-sizing:border-box; }
+    body{
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+      color:#111; overflow-x:hidden;
+    }
+    .text-italic{font-family: Georgia, 'Times New Roman', serif; font-style: italic}
+    .rounded-22{border-radius: var(--rounded)}
+    .shadow-smooth{ box-shadow:0 10px 28px rgba(18,38,63,.08), 0 2px 8px rgba(18,38,63,.06) }
+    .section{ padding:min(7vw,72px) 0; }
+
+    /* ===== NAVBAR (fixed + blur) ===== */
+    .navbar{
+      --bs-navbar-padding-y:0;
+    }
+
+    /* Asosiy blurli konteyner */
+    .navbar-blur{
+      position:fixed;
+      top:12px;
+      left:50%;
+      transform:translateX(-50%);
+      width:min(1200px,94vw);
+      z-index:9999;
+      padding:.65rem 1rem;
+      border-radius:14px;
+      background:rgba(255,255,255,.86);
+      backdrop-filter:saturate(140%) blur(10px);
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+      line-height:1;
+      flex-wrap:nowrap;
+    }
+
+    .navbar-blur .navbar-brand img{
+      height:34px;
+      width:auto;
+    }
+
+    .navbar-blur .nav-link{
+      font-weight:600;
+      color:#0f172a;
+    }
+
+    /* ===== Toggler: chip-like button + custom icon ===== */
+
+    .navbar-blur .navbar-toggler{
+      border:0;
+      outline:0;
+      width:46px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border-radius:12px;
+      background:#fff;
+      box-shadow:0 6px 16px rgba(16,24,40,.08);
+      padding:0;
+    }
+
+    .navbar-blur .navbar-toggler:focus{
+      box-shadow:0 0 0 3px rgba(30,123,255,.15);
+    }
+
+    /* Ichidagi custom burger */
+    .navbar-blur .navbar-toggler-icon{
+      width:22px;
+      height:16px;
+      background:none;
+      position:relative;
+      display:block;
+    }
+
+    /* Yuqori va pastki chiziqlar (pseudo) + o‘rta chiziq (child span) */
+    .navbar-blur .navbar-toggler-icon::before,
+    .navbar-blur .navbar-toggler-icon::after,
+    .navbar-blur .navbar-toggler-icon span{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      height:2px;
+      border-radius:999px;
+      background:#111827;
+      transition:all .18s ease;
+    }
+
+    .navbar-blur .navbar-toggler-icon::before{
+      top:0;
+    }
+
+    .navbar-blur .navbar-toggler-icon::after{
+      bottom:0;
+    }
+
+    .navbar-blur .navbar-toggler-icon span{
+      top:50%;
+      transform:translateY(-50%);
+    }
+
+    /* Ochilganda X animatsiya */
+    .navbar-toggler:not(.collapsed) .navbar-toggler-icon::before{
+      top:50%;
+      transform:translateY(-50%) rotate(45deg);
+    }
+
+    .navbar-toggler:not(.collapsed) .navbar-toggler-icon::after{
+      top:50%;
+      bottom:auto;
+      transform:translateY(-50%) rotate(-45deg);
+    }
+
+    .navbar-toggler:not(.collapsed) .navbar-toggler-icon span{
+      opacity:0;
+    }
+
+    /* ===== MOBILE (max 991.98px) — floating panel, smooth, no glitch ===== */
+
+    @media (max-width: 991.98px){
+      .navbar-blur{
+        padding:.55rem .8rem;
+      }
+
+      /* Panel bazaviy: absolute card ko‘rinishida */
+      #navMain{
+        position:absolute;
+        right:8px;
+        top:calc(100% + 10px);
+        width:min(92vw,380px);
+        background:rgba(255,255,255,.96);
+        backdrop-filter:saturate(150%) blur(12px);
+        border-radius:18px;
+        box-shadow:0 16px 40px rgba(15,23,42,.16);
+        padding:10px;
+        overflow:hidden;
+        z-index:9998;
+      }
+
+      /* Yopiq holat — height animatsiyasiz, faqat opacity/translate */
+      #navMain.collapse{
+        display:block;                /* Bootstrap defaultini chetlab o‘tish */
+        opacity:0;
+        transform:translateY(6px);
+        pointer-events:none;
+      }
+
+      /* Ochilgan holat */
+      #navMain.collapse.show{
+        opacity:1;
+        transform:translateY(0);
+        pointer-events:auto;
+        transition:opacity .18s ease-out, transform .18s ease-out;
+      }
+
+      /* Collapsing holati uchun ham shu logika (sakrashsiz) */
+      #navMain.collapsing{
+        opacity:0;
+        transform:translateY(6px);
+        pointer-events:none;
+        height:auto !important;
+        transition:opacity .18s ease-out, transform .18s ease-out;
+      }
+
+      /* Vertical menu */
+      .navbar-blur .navbar-nav{
+        flex-direction:column;
+        align-items:stretch;
+        gap:.25rem;
+      }
+
+      .navbar-blur .nav-item{
+        width:100%;
+      }
+
+      .navbar-blur .nav-link{
+        padding:.85rem 12px;
+        border-radius:12px;
+        color:#0b1220;
+      }
+
+      .navbar-blur .nav-link:hover{
+        background:#f4f6fb;
+      }
+
+      /* CTA (Aloqa) full width */
+      .navbar-blur .btn{
+        width:100%;
+        justify-content:center;
+        padding:.8rem 1rem;
+        border-radius:999px;
+        font-weight:600;
+      }
+    }
+
+    /* ===== DESKTOP (min 992px) — classic inline menu ===== */
+
+    @media (min-width: 992px){
+      /* Burgerni yashiramiz */
+      .navbar .navbar-toggler{
+        display:none !important;
+      }
+
+      /* Collapse doimiy ko‘rinadigan, inline holat */
+      #navMain{
+        position:static;
+        width:auto;
+        background:transparent;
+        box-shadow:none;
+        padding:0;
+        opacity:1;
+        transform:none;
+        pointer-events:auto;
+        display:flex !important;
+        flex-basis:auto !important;
+        align-items:center;
+      }
+
+      #navMain.collapse,
+      #navMain.collapse.show,
+      #navMain.collapsing{
+        position:static;
+        width:auto;
+        background:transparent;
+        box-shadow:none;
+        padding:0;
+        opacity:1;
+        transform:none;
+        pointer-events:auto;
+        display:flex !important;
+        height:auto !important;
+      }
+
+      .navbar-blur .navbar-nav{
+        flex-direction:row;
+        align-items:center;
+        gap:.5rem;
+      }
+
+      .navbar-blur .nav-link{
+        padding:.4rem .75rem;
+        border-radius:999px;
+      }
+
+      .navbar-blur .nav-link:hover{
+        background:rgba(148,163,253,.09);
+      }
+
+      .navbar-blur .btn{
+        width:auto;
+        padding:.55rem 1.2rem;
+      }
+    }
+
+
+    /* ===== PAGE HERO ===== */
+    .page-hero{ background:#f7f7f7; }
+    .page-hero h1{ font-weight:800; font-size:clamp(28px,4.4vw,56px); }
+
+    /* ===== STICKY FILTER ===== */
+    .filter-wrap{
+      position:sticky; top:var(--sticky-top); z-index:1029;   /* navbar (11000) dan pastroq */
+    }
+    .filter-card{
+      display:flex; align-items:center; gap:.6rem;
+      background:#fff; border:1px solid #eef1f6; border-radius:14px;
+      padding:.55rem .6rem; box-shadow:0 8px 20px rgba(0,0,0,.06);
+    }
+    .filter-input{
+      display:flex; align-items:center; gap:.5rem; flex:1;
+      background:#f7f8fb; border-radius:12px; padding:.4rem .6rem;
+    }
+    .filter-input .form-control{ background:transparent; border:0; box-shadow:none; }
+    .filter-input i{ opacity:.65; }
+    .btn-clear{ background:transparent; border:0; padding:.2rem .3rem; opacity:.65; }
+    .filter-select{
+      display:flex; align-items:center; gap:.5rem;
+      border:1px solid #eef1f6; border-radius:12px; padding:.4rem .6rem;
+    }
+    .filter-select .form-select{ border:0; background:transparent; box-shadow:none; padding-left:0; }
+    .filter-actions .btn{ height:40px; }
+    .filter-actions .btn-link{ text-decoration:none; }
+    .active-chips{ display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem; }
+    .chip{
+      background:#f2f4f8; border:1px solid #e5e8ef; color:#333;
+      border-radius:999px; padding:.25rem .6rem; font-size:.9rem;
+      display:inline-flex; align-items:center; gap:.35rem; cursor:pointer;
+    }
+    .chip i{ font-size:.9rem; opacity:.75; }
+
+    /* ===== GRID / CARDS ===== */
+    .latest-card{ background:#fff; border-radius:var(--rounded); box-shadow:0 10px 30px rgba(0,0,0,.06); overflow:hidden; }
+    .latest-media{ min-height:280px; background:#e9ecef; background-size:cover; background-position:center; }
+    .latest-content{ padding:24px; }
+    .post-meta{ font-size:.9rem; color:#6c757d; }
+    .line-clamp-2{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .line-clamp-3{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+    .post-card{ border:1px solid #edf0f5; border-radius:16px; overflow:hidden; transition: box-shadow .2s ease; }
+    .post-card:hover{ box-shadow:0 10px 26px rgba(0,0,0,.08); }
+    .post-thumb{ aspect-ratio:16/10; background:#eef1f6; background-size:cover; background-position:center; display:block; }
+
+    /* Pager */
+    .pager .page-link{ border-radius:999px; }
+
+    /* ===== CTA & FOOTER ===== */
+    .cta-section{ background:#f7f9ff; }
+    .cta-wrap{ background:var(--cta-grad); border-radius:22px; box-shadow:0 18px 42px rgba(32,64,210,.22); overflow:hidden; color:#fff; }
+    .cta-title{ font-weight:800; line-height:1.2; font-size:clamp(28px,4.2vw,46px); letter-spacing:.2px; }
+    .cta-btn{
+      --ring: rgba(255,255,255,.35);
+      gap:.75rem; padding:.9rem 1.2rem; background:#fff; color:#0f172a; border-radius:999px; font-weight:600;
+      box-shadow:0 10px 22px rgba(13,18,33,.18);
+      text-decoration:none; transition:transform .18s ease, box-shadow .18s ease, background .18s ease; position:relative;
+    }
+    .cta-btn:hover{ transform:translateY(-1px); box-shadow:0 14px 28px rgba(13,18,33,.24); }
+    .cta-btn i{ background:var(--cta-blue); color:#fff; width:34px; height:34px; display:inline-grid; place-items:center; border-radius:50%; transition:transform .18s ease, background .18s ease; }
+    .cta-btn:hover i{ transform:translate(.5px,-.5px); background:#143bff; }
+    .cta-features{ list-style:none; padding:0; margin:0; }
+    .cta-features li{ display:flex; align-items:flex-start; gap:.6rem; font-size:clamp(14px,1.7vw,16px); margin:.35rem 0; opacity:.95; }
+    .cta-features i{ color:#cce1ff; font-size:1.1rem; margin-top:.15rem; filter:drop-shadow(0 2px 6px rgba(0,0,0,.15)); }
+    .cta-media{ position:relative; border-radius:22px; overflow:hidden; border:3px solid var(--cta-soft);
+      box-shadow:0 12px 28px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.15); }
+    .cta-media:before{ content:""; position:absolute; inset:-30% -10% auto -10%; height:70%; pointer-events:none;
+      background:radial-gradient(60% 60% at 20% 20%, rgba(255,255,255,.35), transparent 55%); filter:blur(28px); }
+    .cta-media img{ display:block; width:100%; height:auto; }
+    @media (max-width: 991.98px){ .cta-wrap{ border-radius:18px; } .cta-media{ margin-top:.5rem; } }
+
+
+    .footer-top{ background:#f5f7fb; padding:48px 0; }
+    .footer-bottom{ background:#fff; color:#000; padding:20px 0; margin-top:24px; border-radius:16px; }
+    .footer-link{ color:inherit; text-decoration:none; }
+    .footer-link:hover{ text-decoration:underline; }
+
+    /* Footer overflow fix (wrap + ms-auto patch) */
+    .footer-bottom .container{ display:flex; flex-wrap:wrap; gap:12px; }
+    .footer-bottom .container .ms-auto{
+      margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    @media (max-width:576px){
+      .footer-bottom .container{ flex-direction:column; align-items:flex-start; }
+      .footer-bottom .container .ms-auto{ margin-left:0!important; width:100%; gap:10px; }
+    }
+
+    /* ===== Responsive tweaks ===== */
+    @media (max-width: 991.98px){
+      .filter-card{ flex-wrap:wrap; }
+      .filter-actions{ width:100%; display:flex; justify-content:flex-end; }
+    }
+
+    /*FONTS*/
+    /* Asosiy qism — Inter Tight Semibold */
+
+    /* Aksent qism — Playfair Display Semibold Italic */
+    .hero-title .hero-accent{
+      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+      font-weight: 600;          /* Semibold */
+      font-style: italic;        /* Italic */
+      display: inline-block;
+    }
+
+    /* Agar avval .fw-bold (700) turib qolsa, pastdagini qo‘shib qo‘ying */
+    .hero-title{ font-weight: 600 !important; }
+
+
+    .hero-line{
+      margin: 0;
+      line-height: 1.2;
+      color: #0f172a; /* yoki oq bannerda #fff */
+    }
+
+    /* 1-qism: Playfair Display — Semibold Italic */
+    .hero-accent{
+      display: inline-block;
+      font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+      font-weight: 600;
+      font-style: italic;
+      /* Figma'ga yaqin (bir oz kichikroq) */
+      font-size: clamp(34px, 3.2vw, 44px);
+      letter-spacing: 0; /* kerak bo'lsa sozlang */
+    }
+
+    /* 2-qism: Inter Tight — Semibold, keyingi satrga tushadi */
+    .hero-rest{
+      display: inline;
+      font-family: "Inter Tight", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-weight: 600;
+      font-style: normal;
+      font-size: clamp(34px, 3.2vw, 44px);
+      letter-spacing: 0; /* kerak bo'lsa -0.01em */
+    }
+    .no-wrap { white-space: nowrap; }
+
+    .stat-value{
+      font-family:"Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-weight:750;        /* “Inter – Solid” ko‘rinishi */
+      font-size:clamp(32px, 6vw, 64px);
+      line-height:1;
+      letter-spacing:-0.01em; /* raqamlarni zichroq ko‘rsatish */
+      color:var(--ink);
+    }
+    .stat-card{
+      font-family:"Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-weight:600;        /* “Inter – Solid” ko‘rinishi */
+      font-size:clamp(32px, 6vw, 64px);
+      line-height:1;
+      letter-spacing:-0.01em; /* raqamlarni zichroq ko‘rsatish */
+      color:var(--ink);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-blur">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="/home" id="navHome">
+      <!-- Logotip -->
+      <img src="/files/logo.png" alt="Mazmun">
+    </a>
+
+    <button class="navbar-toggler collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navMain"
+            aria-controls="navMain"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"><span></span></span>
+    </button>
+
+    <div id="navMain" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/home">Bosh sahifa</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/posts">Yangiliklar</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/projects">Loyihalar</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/about">Biz haqimizda</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/services">Xizmatlar</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="/price-list">Narxlar</a></li>
+        <li class="nav-item ms-lg-2">
+          <a class="btn btn-primary rounded-pill d-inline-flex align-items-center" href="/contact">
+            Aloqa <i class="bi bi-arrow-up-right ms-1"></i>
+          </a>
+        </li>
+        <li id="liPanel" class="nav-item ms-lg-2 d-none">
+          <a id="panelBtn" class="btn btn-dark rounded-pill d-inline-flex align-items-center" href="#">
+            <i class="bi bi-shield-lock me-1"></i> Admin Panel
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<!-- kontentni pastga surish uchun spacer -->
+<div class="filter-spacer"></div>
+
+<!-- ===== HERO ===== -->
+<section class="page-hero py-5">
+  <div class="container text-center">
+    <h1 class="hero-line">
+      <span class="hero-rest">Mazmun jamoasining</span>
+      <span class="hero-accent">so'nggi yangiliklari</span>
+    </h1>
+  </div>
+</section>
+
+<!-- FILTER: hero dan keyin, latestdan oldin -->
+<section class="container py-2">
+  <div class="filter-wrap">
+    <form id="postFilterFrm" class="filter-card">
+      <div class="filter-input flex-grow-1">
+        <i class="bi bi-search"></i>
+        <input id="postFilterQ" type="search" class="form-control"
+               placeholder="Qidiruv: sarlavha yoki matn">
+        <button type="button" id="postFilterClearQ" class="btn-clear" aria-label="Clear">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="filter-select">
+        <i class="bi bi-grid"></i>
+        <select id="postFilterCategory" class="form-select">
+          <option value="">Barcha kategoriyalar</option>
+        </select>
+      </div>
+
+      <div class="filter-actions d-flex gap-2">
+        <button id="postFilterApply" class="btn btn-primary px-4" type="submit">
+          <i class="bi bi-sliders2 me-1"></i> Filter
+        </button>
+        <button id="postFilterReset" class="btn btn-link" type="button">Tozalash</button>
+      </div>
+    </form>
+
+    <div id="activeChips" class="active-chips d-none"></div>
+  </div>
+</section>
+
+
+<!-- ===== LATEST POST ===== -->
+<section class="py-4">
+  <div class="container">
+    <div id="latestWrap" class="latest-card d-none">
+      <div class="row g-0">
+        <div class="col-lg-6"><div id="latestThumb" class="latest-media"></div></div>
+        <div class="col-lg-6">
+          <div class="latest-content">
+            <div class="post-meta mb-2" id="latestDate"></div>
+            <h3 class="fw-bold" id="latestTitle"></h3>
+            <p class="mt-2 line-clamp-3" id="latestExcerpt"></p>
+            <a id="latestRead" class="btn btn-outline-primary rounded-pill">Batafsil <i class="bi bi-arrow-up-right ms-1"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skeleton -->
+    <div id="latestSkeleton" class="latest-card">
+      <div class="row g-0">
+        <div class="col-lg-6"><div class="latest-media placeholder col-12" style="min-height:280px"></div></div>
+        <div class="col-lg-6">
+          <div class="latest-content">
+            <div class="placeholder-glow">
+              <span class="placeholder col-4"></span>
+              <h3 class="mt-2 placeholder-glow"><span class="placeholder col-9"></span></h3>
+              <p class="placeholder-glow"><span class="placeholder col-12"></span><span class="placeholder col-10"></span></p>
+              <a class="btn btn-outline-secondary disabled placeholder col-3"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== GRID ===== -->
+<section class="py-4">
+  <div class="container">
+    <div class="d-flex align-items-center mb-2">
+      <h2 class="hero-line">
+        <span class="hero-rest fs-1">So'nggi</span>
+        <span class="hero-accent inline fs-1">yangiliklar</span>
+      </h2>
+      <div id="countInfo" class="ms-auto small text-muted"></div>
+    </div>
+
+    <div id="grid" class="row g-4"></div>
+
+    <nav class="mt-4">
+      <ul id="pager" class="pagination pager justify-content-center"></ul>
+    </nav>
+
+    <div id="empty" class="text-center text-muted d-none py-5">Hech narsa topilmadi.</div>
+  </div>
+</section>
+
+<!-- ========== CTA BLUE (konsultatsiya) ========== -->
+<section class="cta-section py-5">
+  <div class="container">
+    <div class="cta-wrap row g-0 align-items-center">
+      <!-- Left content -->
+      <div class="col-lg-6 p-4 p-md-5">
+        <h2 class="hero-line" style="color: white">
+          <span class="hero-rest"> Tizim, metodika va </span>
+          <span class="hero-rest d-block">brend - birgalikda</span>
+          <span class="hero-accent">kuchli natija</span>
+        </h2>
+
+        <!-- Button -->
+        <a href="/contact#consulting"
+           class="cta-btn d-inline-flex align-items-center">
+          <span>Konsultatsiya olish</span>
+          <i class="bi bi-arrow-up-right"></i>
+        </a>
+
+        <!-- Feature list -->
+        <ul class="cta-features mt-4">
+          <li><i class="bi bi-check2-circle"></i> O‘quv reja & setka tayyorlash</li>
+          <li><i class="bi bi-check2-circle"></i> Maktabingiza mos reja va paketlar</li>
+          <li><i class="bi bi-check2-circle"></i> Litsenziya va hujjatlar to‘plami</li>
+        </ul>
+      </div>
+
+      <!-- Right image -->
+      <div class="col-lg-6 p-4 p-md-5">
+        <div class="cta-media">
+          <img
+                  src="/files/cta.jpg"
+                  alt="Consultation"
+                  class="img-fluid"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer-top">
+  <div class="container">
+    <div class="row align-items-center mb-4">
+      <div class="col-md-6">
+        <h5 class="mb-2">Telegram sahifamizda</h5>
+        <div class="text-muted">Haftalik maslahatlar, amaliy tajribalar va bepul video darslar berib boriladi</div>
+      </div>
+      <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a id="btnSubscribeTG" class="btn btn-primary rounded-pill">
+          Obuna bo‘lish <i class="bi bi-telegram ms-1"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="row gy-4">
+      <div class="col-12 col-lg-4">
+        <div class="mb-2 small text-muted">Email</div>
+        <div class="fw-semibold">mazmunedu@gmail.com</div>
+        <div class="mt-3 small text-muted">Manzil</div>
+        <div class="fw-semibold">Toshkent shahar, Chilonzor 11 daha, 35</div>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h6 class="fw-bold mb-2">Main Pages</h6>
+        <div><a class="footer-link" href="/home">Bosh sahifa</a></div>
+        <div><a class="footer-link" href="/projects">Loyihalar</a></div>
+        <div><a class="footer-link" href="/services">Xizmatlar</a></div>
+        <div><a class="footer-link" href="/posts">Yangiliklar</a></div>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h6 class="fw-bold mb-2">Company</h6>
+        <div><a class="footer-link" href="/contact">Aloqa</a></div>
+        <div><a class="footer-link" href="/about">Mazmun haqida</a></div>
+        <div><a class="footer-link" href="/about#team">Jamoa</a></div>
+      </div>
+
+      <div class="col-6 col-lg-2">
+        <h6 class="fw-bold mb-2">Resurslar</h6>
+        <div><a class="footer-link" href="/home#webinar-video">Vebinarlar</a></div>
+        <div><a class="footer-link" href="/contact#faq">FAQ</a></div>
+        <div><a class="footer-link" href="/privacy">Maxfiylik siyosati</a></div>
+      </div>
+    </div>
+
+    <div class="footer-bottom mt-4">
+      <div class="container d-flex flex-wrap align-items-center gap-3">
+        <img src="/files/logo.png" height="22" alt="Mazmun">
+        <div class="ms-auto d-flex align-items-center gap-3">
+          <a class="footer-link" href="https://t.me/mazmun_edu" target="_blank">Telegram</a>
+          <a class="footer-link" href="https://www.instagram.com/mazmun_edu" target="_blank">Instagram</a>
+          <a class="footer-link" href="https://www.facebook.com/mazmunedu" target="_blank">Facebook</a>
+          <a class="footer-link" href="https://www.linkedin.com/company/mazmunedu/posts/?feedView=all" target="_blank">LinkedIn</a>
+          <span class="mx-2">|</span>
+          <a class="footer-link" href="/terms">Foydalanish shartlari</a>
+        </div>
+      </div>
+      <div class="container small mt-2" style="opacity:.85;">© 2025 MazmunEDU MCHJ. Barcha huquqlar himoyalangan.</div>
+    </div>
+  </div>
+</footer>
+
+<!-- Libs -->
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+<script>
+  /* ===== CONFIG ===== */
+  const API_BASE   = '/api/posts/search';
+  const API_LATEST = '/api/posts?size=1&sort=publishedAt,desc';
+  const ORIGIN = location.origin;
+
+  /* ===== HELPERS ===== */
+  function ensureAbsolute(u){ if(!u) return ''; if(/^\/(uploads|files|api)\//i.test(u)) return ORIGIN+u; return u; }
+  function getMediaUrl(media){
+    if(!media) return '/files/team.jpg';
+    if(typeof media==='string'){
+      if(/^https?:\/\//i.test(media)) return media;
+      if(media.startsWith('/')) return ensureAbsolute(media);
+      return `/api/media/url?key=${encodeURIComponent(media)}`;
+    }
+    if(typeof media==='number') return `/api/media/${media}/view`;
+    if(media && typeof media==='object'){
+      if (media.url) return ensureAbsolute(media.url);
+      if (media.key) return `/api/media/url?key=${encodeURIComponent(media.key)}`;
+      if (media.imageKey) return `/api/media/url?key=${encodeURIComponent(media.imageKey)}`;
+      if (media.mediaKey) return `/api/media/url?key=${encodeURIComponent(media.mediaKey)}`;
+      if (media.id) return `/api/media/${media.id}/view`;
+      if (media.photoId) return `/api/media/${media.photoId}/view`;
+      if (media.mediaId) return `/api/media/${media.mediaId}/view`;
+    }
+    return '/files/team.jpg';
+  }
+  function setBgWithFallback(el, src){
+    const img = new Image();
+    img.onload = ()=> el.style.backgroundImage = `url('${src}')`;
+    img.onerror= ()=> el.style.backgroundImage = `url('/files/team.jpg')`;
+    img.referrerPolicy = 'no-referrer';
+    img.src = src;
+  }
+  // TZ qo‘shmaydigan normalizator
+  function normalizeIso(s){
+    if (s == null) return null;
+
+    if (s instanceof Date) return s.toISOString();
+    if (typeof s === "number"){
+      if (String(s).length === 10) s = s * 1000;  // sec -> ms
+      return new Date(s).toISOString();
+    }
+
+    s = String(s).trim();
+    if (!s) return null;
+
+    // YYYY-MM-DD -> lokal kun boshi
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s + "T00:00:00";
+
+    // "YYYY-MM-DD HH:mm:ss(.ssssss)?" -> "YYYY-MM-DDTHH:mm:ss(.sss)"
+    if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(\.\d+)?$/.test(s)) s = s.replace(" ", "T");
+
+    // fraksiyani 3 xonagacha
+    s = s.replace(/(\.\d{0,3})\d+$/, "$1");
+
+    // epoch string
+    if (/^\d{10}$/.test(s)) return new Date(parseInt(s,10) * 1000).toISOString();
+    if (/^\d{13}$/.test(s)) return new Date(parseInt(s,10)).toISOString();
+
+    // E’TIBOR: TZ yo‘q bo‘lsa Z qo‘shmaymiz — lokal deb olamiz
+    return s;
+  }
+
+  // time-ago ko‘rinishi
+  function formatDate(input){
+    try{
+      const norm = normalizeIso(input);
+      if (!norm) return "";
+      const d = new Date(norm);
+      if (isNaN(d)) return "";
+
+      let diffSec = Math.floor((Date.now() - d.getTime())/1000);
+      diffSec = Math.max(0, diffSec); // manfiy bo‘lsa 0 ga qirqamiz
+
+      if (diffSec < 60)    return "Hozir";
+      if (diffSec < 3600)  return `${Math.floor(diffSec/60)} minut oldin`;
+      if (diffSec < 86400) return `${Math.floor(diffSec/3600)} soat oldin`;
+      if (diffSec < 7*86400)  return `${Math.floor(diffSec/86400)} kun oldin`;
+      if (diffSec < 30*86400) return `${Math.max(1,Math.floor(diffSec/(7*86400)))} hafta oldin`;
+      if (diffSec < 365*86400)return `${Math.max(1,Math.floor(diffSec/(30*86400)))} oy oldin`;
+
+      return d.toLocaleDateString('uz-UZ',{year:'numeric',month:'short',day:'numeric'});
+    }catch{
+      return "";
+    }
+  }
+
+
+  function excerpt(htmlOrText,len=200){ const txt=(htmlOrText||'').replace(/<[^>]+>/g,'').trim(); return txt.length>len?txt.slice(0,len).trim()+'…':txt; }
+  function qs(name){ return new URL(location.href).searchParams.get(name); }
+  function setQuery(params){
+    const url = new URL(location.href);
+    Object.entries(params).forEach(([k,v])=>{
+      if(v===undefined || v===null || v==='') url.searchParams.delete(k);
+      else url.searchParams.set(k,v);
+    });
+    history.pushState(null,'',url.toString());
+  }
+
+  /* ===== STATE ===== */
+  const state = {
+    page: parseInt(qs('page')||'0',10),
+    size: parseInt(qs('size')||'9',10),
+    q: qs('q')||'',
+    category: qs('category')||'',
+    sort: qs('sort')||'publishedAt,desc'
+  };
+
+  /* ===== UI REFS ===== */
+  const $frm   = document.getElementById('postFilterFrm');
+  const $q     = document.getElementById('postFilterQ');
+  const $cat   = document.getElementById('postFilterCategory');
+  if($q)   $q.value   = state.q;
+  if($cat) $cat.value = state.category;
+
+  /* ===== CATEGORIES ===== */
+  async function loadCategories(){
+    if(!$cat) return;
+    const endpoints = [
+      '/api/categories?size=1000&sort=name,asc',
+      '/api/categories',
+      '/api/post-categories'
+    ];
+    for(const ep of endpoints){
+      try{
+        const {data} = await axios.get(ep);
+        const items = Array.isArray(data?.content)?data.content:(Array.isArray(data)?data:[]);
+        $cat.innerHTML = '<option value="">Barcha kategoriyalar</option>';
+        items.forEach(c=>{
+          const opt = document.createElement('option');
+          opt.value = c.slug||c.code||c.id||c.name;
+          opt.textContent = c.name||c.title||c.slug;
+          $cat.appendChild(opt);
+        });
+        if(state.category) $cat.value = state.category;
+        return;
+      }catch{/* try next */}
+    }
+  }
+
+  /* ===== LATEST (hero) ===== */
+  (async function loadLatest(){
+    try{
+      const {data} = await axios.get(API_LATEST);
+      const it = Array.isArray(data?.content)?data.content[0]:(Array.isArray(data)?data[0]:data);
+      if(!it){ document.getElementById('latestSkeleton')?.classList.add('d-none'); return; }
+      setBgWithFallback(document.getElementById('latestThumb'), getMediaUrl(it.coverUrl||it.cover||it.photo||it.media||it.imageKey||it.mediaId||it.photoId));
+      document.getElementById('latestDate').textContent    = formatDate(it.publishedAtIso ||it.publishedAt||it.createdAt);
+      document.getElementById('latestTitle').textContent   = it.title||'Untitled';
+      document.getElementById('latestExcerpt').textContent = excerpt(it.summary||it.content||it.description,260);
+      document.getElementById('latestRead').href           = `/post?slug=${encodeURIComponent(it.slug||it.id)}`;
+      document.getElementById('latestSkeleton')?.classList.add('d-none');
+      document.getElementById('latestWrap')?.classList.remove('d-none');
+    }catch{ document.getElementById('latestSkeleton')?.classList.add('d-none'); }
+  })();
+
+  /* ===== GRID + PAGINATION ===== */
+  async function loadGrid(){
+    const grid  = document.getElementById('grid');
+    const pager = document.getElementById('pager');
+    const empty = document.getElementById('empty');
+    const countInfo = document.getElementById('countInfo');
+
+    grid.innerHTML = '<div class="col-12 text-center text-muted py-3">Yuklanmoqda…</div>';
+    pager.innerHTML = ''; empty.classList.add('d-none');
+
+    const params = new URLSearchParams();
+    params.set('page', state.page);
+    params.set('size', state.size);
+    params.set('sort', state.sort);
+    if(state.q) params.set('q', state.q);
+    if(state.category) params.set('category', state.category);
+
+    const {data} = await axios.get(`${API_BASE}?${params.toString()}`);
+    const items = Array.isArray(data?.content)?data.content:(Array.isArray(data)?data:[]);
+    const total = data?.totalElements ?? items.length;
+    const totalPages = data?.totalPages ?? 1;
+    const number = data?.number ?? state.page;
+
+    grid.innerHTML = '';
+    items.forEach(p=>{
+      const thumb = getMediaUrl(p.coverUrl||p.cover||p.photo||p.media||p.imageKey||p.mediaId||p.photoId);
+      const href = `/post?slug=${encodeURIComponent(p.slug||p.id)}`;
+      const cardId = `thumb-${(p.slug||p.id||Math.random()).toString().replace(/[^a-z0-9]/gi,'')}`;
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="col-12 col-md-6 col-lg-4">
+          <article class="post-card h-100 d-flex flex-column">
+            <a href="${href}" class="d-block"><div id="${cardId}" class="post-thumb"></div></a>
+            <div class="p-3 d-flex flex-column flex-grow-1">
+              <div class="post-meta mb-1">${formatDate(p.publishedAtIso ||p.publishedAt||p.createdAt)} <!-- ·  ${(p.category||p.categories?.[0]||p.tags?.[0]||'Yangilik')} --> </div>
+              <h5 class="fw-semibold line-clamp-2">${p.title||'Untitled'}</h5>
+              <p class="text-muted small mt-1 line-clamp-3">${excerpt(p.summary||p.content||p.description,130)}</p>
+              <div class="mt-auto">
+                <a class="btn btn-sm btn-outline-primary rounded-pill" href="${href}">Batafsil <i class="bi bi-arrow-up-right ms-1"></i></a>
+              </div>
+            </div>
+          </article>
+        </div>
+      `);
+      setBgWithFallback(document.getElementById(cardId), thumb);
+    });
+
+    countInfo.textContent = `${(total||0).toLocaleString('ru-RU')} ta maqola`;
+    if(items.length===0) empty.classList.remove('d-none'); else renderPager(pager, number, totalPages);
+
+    // filter chiplarni yangilab turamiz
+    renderActiveChips();
+  }
+
+  function renderPager(el, page, totalPages){
+    el.innerHTML = '';
+    const mk = (p, label, disabled=false, active=false)=>{
+      const li = document.createElement('li');
+      li.className = `page-item ${disabled?'disabled':''} ${active?'active':''}`;
+      const a = document.createElement('a');
+      a.className = 'page-link'; a.href = '#'; a.textContent = label;
+      a.onclick = (e)=>{ e.preventDefault(); if(disabled) return; goPage(p); };
+      li.appendChild(a); el.appendChild(li);
+    };
+    mk(page-1,'«', page<=0);
+    for(let i=Math.max(0,page-2); i<Math.min(totalPages,page+3); i++) mk(i,(i+1),false,i===page);
+    mk(page+1,'»', page>=totalPages-1);
+  }
+  function goPage(p){
+    state.page = Math.max(0,p);
+    setQuery({page:state.page,size:state.size,q:state.q,category:state.category,sort:state.sort});
+    loadGrid();
+  }
+
+  /* ===== FILTER EVENTS ===== */
+  $frm?.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    state.q = ($q?.value || '').trim();
+    state.category = ($cat?.value || '');
+    state.page = 0;
+    setQuery({page:0,size:state.size,q:state.q,category:state.category,sort:state.sort});
+    loadGrid();
+  });
+  document.getElementById('postFilterReset')?.addEventListener('click', ()=>{
+    if($q) $q.value = ''; if($cat) $cat.value = '';
+    state.q=''; state.category=''; state.page=0;
+    setQuery({page:0,size:state.size,sort:state.sort});
+    loadGrid();
+  });
+  document.getElementById('postFilterClearQ')?.addEventListener('click', ()=>{
+    if($q){ $q.value=''; $q.focus(); }
+  });
+  window.addEventListener('popstate', ()=>location.reload());
+
+  // chips
+  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;' }[m])); }
+  function renderActiveChips(){
+    const wrap = document.getElementById('activeChips'); if(!wrap) return;
+    const qVal = ($q?.value||'').trim();
+    const catVal = $cat?.value||'';
+    const chips = [];
+    if(qVal) chips.push({type:'q', label:qVal});
+    if(catVal){
+      const text = $cat.options[$cat.selectedIndex]?.text || catVal;
+      chips.push({type:'category', label:text});
+    }
+    if(chips.length===0){ wrap.classList.add('d-none'); wrap.innerHTML=''; return; }
+    wrap.classList.remove('d-none');
+    wrap.innerHTML = chips.map(c=>`<span class="chip" data-type="${c.type}">${escapeHtml(c.label)} <i class="bi bi-x"></i></span>`).join('');
+  }
+  document.getElementById('activeChips')?.addEventListener('click', (e)=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    const t = chip.dataset.type;
+    if(t==='q' && $q) $q.value='';
+    if(t==='category' && $cat) $cat.value='';
+    $frm?.dispatchEvent(new Event('submit', {cancelable:true}));
+  });
+
+  /* ===== INIT ===== */
+  (async function init(){
+    await loadCategories();
+    if(state.category && $cat) $cat.value = state.category;
+    loadGrid();
+  })();
+</script>
+
+</body>
+</html>

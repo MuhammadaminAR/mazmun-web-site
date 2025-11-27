@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Super Admin — Control Panel</title>
+
+  <!-- UI libs -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+
+  <style>
+    :root{
+      --sidebar:#0f172a;
+      --sidebar-soft:#111827;
+      --brand:#1e7bff;
+      --muted:#6b7280;
+      --rounded:16px;
+    }
+    body{font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#f6f7fb;}
+    .app{display:grid; grid-template-columns: 260px 1fr; min-height:100vh;}
+
+    /* Sidebar */
+    .sidebar{
+      background:linear-gradient(180deg,var(--sidebar),var(--sidebar-soft));
+      color:#e5e7eb; padding:18px; position:sticky; top:0; height:100vh;
+    }
+    .brand{display:flex; align-items:center; gap:.6rem; color:#fff; font-weight:800; letter-spacing:.3px; margin-bottom:18px;}
+    .brand img{height:26px;}
+    .nav-sec{margin-top:12px;}
+    .nav-sec h6{font-size:.75rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin:14px 0 6px;}
+    .side-link{display:flex; align-items:center; gap:.6rem; padding:.55rem .65rem; color:#e5e7eb; border-radius:10px; text-decoration:none;}
+    .side-link:hover{background:#111827;}
+    .side-link.active{background:#0b1222; border:1px solid rgba(255,255,255,.06)}
+    .side-footer{position:absolute; left:18px; right:18px; bottom:18px; }
+
+    /* Topbar */
+    .topbar{background:#fff; border-bottom:1px solid #eef0f5; padding:10px 16px; position:sticky; top:0; z-index:10;}
+    .search{max-width:440px;}
+    .avatar{width:36px; height:36px; border-radius:50%; object-fit:cover;}
+
+    /* Content */
+    .content{padding:18px;}
+    .card-rounded{border-radius:var(--rounded);}
+    .stat-card .num{font-weight:800; font-size:clamp(22px,2.4vw,30px)}
+
+    /* Table */
+    .table thead th{white-space:nowrap;}
+    .badge-role{background:#eef2ff; color:#3730a3; font-weight:700;}
+
+    /* Toggle */
+    .form-switch .form-check-input{width:2.6em;}
+
+    /* Toast */
+    .toast-container{z-index:1080;}
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/files/logo.png" alt="logo">
+      <span>Super Admin</span>
+    </div>
+
+    <div class="nav-sec">
+      <h6>Overview</h6>
+      <a class="side-link active" href="#"><i class="bi bi-speedometer2"></i> Boshqaruv</a>
+    </div>
+
+    <div class="nav-sec">
+      <h6>Management</h6>
+      <a class="side-link" href="#users"><i class="bi bi-people"></i> Users</a>
+      <a class="side-link" href="#roles"><i class="bi bi-shield-lock"></i> Roles</a>
+      <a class="side-link" href="#system"><i class="bi bi-gear"></i> System</a>
+    </div>
+
+    <div class="side-footer">
+      <a class="side-link" href="/admin">
+        <i class="bi bi-columns-gap"></i> Admin Panel
+      </a>
+    </div>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <main>
+    <!-- Topbar -->
+    <div class="topbar d-flex align-items-center gap-2">
+      <form class="search d-flex flex-grow-1" role="search" onsubmit="return false">
+        <input id="q" class="form-control" type="search" placeholder="Foydalanuvchi qidirish (username, full name, email)" />
+      </form>
+      <button id="btnNew" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Yangi user</button>
+      <img class="avatar ms-2" src="/files/me.webp" alt="">
+    </div>
+
+    <div class="content">
+      <!-- Stats -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="card card-rounded stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="text-primary fs-3"><i class="bi bi-people-fill"></i></div>
+              <div>
+                <div class="small text-muted">Jami foydalanuvchilar</div>
+                <div id="statTotal" class="num">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-rounded stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="text-success fs-3"><i class="bi bi-shield-check"></i></div>
+              <div>
+                <div class="small text-muted">Adminlar</div>
+                <div id="statAdmins" class="num">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-rounded stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="text-warning fs-3"><i class="bi bi-lock"></i></div>
+              <div>
+                <div class="small text-muted">Parol reset (bugun)</div>
+                <div id="statPwd" class="num">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <div id="users" class="card card-rounded">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <h5 class="m-0">Users</h5>
+            <div class="ms-auto d-flex align-items-center gap-2">
+              <select id="pageSize" class="form-select form-select-sm" style="width:110px">
+                <option value="10" selected>10 / page</option>
+                <option value="20">20 / page</option>
+                <option value="50">50 / page</option>
+              </select>
+              <div class="btn-group">
+                <button id="btnPrev" class="btn btn-outline-secondary btn-sm">Oldingi</button>
+                <button id="btnNext" class="btn btn-outline-secondary btn-sm">Keyingi</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Full name</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th class="text-center">Admin?</th>
+                <th class="text-end">Amal</th>
+              </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <div id="lblInfo" class="small text-muted"></div>
+            <div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ===== Modals ===== -->
+<!-- Create user -->
+<div class="modal fade" id="mdlCreate" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="frmCreate" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Yangi user yaratish</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="mb-2">
+          <label class="form-label">Full name</label>
+          <input id="cFullName" class="form-control" required>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Username</label>
+          <input id="cUsername" class="form-control" minlength="3" required>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Email (ixtiyoriy)</label>
+          <input id="cEmail" class="form-control" type="email">
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Password</label>
+          <input id="cPassword" class="form-control" type="password" minlength="8" required>
+          <div class="form-text">Kamida 8 ta belgi.</div>
+        </div>
+
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="cIsAdmin">
+          <label class="form-check-label" for="cIsAdmin">Admin huquqi bilan yaratish</label>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i> Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reset password -->
+<div class="modal fade" id="mdlPwd" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="frmPwd" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Parolni tiklash</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pUserId">
+        <div class="mb-2">
+          <label class="form-label">Yangi parol</label>
+          <input id="pPassword" class="form-control" type="password" minlength="8" required>
+          <div class="form-text">Kamida 8 ta belgi.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-shield-lock me-1"></i> Reset</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <div id="toast" class="toast align-items-center text-bg-dark border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastMsg">Done.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  /* ===================== PATHS ===================== */
+  const PATH = {
+    LOGIN : '/admin-user/login',
+    ADMIN : '/admin'
+  };
+  const API = {
+    ME     : '/api/auth/me',
+    LIST   : (page,size,q)=> `/api/admin/users?page=${page}&size=${size}${q?`&q=${encodeURIComponent(q)}`:''}`,
+    CREATE : '/api/admin/users',
+    GRANT  : id => `/api/admin/users/${id}/grant-admin`,
+    REVOKE : id => `/api/admin/users/${id}/revoke-admin`,
+    RESET  : id => `/api/admin/users/${id}/password`
+  };
+
+  /* ===================== SMALL HELPERS ===================== */
+  function base64UrlDecode(str) {
+    if (!str) return '';
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = str.length % 4;
+    if (pad) str += '='.repeat(4 - pad);
+    try { return atob(str); } catch { return ''; }
+  }
+  function safeJwtPayload(t) {
+    try {
+      const parts = t.split('.');
+      if (parts.length !== 3) return {};
+      const json = base64UrlDecode(parts[1]);
+      return JSON.parse(json || '{}');
+    } catch { return {}; }
+  }
+  const upArr = (a)=> Array.isArray(a) ? a.map(v=>String(v).toUpperCase().trim()) : [];
+
+  /* ===================== AXIOS INTERCEPTOR ===================== */
+  /* Faqat 401/403 da redirect, 404/500 da sahifa qoladi */
+  axios.interceptors.response.use(
+          r => r,
+          err => {
+            const s = err?.response?.status;
+            if (s === 401 || s === 403) {
+              localStorage.removeItem('jwt');
+              if (!location.pathname.includes(PATH.LOGIN)) {
+                location.replace(PATH.LOGIN);
+              }
+              return;
+            }
+            return Promise.reject(err);
+          }
+  );
+
+  /* ===================== AUTH GUARD (TOKEN + /ME = REQUIRED) ===================== */
+  async function ensureAuth() {
+    const token = localStorage.getItem('jwt');
+    if (!token) { location.replace(PATH.LOGIN); return false; }
+
+    // Token'ni default headerga qo'yib qo'yamiz
+    axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+
+    // 1) Token exp tekshirish (moddati tugagan bo'lmasin)
+    const p = safeJwtPayload(token);
+    if (p?.exp && p.exp * 1000 < Date.now()) {
+      localStorage.removeItem('jwt');
+      location.replace(PATH.LOGIN);
+      return false;
+    }
+
+    // 2) Serverdagi REAL authorities (ROLE_ prefiks bilan) ni tekshiramiz
+    try {
+      const { data } = await axios.get(API.ME);
+      // Sizning /me roles maydoni = auth.getAuthorities() bo'lgani uchun shu yerga to'g'ri keladi:
+      const roles = upArr(data?.roles || data?.authorities || []);
+      if (roles.includes('ROLE_SUPER_ADMIN')) {
+        // OK — super admin panelga ruxsat
+        return true;
+      }
+      if (roles.includes('ROLE_ADMIN')) {
+        // Admin bo'lsa oddiy admin panelga yo'naltiramiz
+        location.replace(PATH.ADMIN);
+        return false;
+      }
+      // Aks holda login'ga
+      localStorage.removeItem('jwt');
+      location.replace(PATH.LOGIN);
+      return false;
+    } catch (err) {
+      // /me ishlamasa — kirish berilmaydi (majburiy tekshiruv)
+      localStorage.removeItem('jwt');
+      location.replace(PATH.LOGIN);
+      return false;
+    }
+  }
+
+  /* ===================== STATE ===================== */
+  let page=0, size=10, q='';
+  let total=0, content=[];
+
+  const toast = () => new bootstrap.Toast(document.getElementById('toast'));
+  function notify(msg){
+    document.getElementById('toastMsg').textContent = msg;
+    toast().show();
+  }
+
+  /* ===================== RENDER HELPERS ===================== */
+  function renderRoles(roles){
+    const arr = normalizeRoles(roles);
+    if(!arr.length) return '<span class="badge text-bg-light">USER</span>';
+    return arr.map(r=>`<span class="badge badge-role me-1">${r}</span>`).join('');
+  }
+  function hasAdmin(roles){
+    const a = normalizeRoles(roles);
+    return a.includes('ROLE_ADMIN') || a.includes('ADMIN');
+  }
+  function normalizeRoles(roles){
+    if(!Array.isArray(roles)) return [];
+    return roles.map(r=>{
+      if(typeof r==='string') return r;
+      if(r.roleName) return r.roleName;
+      if(r.authority) return r.authority;
+      return '';
+    }).filter(Boolean);
+  }
+  function safe(v){ return (v===null||v===undefined) ? '' : String(v); }
+
+  /* ===================== TABLE RENDER ===================== */
+  function renderTable(){
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+
+    content.forEach(u=>{
+      const isAdmin = hasAdmin(u.roles);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+      <td>${safe(u.id)}</td>
+      <td class="fw-semibold">${safe(u.username)}</td>
+      <td>${safe(u.fullName||'')}</td>
+      <td>${safe(u.email||'')}</td>
+      <td>${renderRoles(u.roles)}</td>
+      <td class="text-center">
+        <div class="form-check form-switch d-inline-block">
+          <input class="form-check-input" type="checkbox" ${isAdmin?'checked':''} data-id="${u.id}">
+        </div>
+      </td>
+      <td class="text-end">
+        <div class="btn-group">
+          <button class="btn btn-sm btn-outline-secondary" data-act="pwd" data-id="${u.id}">
+            <i class="bi bi-shield-lock"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" data-act="copy" data-id="${u.id}">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+      </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Delegated handlers
+    tbody.querySelectorAll('.form-check-input').forEach(sw=>{
+      sw.onchange = async (e)=>{
+        const id = e.target.dataset.id;
+        try{
+          if(e.target.checked){ await axios.post(API.GRANT(id)); notify("Admin huquqi berildi"); }
+          else{ await axios.post(API.REVOKE(id)); notify("Admin huquqi olindi"); }
+          await load(false);
+        }catch(err){
+          console.error(err);
+          alert('Role o‘zgartirishda xato');
+          e.target.checked = !e.target.checked; // revert
+        }
+      };
+    });
+
+    tbody.querySelectorAll('button[data-act]').forEach(btn=>{
+      btn.onclick = ()=>{
+        const id = btn.dataset.id, act = btn.dataset.act;
+        if(act==='pwd'){
+          document.getElementById('pUserId').value = id;
+          document.getElementById('pPassword').value = '';
+          new bootstrap.Modal(document.getElementById('mdlPwd')).show();
+        }else if(act==='copy'){
+          navigator.clipboard.writeText(id);
+          notify("ID nusxalandi");
+        }
+      };
+    });
+
+    // Info + stats
+    document.getElementById('lblInfo').textContent =
+            total ? `Ko‘rsatilmoqda ${(page*size)+1}–${Math.min((page+1)*size,total)} / ${total}` : 'Hech narsa topilmadi';
+    const admins = content.filter(u=>hasAdmin(u.roles)).length;
+    document.getElementById('statTotal').textContent = total || content.length || 0;
+    document.getElementById('statAdmins').textContent = admins;
+  }
+
+  /* ===================== LOAD LIST ===================== */
+  async function load(showWarnIfNoGet=true){
+    try{
+      const {data} = await axios.get(API.LIST(page,size,q));
+      content = Array.isArray(data?.content) ? data.content : (Array.isArray(data)? data : []);
+      total   = Number.isFinite(data?.totalElements) ? data.totalElements : content.length;
+      renderTable();
+    }catch(err){
+      console.warn('GET /api/admin/users hozircha yo‘q yoki xato:', err);
+      if(showWarnIfNoGet) {
+        // alert('Eslatma: GET /api/admin/users endpoint hozircha yo‘q (faqat SUPER_ADMIN listing).');
+      }
+      content = []; total = 0; renderTable();
+    }
+  }
+
+  /* ===================== INIT UI EVENTS ===================== */
+  function initUi(){
+    document.getElementById('btnNew').onclick = ()=>{
+      document.getElementById('frmCreate').reset();
+      new bootstrap.Modal(document.getElementById('mdlCreate')).show();
+    };
+    document.getElementById('q').oninput = (e)=>{ q = e.target.value.trim(); page=0; load(); };
+    document.getElementById('pageSize').onchange = (e)=>{ size = +e.target.value; page=0; load(); };
+
+    document.getElementById('btnPrev').onclick = ()=>{ if(page>0){ page--; load(); } };
+    document.getElementById('btnNext').onclick = ()=>{ if((page+1)*size < total){ page++; load(); } };
+
+    document.getElementById('frmCreate').onsubmit = async (e)=>{
+      e.preventDefault();
+      const payload = {
+        fullName:  document.getElementById('cFullName').value.trim(),
+        username:  document.getElementById('cUsername').value.trim(),
+        email:     document.getElementById('cEmail').value.trim() || null,
+        password:  document.getElementById('cPassword').value,
+        admin:     document.getElementById('cIsAdmin').checked
+      };
+      if(!payload.username || !payload.password) return;
+      try{
+        await axios.post(API.CREATE, payload);
+        bootstrap.Modal.getInstance(document.getElementById('mdlCreate')).hide();
+        notify("User yaratildi");
+        page=0; await load();
+      }catch(err){
+        console.error(err);
+        alert(err?.response?.data?.message || 'Yaratishda xato');
+      }
+    };
+
+    document.getElementById('frmPwd').onsubmit = async (e)=>{
+      e.preventDefault();
+      const id = document.getElementById('pUserId').value;
+      const pwd = document.getElementById('pPassword').value;
+      if(!id || !pwd || pwd.length<8) return;
+      try{
+        await axios.post(API.RESET(id), {password: pwd});
+        bootstrap.Modal.getInstance(document.getElementById('mdlPwd')).hide();
+        notify("Parol yangilandi");
+        document.getElementById('statPwd').textContent =
+                (Number(document.getElementById('statPwd').textContent)||0)+1;
+      }catch(err){
+        console.error(err);
+        alert(err?.response?.data?.message || 'Parolni yangilashda xato');
+      }
+    };
+  }
+
+  /* ===================== BOOT ===================== */
+  (async function boot(){
+    const ok = await ensureAuth();
+    if (!ok) return;         // redirect qilingan bo'ladi
+    initUi();
+    load();
+  })();
+</script>
+
+
+</body>
+</html>

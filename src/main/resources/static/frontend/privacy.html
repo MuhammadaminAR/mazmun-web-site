@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mazmun — Maxfiylik siyosati</title>
+  <meta name="description" content="MazmunEDU MCHJ maxfiylik siyosati va shaxsiy ma'lumotlarni qayta ishlash tartibi">
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root{ --brand:#1e6bff; --ink:#0f172a; --muted:#64748b; --bg:#f5f7fb; }
+    html,body{ font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif; color:var(--ink); }
+    a{text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Top navbar */
+    .app-nav{border-bottom:1px solid #eef2ff;background:#fff}
+    .brand{font-weight:800;letter-spacing:.2px;color:var(--ink)}
+    .brand:hover{text-decoration:none;color:var(--brand)}
+
+    /* Hero */
+    .hero{ background:var(--bg); border-bottom:1px solid #eef2ff; }
+    .hero .badge{ background:rgba(30,107,255,.08); color:var(--brand); border:1px solid rgba(30,107,255,.18); }
+
+    /* Cards & titles */
+    .section-card{ background:#fff; border:1px solid #eef2ff; border-radius:14px; padding:1.25rem 1.25rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+    .section-card h2{
+      font-weight:800; /* Inter Bold */
+      margin-bottom:.75rem; scroll-margin-top:86px; line-height:1.25;
+    }
+
+    /* TOC */
+    .toc-sticky{ position:sticky; top:90px; }
+    .toc .nav-link{
+      color:var(--muted); padding:.35rem 0; border-left:2px solid transparent;
+      font-weight:700; /* Inter Bold for section names in TOC */
+    }
+    .toc .nav-link.active{ color:var(--ink); border-color:var(--brand); }
+
+    .last-updated{ color:var(--muted); }
+  </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#tocNav" data-bs-offset="100" tabindex="0">
+
+<!-- Top Navbar with Home link -->
+<nav class="app-nav">
+  <div class="container d-flex align-items-center py-2">
+    <a href="/home" class="brand d-inline-flex align-items-center">
+      <i class="bi bi-mortarboard-fill me-2"></i> Mazmun
+    </a>
+    <div class="ms-auto">
+      <a class="btn btn-sm btn-outline-primary rounded-pill" href="/home">
+        <i class="bi bi-house-door me-1"></i> Bosh sahifa
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero py-5">
+  <div class="container">
+
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="/home">Bosh sahifa</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Maxfiylik siyosati</li>
+      </ol>
+    </nav>
+
+    <span class="badge rounded-pill mb-3">Huquqiy</span>
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+      <div>
+        <h1 class="display-6 fw-bold mb-2">Maxfiylik siyosati</h1>
+        <p class="last-updated mb-0">Oxirgi yangilanish: <span id="lastUpdated">28-oktabr 2025</span></p>
+      </div>
+      <div class="text-muted small mt-3 mt-md-0">
+        <i class="bi bi-lock me-1"></i> MazmunEDU MCHJ
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Content -->
+<main class="py-4">
+  <div class="container">
+    <div class="row g-4">
+      <aside class="col-lg-4 col-xl-3">
+        <div class="toc-sticky">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h6 class="fw-bold text-uppercase small text-muted mb-3">Bo‘limlar</h6>
+              <nav id="tocNav" class="nav flex-column toc">
+                <a class="nav-link" href="#kirish">1. Kirish</a>
+                <a class="nav-link" href="#yigiladigan">2. Yig‘iladigan ma’lumotlar</a>
+                <a class="nav-link" href="#foydalanish">3. Ma’lumotlardan foydalanish</a>
+                <a class="nav-link" href="#uchinchi">4. Uchinchi tomonlarga uzatish</a>
+                <a class="nav-link" href="#cookies">5. Cookie va analytics</a>
+                <a class="nav-link" href="#security">6. Ma’lumotlar xavfsizligi</a>
+                <a class="nav-link" href="#rights">7. Foydalanuvchi huquqlari</a>
+                <a class="nav-link" href="#children">8. Bolalar maxfiyligi</a>
+                <a class="nav-link" href="#changes">9. Siyosatdagi o‘zgarishlar</a>
+                <a class="nav-link" href="#contact">10. Aloqa</a>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="col-lg-8 col-xl-9">
+        <div id="kirish" class="section-card">
+          <h2>1. Kirish</h2>
+          <p>Ushbu Maxfiylik siyosati <strong>MazmunEDU MCHJ</strong> tomonidan foydalanuvchilarning shaxsiy ma’lumotlari qanday yig‘ilishi, saqlanishi va himoya qilinishini tushuntiradi. Saytdan foydalanish bilan ushbu siyosatga rozilik bildirasiz.</p>
+        </div>
+
+        <div id="yigiladigan" class="section-card mt-3">
+          <h2>2. Yig‘iladigan ma’lumotlar</h2>
+          <ul>
+            <li>Identifikatsiya ma’lumotlari: ism, familiya, telefon, e-mail.</li>
+            <li>Texnik ma’lumotlar: IP manzil, qurilma/brauzer turi, sahifa ko‘rish statistikasi.</li>
+            <li>Cookie va piksel ma’lumotlari (masalan, Google Analytics, Meta Pixel, Telegram mini-app statistikasi bo‘lsa).</li>
+            <li>To‘lov ma’lumotlari — faqat to‘lov provayderlarida qayta ishlanadi (Bizda to‘liq karta raqamlari saqlanmaydi).</li>
+          </ul>
+        </div>
+
+        <div id="foydalanish" class="section-card mt-3">
+          <h2>3. Ma’lumotlardan foydalanish</h2>
+          <ul>
+            <li>Aloqa, xizmatlar haqida xabarnoma, qo‘llab-quvvatlash.</li>
+            <li>Xizmat sifatini yaxshilash, tahlil va ichki hisobotlar.</li>
+            <li>Marketing (rozilik asosida) — yangiliklar, treninglar, takliflar.</li>
+            <li>Huquqiy majburiyatlarni bajarish va firibgarlikni oldini olish.</li>
+          </ul>
+        </div>
+
+        <div id="uchinchi" class="section-card mt-3">
+          <h2>4. Uchinchi tomonlarga uzatish</h2>
+          <p>Ma’lumotlar quyidagi vaziyatlarda uchinchi tomonlarga uzatilishi mumkin:</p>
+          <ul>
+            <li>Xosting va infratuzilma provayderlari (serverlar, e-pochta xizmati).</li>
+            <li>Analitika va reklama tizimlari (Google Analytics/Tag, Meta/Telegram reklama pikseli).</li>
+            <li>To‘lov tizimlari (Click, Payme va boshqalar). To‘lov ma’lumotlarini ular qayta ishlaydi.</li>
+          </ul>
+          <p>Uchinchi tomonlar ham amaldagi maxfiylik standartlariga rioya qilishi talab etiladi.</p>
+        </div>
+
+        <div id="cookies" class="section-card mt-3">
+          <h2>5. Cookie va analytics</h2>
+          <p>Cookie fayllari foydalanuvchi tajribasini yaxshilash va sayt ishlashini tahlil qilish uchun qo‘llanadi. Brauzer sozlamalaridan cookie’larni o‘chirishingiz yoki cheklashingiz mumkin. Analitika vositalari anonimlashtirilgan statistikadan foydalanadi.</p>
+        </div>
+
+        <div id="security" class="section-card mt-3">
+          <h2>6. Ma’lumotlar xavfsizligi</h2>
+          <p>Biz ruxsatsiz kirish, yo‘qotish yoki oshkor etishdan himoya qilish uchun texnik va tashkiliy choralarni (SSL, server xavfsizligi, autentifikatsiya) qo‘llaymiz.</p>
+        </div>
+
+        <div id="rights" class="section-card mt-3">
+          <h2>7. Foydalanuvchi huquqlari</h2>
+          <ul>
+            <li>O‘z ma’lumotlarini ko‘rish, tahrirlash yoki o‘chirishni so‘rash.</li>
+            <li>Marketing xabarlaridan voz kechish (unsubscribe).</li>
+            <li>So‘rovlar uchun: <a href="mailto:info@mazmunedu.uz">info@mazmunedu.uz</a></li>
+          </ul>
+        </div>
+
+        <div id="children" class="section-card mt-3">
+          <h2>8. Bolalar maxfiyligi</h2>
+          <p>Biz ota-ona/vasiy roziligisiz bolalardan (odatda 16 yoshgacha) ma’lumot to‘plashni maqsad qilmaymiz. Bunday holat aniqlansa, ma’lumotlar o‘chirib tashlanadi.</p>
+        </div>
+
+        <div id="changes" class="section-card mt-3">
+          <h2>9. Siyosatdagi o‘zgarishlar</h2>
+          <p>Siyosat vaqti-vaqti bilan yangilanadi. Yangilangan sana sahifa yuqorisida ko‘rsatiladi.</p>
+        </div>
+
+        <div id="contact" class="section-card mt-3">
+          <h2>10. Aloqa</h2>
+          <address class="mb-0">
+            <strong>MazmunEDU MCHJ</strong><br>
+            Toshkent shahar, Chilonzor 11-daha, 35<br>
+            E-mail: <a href="mailto:info@mazmunedu.uz">info@mazmunedu.uz</a>
+          </address>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- Global footer here -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Optional: klaviatura bilan tez qaytish (H) -->
+<script>
+  document.addEventListener('keydown', (e)=>{
+    if(e.key.toLowerCase()==='h' && !/input|textarea|select/i.test(document.activeElement.tagName)){
+      window.location.href = '/home';
+    }
+  });
+</script>
+</body>
+</html>

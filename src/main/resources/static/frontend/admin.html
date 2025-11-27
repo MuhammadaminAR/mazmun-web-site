@@ -1,0 +1,3939 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Panel — Mazmun</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
+  <style>
+    :root{ --sidebar:#0f172a; --sidebar-soft:#111827; --brand:#1e7bff; --rounded:16px; }
+    body{font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#f6f7fb;}
+    .app{display:grid; grid-template-columns: 250px 1fr; min-height:100vh;}
+    .sidebar{background:linear-gradient(180deg,var(--sidebar),var(--sidebar-soft)); color:#e5e7eb; padding:16px; position:sticky; top:0; height:100vh;}
+    .brand{display:flex; align-items:center; gap:.6rem; font-weight:800; margin-bottom:12px;}
+    .brand img{height:24px;}
+    .side-link{display:flex; align-items:center; gap:.55rem; padding:.55rem .65rem; color:#e5e7eb; border-radius:10px; text-decoration:none;}
+    .side-link:hover{background:#111827;}
+    .side-link.active{background:#0b1222; border:1px solid rgba(255,255,255,.06)}
+    .side-footer{position:absolute; left:16px; right:16px; bottom:16px;}
+    .topbar{background:#fff; border-bottom:1px solid #eef0f5; padding:10px 16px; display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:10;}
+    .content{padding:18px;}
+    .card-rounded{border-radius:var(--rounded);}
+    .section-title{font-weight:800;}
+    .help{color:#64748b; font-size:.9rem;}
+    .small-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:.82rem;}
+    .thumb{max-height:140px; border-radius:10px; border:1px solid #eef1f6}
+    .toast-container{z-index:1080;}
+    /* label matn badge bilan bir qatorda cho'zilsin */
+    .side-link { display:flex; align-items:center; gap:.55rem; }
+    .side-link .label { flex: 1; }            /* badge-ni o‘ngga suradi */
+
+
+    /* ===== POSTS TABLE FIX (paste at the end) ===== */
+    #postTable{
+      border-collapse: collapse !important;      /* important: separate emas */
+      width: 100%;
+    }
+
+    #postTable > :not(caption) > * > *{
+      background: transparent !important;        /* Bootstrap overlayni o‘chirish */
+      box-shadow: none !important;               /* striped/hover shadow yo‘q */
+      border-color: #eef1f6 !important;
+      vertical-align: middle;
+      padding: .85rem 1rem;
+    }
+
+    /* Hover paytida yengil fon */
+    #postTable tbody tr:hover > *{
+      background: #fafbff !important;
+    }
+
+    /* Cover rasm */
+    #postTable .thumb-sm{
+      width:54px; height:54px; object-fit:cover;
+      border-radius:10px; border:1px solid #eef1f6;
+    }
+
+    /* Title – 2 qatorgacha ko‘rsatish */
+    #postTable .post-title-line{
+      -webkit-box-orient:vertical;
+      overflow:hidden; max-width:520px;
+    }
+
+    /* Actions ustunida tugmalar bir qatorda qolsin */
+    #postTable .td-actions{ white-space: nowrap; }
+    #postTable .td-actions .btn{ margin-right:.35rem; }
+    #postTable .td-actions .btn:last-child{ margin-right:0; }
+
+    /* Row kliklanadigan */
+    #postTable tbody tr.row-click{ cursor:pointer; }
+
+    /*  Service style */
+    #svcTable > :not(caption) > * > * { background: transparent !important; box-shadow: none !important; }
+    #svcTable td, #svcTable th { border-color:#eef1f6 !important; vertical-align: middle; }
+    #svcTable tbody tr:hover > * { background:#fafbff; }
+    #svcTable .thumb-sm { width:54px; height:54px; object-fit:cover; border-radius:10px; border:1px solid #eef1f6; }
+    #svcTable .svc-title { -webkit-box-orient:vertical; overflow:hidden; max-width:clamp(220px,40vw,520px); }
+
+    /*  PROJECTS */
+    #prjTable > :not(caption) > * > * { background: transparent !important; box-shadow:none!important; }
+    #prjTable .prj-title{ -webkit-box-orient:vertical; overflow:hidden; max-width:clamp(220px,40vw,520px); }
+    #prjTable tbody tr:hover > * { background:#fafbff; }
+    #prjTable .thumb-sm{ width:54px;height:54px;object-fit:cover;border-radius:10px;border:1px solid #eef1f6; }
+
+    /* ===== Trusted User Logos (preview + table) ===== */
+    #tulLogoPrev{
+      max-width:220px !important;
+      max-height:120px !important;
+      width:auto !important;
+      height:auto !important;
+      object-fit:contain;
+      background:#fff;
+      padding:4px;
+      border:1px solid #eef1f6;
+      border-radius:10px;
+      display:block;
+    }
+
+    /* Table styling (xuddi posts/services kabi) */
+    #tulTable > :not(caption) > * > * { background: transparent !important; box-shadow: none !important; }
+    #tulTable td, #tulTable th { border-color:#eef1f6 !important; vertical-align: middle; }
+    #tulTable tbody tr:hover > * { background:#fafbff; }
+    #tulTable .thumb-sm{
+      width:54px; height:54px;
+      object-fit:contain;       /* logolar cho‘zilmasin */
+      border-radius:8px; border:1px solid #eef1f6; background:#fff;
+    }
+
+
+    /* ===== TEAM (thumb + table) ===== */
+    #tmPhotoPrev, #tmEditPhotoPrev{
+      max-height:140px; border-radius:10px; border:1px solid #eef1f6; display:block;
+    }
+    #teamTable > :not(caption) > * > * { background:transparent!important; box-shadow:none!important; }
+    #teamTable td, #teamTable th { border-color:#eef1f6!important; vertical-align:middle; }
+    #teamTable tbody tr:hover > * { background:#fafbff; }
+    #teamTable .thumb-sm{
+      width:54px; height:54px; object-fit:cover; border-radius:10px; border:1px solid #eef1f6;
+    }
+
+  </style>
+
+
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand"><img src="/files/logo.png" alt=""><span>Admin Panel</span></div>
+
+    <nav class="d-grid gap-1">
+      <a class="side-link active" href="#posts"><i class="bi bi-journal-text"></i> <span class="label">Posts</span></a>
+      <a class="side-link" href="#services"><i class="bi bi-tools"></i> <span class="label">Services</span></a>
+      <a class="side-link" href="#projects"><i class="bi bi-kanban"></i> <span class="label">Projects</span></a>
+      <a class="side-link" href="#team"><i class="bi bi-people"></i> <span class="label">Team</span></a>
+      <a class="side-link" href="#categories"><i class="bi bi-tags"></i> <span class="label">Categories</span></a>
+      <a class="side-link" href="#site"><i class="bi bi-gear"></i> <span class="label">Site Settings</span></a>
+      <a class="side-link" href="#pricing">
+        <i class="bi bi-cash-stack"></i>
+        <span class="label">Pricing</span>
+      </a>
+
+      <!-- Messages: alohida page -->
+      <a class="side-link d-flex align-items-center" href="/admin/messages">
+        <i class="bi bi-inbox"></i>
+        <span class="label" style="margin-left:.55rem">Messages</span>
+        <span id="badgeUnread" class="badge bg-danger rounded-pill ms-auto" style="display:none;">0</span>
+      </a>
+    </nav>
+
+    <div class="side-footer">
+      <a class="side-link" id="linkSuper" href="/super-admin"><i class="bi bi-shield-lock"></i> <span class="label">Super Admin</span></a>
+      <a class="side-link" href="/home"><i class="bi bi-box-arrow-up-right"></i> <span class="label">Public site</span></a>
+    </div>
+  </aside>
+
+
+  <!-- Main -->
+  <main>
+    <div class="topbar">
+      <div class="fw-bold">Mazmun — Admin</div>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <span id="who" class="help"></span>
+        <button class="btn btn-outline-secondary btn-sm" id="btnLogout"><i class="bi bi-box-arrow-right"></i> Chiqish</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ===== Trusted User Logos ===== -->
+      <section id="trusted" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Trusted User Logos</h4>
+          <div class="ms-auto small help">/api/admin/trusted-user-logo</div>
+        </div>
+
+        <div class="card card-rounded">
+          <!-- CREATE FORM -->
+          <form id="tulCreateFrm" class="card-body row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Username <span class="text-danger">*</span></label>
+              <input id="tulUsername" class="form-control" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Status <span class="text-danger">*</span></label>
+              <select id="tulStatus" class="form-select" required>
+                <option value="DRAFT">DRAFT</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Logo <span class="text-danger">*</span></label>
+              <input id="tulLogoFile" type="file" accept="image/*" class="form-control" required>
+              <img id="tulLogoPrev" class="thumb mt-2 d-none" alt="preview">
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>Create</button>
+              <button id="tulLoadBtn" class="btn btn-outline-secondary" type="button">Load</button>
+              <button id="tulHideBtn" class="btn btn-outline-secondary d-none" type="button">Hide</button>
+            </div>
+          </form>
+
+          <!-- LIST -->
+          <div id="tulTableWrap" class="px-3 pb-3 d-none">
+            <div class="table-responsive mt-3">
+              <table class="table align-middle" id="tulTable">
+                <thead>
+                <tr>
+                  <th style="width:72px">Logo</th>
+                  <th>Username</th>
+                  <th>Status</th>
+                  <th style="width:270px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="tulTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mt-2" id="tulPager">
+              <button class="btn btn-sm btn-outline-secondary" id="tulPrev" type="button">Prev</button>
+              <button class="btn btn-sm btn-outline-secondary" id="tulNext" type="button">Next</button>
+              <span class="small ms-2" id="tulPageInfo"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EDIT MODAL -->
+      <div class="modal fade" id="tulEditModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Trusted User Logo</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="tulEditFrm" class="row g-3">
+                <input type="hidden" id="tulEditId">
+                <div class="col-12">
+                  <label class="form-label">Username</label>
+                  <input id="tulEditUsername" class="form-control" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Status</label>
+                  <select id="tulEditStatus" class="form-select" required>
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Change logo (optional)</label>
+                  <input id="tulEditLogoFile" type="file" accept="image/*" class="form-control">
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button id="tulEditSaveBtn" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ==================== HOMEPAGE KPI (4 box) ==================== -->
+      <section id="kpi" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Homepage KPI (4 box)</h4>
+          <div class="ms-auto small help">/api/admin/home/kpis</div>
+        </div>
+
+        <div class="card card-rounded">
+          <div class="card-body">
+            <p class="help mb-3">
+              Bu yerda bosh sahifadagi 4 ta KPI kartochka uchun qiymat, matn va iconlarni o‘zgartirishingiz
+              yoki yangilarini qo‘shishingiz mumkin.
+              <br>“Computed” bo‘lgan KPI uchun <code>value</code> backend tomonidan avtomatik hisoblanadi
+              (masalan: project count + 10).
+            </p>
+
+            <div class="d-flex gap-2 mb-3">
+              <button id="kpiLoadBtn" class="btn btn-outline-secondary btn-sm" type="button">
+                Load KPI
+              </button>
+              <button id="kpiHideBtn" class="btn btn-outline-secondary btn-sm d-none" type="button">
+                Hide
+              </button>
+              <button id="kpiAddBtn" class="btn btn-primary btn-sm ms-auto d-none" type="button">
+                + Add KPI
+              </button>
+            </div>
+
+            <div id="kpiTableWrap" class="table-responsive d-none">
+              <table class="table align-middle" id="kpiTable">
+                <thead>
+                <tr>
+                  <th style="width:110px">Code</th>
+                  <th style="width:80px">Value</th>
+                  <th style="width:60px">Suffix</th>
+                  <th>Label</th>
+                  <th style="width:170px">Icon class</th>
+                  <th style="width:90px">Enabled</th>
+                  <th style="width:90px">Computed</th>
+                  <th style="width:70px">Order</th>
+                  <th style="width:170px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="kpiTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= KPI CREATE/EDIT MODAL ========= -->
+      <div class="modal fade" id="kpiEditModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="kpiEditTitle">Edit KPI</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="kpiEditFrm" class="row g-3">
+                <input type="hidden" id="kpiEditId">
+
+                <div class="col-12">
+                  <label class="form-label">Code</label>
+                  <input id="kpiEditCode" class="form-control" placeholder="projects, satisfaction, trained...">
+                  <div class="form-text">
+                    Unikal identifikator (frontend <code>code</code> bilan ishlatishi mumkin).
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Value</label>
+                  <input id="kpiEditValue" type="number" class="form-control">
+                  <div class="form-text" id="kpiValueHelp">Raqam (0, 12, 99...).</div>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Suffix</label>
+                  <input id="kpiEditSuffix" class="form-control" placeholder="+ yoki %">
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Order</label>
+                  <input id="kpiEditOrder" type="number" class="form-control" value="0">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Label (pastdagi matn)</label>
+                  <input id="kpiEditLabel" class="form-control">
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Icon class</label>
+                  <input id="kpiEditIcon" class="form-control" placeholder="bi bi-folder2-open">
+                  <div class="form-text">
+                    Bootstrap Icons: <code>bi bi-folder2-open</code>, <code>bi bi-emoji-smile</code>,
+                    <code>bi bi-people</code> va boshqalar.
+                  </div>
+                </div>
+
+                <div class="col-md-6 d-flex align-items-center">
+                  <div class="form-check form-switch">
+                    <input id="kpiEditEnabled" class="form-check-input" type="checkbox" checked>
+                    <label class="form-check-label" for="kpiEditEnabled">Enabled (kartka ko‘rinsin)</label>
+                  </div>
+                </div>
+
+                <div class="col-md-6 d-flex align-items-center">
+                  <div class="form-check form-switch">
+                    <input id="kpiEditComputed" class="form-check-input" type="checkbox">
+                    <label class="form-check-label" for="kpiEditComputed">Computed (backend hisoblaydi)</label>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button id="kpiEditSaveBtn" class="btn btn-primary">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- ==================== TEAM MEMBERS ==================== -->
+      <section id="team" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Create Team Member</h4>
+          <div class="ms-auto small help">/api/admin/team-member</div>
+        </div>
+
+        <div class="card card-rounded">
+          <!-- CREATE FORM -->
+          <form id="tmCreateFrm" class="card-body row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Full name <span class="text-danger">*</span></label>
+              <input id="tmName" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Role/Position <span class="text-danger">*</span></label>
+              <input id="tmRole" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Status <span class="text-danger">*</span></label>
+              <select id="tmStatus" class="form-select" required>
+                <option value="DRAFT">DRAFT</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Order</label>
+              <input id="tmOrder" type="number" class="form-control" value="0">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Photo <span class="text-danger">*</span></label>
+              <input id="tmPhoto" type="file" accept="image/*" class="form-control" required>
+              <img id="tmPhotoPrev" class="thumb mt-2 d-none" alt="preview">
+            </div>
+
+            <!-- SOCIALS -->
+            <div class="col-12">
+              <div class="d-flex align-items-center justify-content-between">
+                <label class="form-label m-0">Social links (0–4)</label>
+                <button id="tmAddSocial" class="btn btn-sm btn-outline-secondary" type="button">
+                  <i class="bi bi-plus-lg me-1"></i>Add social
+                </button>
+              </div>
+              <div id="tmSocialWrap" class="row g-2 mt-1"></div>
+              <div class="form-text">bi-telegram,bi-facebook,bi-linkedin, bi-twitter-x <code>bi-...</code> icon class.</div>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>Create member</button>
+              <button id="tmLoadBtn" class="btn btn-outline-secondary" type="button">Load</button>
+              <button id="tmHideBtn" class="btn btn-outline-secondary d-none" type="button">Hide</button>
+            </div>
+          </form>
+
+          <!-- LIST / TABLE -->
+          <div id="tmTableWrap" class="px-3 pb-3 d-none">
+            <div class="table-responsive mt-3">
+              <table class="table align-middle" id="teamTable">
+                <thead>
+                <tr>
+                  <th style="width:72px">Photo</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th style="width:270px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="tmTbody"></tbody>
+              </table>
+            </div>
+            <div class="d-flex align-items-center gap-2 mt-2">
+              <button class="btn btn-sm btn-outline-secondary" id="tmPrev" type="button">Prev</button>
+              <button class="btn btn-sm btn-outline-secondary" id="tmNext" type="button">Next</button>
+              <span class="small ms-2" id="tmPageInfo"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= EDIT TEAM MODAL ========= -->
+      <div class="modal fade" id="tmEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Team Member</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="tmEditFrm" class="row g-3">
+                <input type="hidden" id="tmEditId">
+                <div class="col-md-6">
+                  <label class="form-label">Full name</label>
+                  <input id="tmEditName" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Role/Position</label>
+                  <input id="tmEditRole" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Status</label>
+                  <select id="tmEditStatus" class="form-select">
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Order</label>
+                  <input id="tmEditOrder" type="number" class="form-control" value="0">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Change photo (optional)</label>
+                  <input id="tmEditPhoto" type="file" accept="image/*" class="form-control">
+                  <img id="tmEditPhotoPrev" class="thumb mt-2 d-none" alt="">
+                </div>
+
+                <div class="col-12 d-flex align-items-center justify-content-between">
+                  <label class="form-label m-0">Social links</label>
+                  <button id="tmEditAddSocial" class="btn btn-sm btn-outline-secondary" type="button">
+                    <i class="bi bi-plus-lg me-1"></i>Add social
+                  </button>
+                </div>
+                <div id="tmEditSocialWrap" class="row g-2"></div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button id="tmEditSaveBtn" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- ==================== POSTS ==================== -->
+      <section id="posts" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Create Post</h4>
+          <div class="ms-auto small help">/api/admin/posts</div>
+        </div>
+
+        <div class="card card-rounded">
+          <form id="postCreateFrm" class="card-body row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Title <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="postTitle" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Category <span class="text-danger" aria-hidden="true">*</span></label>
+              <select id="postCategory" class="form-select" required>
+                <option value="" selected disabled>&#x1F4C2; Kategoriyani tanlang</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Summary / Description (ixtiyoriy) <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="postSummary" class="form-control" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Content <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="postContent" class="form-control" rows="5" required></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Cover image <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="postCoverFile" type="file" accept="image/*" class="form-control" required>
+              <img id="postCoverPrev" class="thumb mt-2 d-none" alt="preview">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Hashtag(s)</label>
+              <input id="pHash" class="form-control" placeholder="#ai #edu">
+              <div class="form-text">Bir nechta: #tag1 #tag2 (ixtiyoriy)</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Publish now? <span class="text-danger" aria-hidden="true">*</span></label>
+              <select id="postPublish" class="form-select" required>
+                <option value="no" selected>No (Draft)</option>
+                <option value="yes">Yes (Publish)</option>
+              </select>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button id="postCreateBtn" class="btn btn-primary" type="submit">
+                <i class="bi bi-plus-lg me-1"></i>Create post
+                <button id="postLoadBtn" class="btn btn-outline-secondary" type="button">Load posts</button>
+                <button id="postHideBtn" class="btn btn-outline-secondary d-none" type="button">Hide</button>
+              </button>
+            </div>
+          </form>
+
+          <!-- table -->
+          <div id="postTableWrap" class="px-3 pb-3 d-none">
+            <div class="table-responsive mt-3">
+              <table class="table align-middle" id="postTable">
+                <thead>
+                <tr>
+                  <th style="width:72px">Cover</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Published</th>
+                  <th style="width:270px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="postTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mt-2" id="postPager">
+              <button class="btn btn-sm btn-outline-secondary" id="postPrev">Prev</button>
+              <button class="btn btn-sm btn-outline-secondary" id="postNext">Next</button>
+              <span class="small ms-2" id="postPageInfo"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= EDIT POST MODAL ========= -->
+      <div class="modal fade" id="postEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit post</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="postEditFrm" class="row g-3">
+                <input type="hidden" id="postEditId">
+                <div class="col-md-8">
+                  <label class="form-label">Title</label>
+                  <input id="postEditTitle" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Status</label>
+                  <select id="postEditStatus" class="form-select">
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Summary</label>
+                  <input id="postEditSummary" class="form-control">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Content</label>
+                  <textarea id="postEditContent" rows="5" class="form-control"></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Hashtag(s)</label>
+                  <input id="postEditHashTag" class="form-control" placeholder="#ai #edu">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Categories</label>
+                  <select id="postEditCategories" class="form-select" multiple></select>
+                  <div class="form-text">Bir nechtasini tanlash mumkin</div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Change cover (optional)</label>
+                  <input id="postEditCover" type="file" accept="image/*" class="form-control">
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button id="postEditSaveBtn" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ==================== SERVICES ==================== -->
+      <section id="services" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Create Service</h4>
+          <div class="ms-auto small help">/api/admin/services</div>
+        </div>
+
+        <div class="card card-rounded">
+          <!-- CREATE FORM -->
+          <form id="frmSvc" class="card-body row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Title <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sTitle" class="form-control" required>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Subtitle <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sSubtitle" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Overview <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="sOverview" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Author text:  service haqida <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="sQuoteText" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Author name <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sQuoteAuthor" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Role <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sQuoteRole" class="form-control" placeholder="CEO" required>
+            </div>
+
+
+            <div class="col-12">
+              <label class="form-label">Bullets (har qatorda bitta) <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="sBullets" class="form-control" rows="3" placeholder="Bullet 1&#10;Bullet 2" required></textarea>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Hero image <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sHeroFile" type="file" accept="image/*" class="form-control" required>
+              <img id="sHeroPrev" class="thumb mt-2 d-none" alt="">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Author avatar <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sAuthorFile" type="file" accept="image/*" class="form-control" required>
+              <img id="sAuthorPrev" class="thumb mt-2 d-none" alt="">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Service icon <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sServiceIconFile" type="file" accept="image/*" class="form-control" required>
+              <img id="sServiceIconPrev" class="thumb mt-2 d-none" alt="">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Left image <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sLeftFile" type="file" accept="image/*" class="form-control" required>
+              <img id="sLeftPrev" class="thumb mt-2 d-none" alt="">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Right image <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="sRightFile" type="file" accept="image/*" class="form-control" required>
+              <img id="sRightPrev" class="thumb mt-2 d-none" alt="">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Status <span class="text-danger" aria-hidden="true">*</span></label>
+              <select id="sStatus" class="form-select" required>
+                <option value="DRAFT">DRAFT</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <details>
+                <summary class="small-mono">Advanced: Raw JSON override</summary>
+                <textarea id="sRaw" class="form-control small-mono" rows="5" placeholder='{"title":"...", "subtitle":"..."}'></textarea>
+              </details>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i> Create service</button>
+              <button id="svcLoadBtn" class="btn btn-outline-secondary" type="button">Load services</button>
+              <button id="svcHideBtn" class="btn btn-outline-secondary d-none" type="button">Hide</button>
+            </div>
+          </form>
+
+          <!-- LIST / TABLE -->
+          <div id="svcTableWrap" class="px-3 pb-3 d-none">
+            <div class="table-responsive mt-3">
+              <table class="table align-middle" id="svcTable">
+                <thead>
+                <tr>
+                  <th style="width:72px">Hero</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Published</th>
+                  <th style="width:270px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="svcTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mt-2" id="svcPager">
+              <button class="btn btn-sm btn-outline-secondary" id="svcPrev" type="button">Prev</button>
+              <button class="btn btn-sm btn-outline-secondary" id="svcNext" type="button">Next</button>
+              <span class="small ms-2" id="svcPageInfo"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= EDIT SERVICE MODAL ========= -->
+      <div class="modal fade" id="svcEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit service</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="svcEditFrm" class="row g-3">
+                <input type="hidden" id="svcEditId">
+                <div class="col-md-8">
+                  <label class="form-label">Title</label>
+                  <input id="svcEditTitle" class="form-control" required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Quote Text</label>
+                  <input id="svcEditQuoteText" class="form-control" required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Author name</label>
+                  <input id="svcEditQuoteAuthor" class="form-control" required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label">Author Role</label>
+                  <input id="svcEditQuoteRole" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Status</label>
+                  <select id="svcEditStatus" class="form-select">
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Subtitle</label>
+                  <input id="svcEditSubtitle" class="form-control">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Overview</label>
+                  <textarea id="svcEditOverview" rows="4" class="form-control"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Bullets (har qatorda bitta)</label>
+                  <textarea id="svcEditBullets" rows="3" class="form-control" placeholder="Bullet 1&#10;Bullet 2"></textarea>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Change hero (optional)</label>
+                  <input id="svcEditHero" type="file" accept="image/*" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Change author avatar (optional)</label>
+                  <input id="svcEditAuthor" type="file" accept="image/*" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Change service icon (optional)</label>
+                  <input id="svcEditServiceIcon" type="file" accept="image/*" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Change left (optional)</label>
+                  <input id="svcEditLeft" type="file" accept="image/*" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Change right (optional)</label>
+                  <input id="svcEditRight" type="file" accept="image/*" class="form-control">
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button id="svcEditSaveBtn" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- ==================== PROJECTS ==================== -->
+      <section id="projects" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Create Project</h4>
+          <div class="ms-auto small help">/api/admin/projects</div>
+        </div>
+
+        <div class="card card-rounded">
+          <!-- CREATE FORM -->
+          <form id="frmPrj" class="card-body row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Title <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jTitle" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Client name <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jClient" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Location <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jLocation" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Service name <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jServiceName" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Duration <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jDuration" class="form-control" placeholder="3 months">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label" for="jStart">Start date <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jStart" type="date" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="jEnd">End date <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jEnd" type="date" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="jPrjStatus">Project status <span class="text-danger" aria-hidden="true">*</span></label>
+              <select id="jPrjStatus" class="form-select" required>
+                <option value="">—</option>
+                <option value="PENDING">PENDING</option>
+                <option value="APPROVED">APPROVED</option>
+                <option value="REJECTED">REJECTED</option>
+                <option value="FINISHED">FINISHED</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label" for="jPublish">Publish now? <span class="text-danger" aria-hidden="true">*</span></label>
+              <select id="jPublish" class="form-select" required>
+                <option value="no" selected>No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Overview <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="jOverview" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">How we started <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="jStarted" class="form-control" rows="3" required></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Main cover <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jCoverFile" type="file" accept="image/*" class="form-control" required>
+              <img id="jCoverPrev" class="thumb mt-2 d-none" alt="">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Gallery (bir nechta) <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jGalleryFiles" type="file" accept="image/*" class="form-control" multiple required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Approach image <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="jApproachFile" type="file" accept="image/*" class="form-control" required>
+              <img id="jApproachPrev" class="thumb mt-2 d-none" alt="">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Our approach <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="jApproach" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Conclusion <span class="text-danger" aria-hidden="true">*</span></label>
+              <textarea id="jConclusion" class="form-control" rows="3" required></textarea>
+            </div>
+
+            <div class="col-12">
+              <details>
+                <summary class="small-mono">Advanced: Raw JSON override</summary>
+                <textarea id="jRaw" class="form-control small-mono" rows="6" placeholder='{"title":"...", "overview":"..."}'></textarea>
+              </details>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary" type="submit"><i class="bi bi-plus-lg me-1"></i> Create project</button>
+              <button id="prjLoadBtn" class="btn btn-outline-secondary" type="button">Load projects</button>
+              <button id="prjHideBtn" class="btn btn-outline-secondary d-none" type="button">Hide</button>
+            </div>
+          </form>
+
+          <!-- LIST / TABLE -->
+          <div id="prjTableWrap" class="px-3 pb-3 d-none">
+            <div class="table-responsive mt-3">
+              <table class="table align-middle" id="prjTable">
+                <thead>
+                <tr>
+                  <th style="width:72px">Cover</th>
+                  <th>Title</th>
+                  <th>Client</th>
+                  <th>Status</th>
+                  <th>Period</th>
+                  <th style="width:270px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="prjTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mt-2" id="prjPager">
+              <button class="btn btn-sm btn-outline-secondary" id="prjPrev" type="button">Prev</button>
+              <button class="btn btn-sm btn-outline-secondary" id="prjNext" type="button">Next</button>
+              <span class="small ms-2" id="prjPageInfo"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= EDIT PROJECT MODAL ========= -->
+      <div class="modal fade" id="prjEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit project</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="prjEditFrm" class="row g-3">
+                <input type="hidden" id="prjEditId">
+                <div class="col-md-8">
+                  <label class="form-label">Title</label>
+                  <input id="prjEditTitle" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Publish status</label>
+                  <select id="prjEditStatus" class="form-select">
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="PUBLISHED">PUBLISHED</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Client</label>
+                  <input id="prjEditClient" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Location</label>
+                  <input id="prjEditLocation" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Service name</label>
+                  <input id="prjEditServiceName" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Duration</label>
+                  <input id="prjEditDuration" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Start</label>
+                  <input id="prjEditStart" type="date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">End</label>
+                  <input id="prjEditEnd" type="date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Project status</label>
+                  <select id="prjEditPrjStatus" class="form-select">
+                    <option value="">—</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="APPROVED">APPROVED</option>
+                    <option value="REJECTED">REJECTED</option>
+                    <option value="FINISHED">FINISHED</option>
+                  </select>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Overview</label>
+                  <textarea id="prjEditOverview" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">How we started</label>
+                  <textarea id="prjEditStarted" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Our approach</label>
+                  <textarea id="prjEditApproach" rows="3" class="form-control"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Conclusion</label>
+                  <textarea id="prjEditConclusion" rows="3" class="form-control"></textarea>
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Change cover (optional)</label>
+                  <input id="prjEditCover" type="file" accept="image/*" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Add gallery (append)</label>
+                  <input id="prjEditGallery" type="file" accept="image/*" multiple class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Change approach (optional)</label>
+                  <input id="prjEditApproachFile" type="file" accept="image/*" class="form-control">
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button id="prjEditSaveBtn" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ==================== PRICING (Plans + Features) ==================== -->
+      <section id="pricing" class="mb-4">
+        <!-- ===== Pricing Plans ===== -->
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Pricing Plans</h4>
+          <div class="ms-auto small help">/api/admin/pricing/plans</div>
+        </div>
+
+        <div class="card card-rounded mb-4">
+          <!-- CREATE PLAN FORM (matches PricingPlanUpsertDto) -->
+          <form id="ppCreateForm" class="card-body row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Plan nomi <span class="text-danger">*</span></label>
+              <input id="ppName" class="form-control" placeholder="Bronze, Silver..." required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Slug <span class="text-danger">*</span></label>
+              <input id="ppSlug" class="form-control small-mono" placeholder="bronze, silver..." required>
+              <div class="form-text">URL uchun unikal slug.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Code <span class="text-danger">*</span></label>
+              <input id="ppCode" class="form-control small-mono" placeholder="BRONZE, SILVER, CUSTOM..." required>
+              <div class="form-text">Backend kodi (unique).</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Tagline</label>
+              <input id="ppTagline" class="form-control"
+                     placeholder="Masalan: Kichik jamoalar uchun start paketi">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Narx (priceAmount)</label>
+              <input id="ppPriceAmount" type="number" step="0.01" class="form-control"
+                     placeholder="2000000">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Narx birlik (priceUnit)</label>
+              <input id="ppPriceUnit" class="form-control"
+                     placeholder="so‘m / loyiha, so‘m / oy, Kelishuv asosida">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Tartib (displayOrder)</label>
+              <input id="ppDisplayOrder" type="number" class="form-control" value="0">
+            </div>
+
+            <div class="col-md-4 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input id="ppPopular" class="form-check-input" type="checkbox">
+                <label class="form-check-label" for="ppPopular">Popular (ko‘p tanlanadigan)</label>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input id="ppCustom" class="form-check-input" type="checkbox">
+                <label class="form-check-label" for="ppCustom">Custom (Customise tarif)</label>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input id="ppActive" class="form-check-input" type="checkbox" checked>
+                <label class="form-check-label" for="ppActive">Active (publicda ko‘rinadi)</label>
+              </div>
+            </div>
+
+            <!-- PLAN FEATURES (rows) -->
+            <div class="col-12">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label m-0">Plan feature’lari</label>
+                <button id="ppAddFeatureRow" class="btn btn-sm btn-outline-secondary" type="button">
+                  <i class="bi bi-plus-lg me-1"></i> Feature qo‘shish
+                </button>
+              </div>
+              <div id="ppFeatureRows" class="row g-2"></div>
+              <div class="form-text">
+                Har bir qator: Feature tanlash + Availability (INCLUDED / OPTIONAL / NOT_INCLUDED) + izoh (ixtiyoriy).
+              </div>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary" type="submit">
+                <i class="bi bi-plus-lg me-1"></i> Yangi plan yaratish
+              </button>
+              <button id="ppReloadBtn" class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-arrow-clockwise me-1"></i> Planlarni yangilash
+              </button>
+            </div>
+          </form>
+
+          <!-- PLANS TABLE -->
+          <div id="ppTableWrap" class="px-3 pb-3 d-none">
+            <div class="table-responsive mt-3">
+              <table class="table align-middle" id="ppTable">
+                <thead>
+                <tr>
+                  <th>Plan</th>
+                  <th>Narx</th>
+                  <th>Tartib</th>
+                  <th>Flaglar</th>
+                  <th style="width:180px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="ppTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== PRICING FEATURES (dictionary) ===== -->
+        <div class="d-flex align-items-center mb-2 mt-4">
+          <h5 class="section-title m-0">Pricing Features</h5>
+          <div class="ms-auto small help">/api/admin/pricing/features</div>
+        </div>
+
+        <div class="card card-rounded">
+          <form id="pfCreateForm" class="card-body row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Code <span class="text-danger">*</span></label>
+              <input id="pfCode" class="form-control small-mono"
+                     placeholder="TEACH_CONCEPT, LICENSE_DOCS..." required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Title <span class="text-danger">*</span></label>
+              <input id="pfTitle" class="form-control"
+                     placeholder="O‘quv konsepsiyasini ishlab chiqish" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Category name <span class="text-danger">*</span></label>
+              <input id="pfCategoryName" class="form-control"
+                     placeholder="Ta’lim jarayoni, Hujjatlar..." required>
+            </div>
+            <div class="col-md-1">
+              <label class="form-label">Order</label>
+              <input id="pfDisplayOrder" type="number" class="form-control" value="0">
+            </div>
+            <div class="col-md-1">
+              <label class="form-label">Base narx</label>
+              <input id="pfBasePriceAmount" type="number" step="0.01"
+                     class="form-control" placeholder="20">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Birlik</label>
+              <input id="pfBasePriceUnit" class="form-control"
+                     placeholder="USD, so‘m / loyiha">
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary" type="submit">
+                <i class="bi bi-plus-lg me-1"></i> Feature yaratish
+              </button>
+              <button id="pfReloadBtn" class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-arrow-clockwise me-1"></i> Featurelarni yangilash
+              </button>
+            </div>
+          </form>
+
+          <div id="pfTableWrap" class="px-3 pb-3 d-none">
+            <div class="table-responsive mt-3">
+              <table class="table align-middle" id="pfTable">
+                <thead>
+                <tr>
+                  <th>Title</th>
+                  <th style="width:180px">Code</th>
+                  <th style="width:220px">Category</th>
+                  <th style="width:80px">Order</th>
+                  <th style="width:160px">Base narx</th>
+                  <th style="width:160px">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="pfTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========= EDIT FEATURE MODAL ========= -->
+      <div class="modal fade" id="pfEditModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Feature tahrirlash</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="pfEditForm" class="row g-3">
+                <input type="hidden" id="pfEditId">
+
+                <div class="col-md-4">
+                  <label class="form-label">Code</label>
+                  <input id="pfEditCode" class="form-control small-mono" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Title</label>
+                  <input id="pfEditTitle" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Category name</label>
+                  <input id="pfEditCategoryName" class="form-control" required>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Order</label>
+                  <input id="pfEditDisplayOrder" type="number" class="form-control" value="0">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Base narx</label>
+                  <input id="pfEditBasePriceAmount" type="number" step="0.01" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Birlik</label>
+                  <input id="pfEditBasePriceUnit" class="form-control">
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Yopish</button>
+              <button id="pfEditSaveBtn" class="btn btn-primary">Saqlash</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========= EDIT PLAN MODAL ========= -->
+      <div class="modal fade" id="ppEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Plan tahrirlash</h5>
+              <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="ppEditForm" class="row g-3">
+                <input type="hidden" id="ppEditId">
+
+                <div class="col-md-4">
+                  <label class="form-label">Plan nomi</label>
+                  <input id="ppEditName" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Slug</label>
+                  <input id="ppEditSlug" class="form-control small-mono" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Code</label>
+                  <input id="ppEditCode" class="form-control small-mono" required>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Tagline</label>
+                  <input id="ppEditTagline" class="form-control">
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Narx (priceAmount)</label>
+                  <input id="ppEditPriceAmount" type="number" step="0.01" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Narx birlik (priceUnit)</label>
+                  <input id="ppEditPriceUnit" class="form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Tartib (displayOrder)</label>
+                  <input id="ppEditDisplayOrder" type="number" class="form-control" value="0">
+                </div>
+
+                <div class="col-md-4 d-flex align-items-center">
+                  <div class="form-check form-switch">
+                    <input id="ppEditPopular" class="form-check-input" type="checkbox">
+                    <label class="form-check-label" for="ppEditPopular">Popular</label>
+                  </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                  <div class="form-check form-switch">
+                    <input id="ppEditCustom" class="form-check-input" type="checkbox">
+                    <label class="form-check-label" for="ppEditCustom">Custom</label>
+                  </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                  <div class="form-check form-switch">
+                    <input id="ppEditActive" class="form-check-input" type="checkbox">
+                    <label class="form-check-label" for="ppEditActive">Active</label>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <label class="form-label m-0">Plan feature’lari</label>
+                    <button id="ppEditAddFeatureRow" class="btn btn-sm btn-outline-secondary" type="button">
+                      <i class="bi bi-plus-lg me-1"></i> Feature qo‘shish
+                    </button>
+                  </div>
+                  <div id="ppEditFeatureRows" class="row g-2"></div>
+                  <div class="form-text">
+                    Eski mappinglar shu yerda ko‘rinadi, o‘zgartirib saqlashingiz mumkin.
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Yopish</button>
+              <button id="ppEditSaveBtn" class="btn btn-primary">Saqlash</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+      <!-- CATEGORIES -->
+      <section id="categories" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Create Category</h4>
+          <div class="ms-auto small help">/api/admin/categories</div>
+        </div>
+
+        <div class="card card-rounded">
+          <form id="frmCat" class="card-body row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Name <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="cName" class="form-control" required>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Create category</button>
+              <button id="cLoadBtn" class="btn btn-outline-secondary" type="button">Load recent</button>
+              <button id="cHideBtn" class="btn btn-outline-secondary d-none" type="button">Hide</button>
+            </div>
+          </form>
+
+          <!-- ro‘yxat wrap: hide/show shu yerda -->
+          <div id="catWrap" class="px-3 pb-3 d-none">
+            <div id="catList" class="row g-3 mt-2"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SITE SETTINGS ==================== -->
+      <section id="site" class="mb-4">
+        <div class="d-flex align-items-center mb-2">
+          <h4 class="section-title m-0">Homepage Video (YouTube)</h4>
+          <div id="hpvStatus" class="small text-muted ms-auto">—</div>
+        </div>
+
+        <div class="card card-rounded">
+          <div class="card-body row g-3">
+
+            <!-- Link kiritish -->
+            <div class="col-12">
+              <label class="form-label">YouTube link</label>
+              <input id="homeVideoUrl" class="form-control"
+                     placeholder="https://youtu.be/AbCdEfGh123 yoki https://www.youtube.com/watch?v=AbCdEfGh123">
+              <div class="form-text">Shorts / embed link ham bo‘ladi.</div>
+            </div>
+
+            <!-- Live preview (thumbnail + ID) -->
+            <div class="col-12 d-none" id="homeVideoPrevWrap">
+              <div class="small text-muted mb-1">Preview</div>
+              <div class="d-flex align-items-center gap-3">
+                <img id="homeVideoThumb" class="thumb" alt="thumb" style="max-height:120px">
+                <code class="small-mono" id="homeVideoId">—</code>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-12 d-flex gap-2 flex-wrap">
+              <button id="btnSaveHomeVideo"  class="btn btn-primary"          type="button" disabled>Save</button>
+              <button id="btnLoadHomeVideo"  class="btn btn-outline-secondary" type="button">Load</button>
+              <button id="btnClearHomeVideo" class="btn btn-outline-danger"    type="button">Clear</button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+
+
+
+
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <div id="toast" class="toast align-items-center text-bg-dark border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastMsg">Done.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  /* ====================== AXIOS (single instance) ====================== */
+  const token = localStorage.getItem('jwt');
+  if (!token) {
+    location.href = '/admin-user/login';
+  }
+
+  /* === Helperlar: JWT decode va role normalizatsiya === */
+  function base64UrlDecode(str) {
+    // base64url -> base64
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    // padding to'ldiramiz (4 ga karrali bo‘lishi shart)
+    const pad = str.length % 4;
+    if (pad) str += '='.repeat(4 - pad);
+    try {
+      return atob(str);
+    } catch {
+      return '';
+    }
+  }
+
+  function safeJwtPayload(t) {
+    try {
+      const parts = t.split('.');
+      if (parts.length !== 3) return {};
+      const json = base64UrlDecode(parts[1]);
+      return JSON.parse(json || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function normalizeRoles(input) {
+    // input: array bo‘lishi mumkin (string yoki object), ba’zan object ham bo‘lishi mumkin
+    if (!input) return [];
+    let arr = [];
+    if (Array.isArray(input)) {
+      arr = input.flatMap(it => {
+        if (typeof it === 'string') return [it];
+        if (it && typeof it === 'object') {
+          return [it.name, it.role, it.authority, it.code].filter(Boolean);
+        }
+        return [];
+      });
+    } else if (typeof input === 'object') {
+      // Agar roles object bo‘lsa va ichida string qiymatlar bo‘lsa (kam uchraydi)
+      arr = Object.values(input).filter(v => typeof v === 'string');
+    }
+    return arr
+            .filter(Boolean)
+            .map(r => String(r).trim().toUpperCase()); // ADMIN, ROLE_ADMIN ko‘rinishga keltiramiz
+  }
+
+  function hasAdminRole(rolesArr) {
+    const R = normalizeRoles(rolesArr);
+    return R.includes('ADMIN') || R.includes('ROLE_ADMIN');
+  }
+
+  /* === PRE-FLIGHT ADMIN GATE: token yaroqliligi + server roles tekshiruv === */
+  (async function preflightAdminGate(){
+    try {
+      // 1) Token exp tekshiramiz
+      const payload = safeJwtPayload(token);
+      const expMs = payload?.exp ? payload.exp * 1000 : 0;
+      if (!expMs || Date.now() >= expMs) throw new Error('Token expired');
+
+      // 2) Serverdagi real role (yakuniy hakam)
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) {
+        throw new Error('ME request failed with status ' + res.status);
+      }
+      const me = await res.json();
+      const serverRoles = me?.roles;
+
+      if (!hasAdminRole(serverRoles)) {
+        // Token bo‘lishi mumkin, lekin serverda ADMIN yo‘q — kirishni bloklaymiz
+        localStorage.removeItem('jwt');
+        if (!location.pathname.includes('/admin-user/login')) {
+          alert('Ruxsat yetarli emas.');
+          location.href = '/admin-user/login';
+        }
+        return;
+      }
+      // ADMIN bo‘lsa — davom etamiz
+    } catch (_e) {
+      // Token yaroqsiz yoki /api/auth/me muvaffaqiyatsiz — logout
+      localStorage.removeItem('jwt');
+      if (!location.pathname.includes('/admin-user/login')) {
+        alert('Sessiya tugagan yoki token yaroqsiz. Qayta login qiling.');
+        location.href = '/admin-user/login';
+      }
+    }
+  })();
+
+  /* Bitta instance va headerlarni avtomatik qo'yish */
+  const api = axios.create({ baseURL: '/' });
+
+  api.interceptors.request.use((cfg) => {
+    cfg.headers = cfg.headers || {};
+    const t = localStorage.getItem('jwt');
+    if (t) cfg.headers.Authorization = 'Bearer ' + t;
+    return cfg;
+  });
+
+  /* 401 uchun yagona handler */
+  api.interceptors.response.use(
+          (r) => r,
+          (err) => {
+            const st = err?.response?.status;
+            const data = err?.response?.data;
+            if (st === 401) {
+              localStorage.removeItem('jwt');
+              if (!location.pathname.includes('/admin-user/login')) {
+                alert('Sessiya tugagan. Qayta login qiling.');
+                location.href = '/admin-user/login';
+              }
+              return Promise.reject(err);
+            }
+            if (st === 403) {
+              // Zudlik bilan kirishni yopamiz
+              localStorage.removeItem('jwt');
+              if (!location.pathname.includes('/admin-user/login')) {
+                alert('Ruxsat yetarli emas.');
+                location.href = '/admin-user/login';
+              }
+              return Promise.reject(err);
+            }
+            let msg = 'Xatolik: ';
+            if (typeof data === 'string') msg += data;
+            else if (data?.message) msg += data.message;
+            else if (data?.error) msg += data.error;
+            else msg += 'Noma’lum xato';
+            alert(msg);
+            return Promise.reject(err);
+          }
+  );
+
+  /* ====================== UI helpers ====================== */
+  const toast = new bootstrap.Toast(document.getElementById('toast'));
+  function notify(m){ document.getElementById('toastMsg').textContent = m; toast.show(); }
+
+  (function whoami(){
+    try{
+      const p = safeJwtPayload(token);
+      const name = p?.sub || p?.username || '';
+      const rolesArr = p?.roles || p?.authorities || [];
+      const rolesText = normalizeRoles(rolesArr).join(', ');
+      document.getElementById('who').textContent = name ? `${name} (${rolesText})` : '';
+      const hasSuper = normalizeRoles(rolesArr).includes('ROLE_SUPER_ADMIN') || normalizeRoles(rolesArr).includes('SUPER_ADMIN');
+      if(!hasSuper){ document.getElementById('linkSuper').classList.add('disabled'); }
+    }catch(_){}
+  })();
+  document.getElementById('btnLogout').onclick = ()=>{ localStorage.removeItem('jwt'); location.href='/admin-user/login'; };
+
+  /* ====================== MEDIA HELPERS ====================== */
+  async function uploadFile(file, folder){
+    if(!file) return null;
+    const form = new FormData();
+    form.append('file', file);
+    if(folder) form.append('folder', folder);
+    const {data} = await api.post('/api/media/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return data?.id ?? null;
+  }
+
+  async function uploadMany(fileList, folder){
+    const ids = [];
+    for(const f of Array.from(fileList || [])){
+      const id = await uploadFile(f, folder);
+      if(id) ids.push(id);
+    }
+    return ids;
+  }
+
+  function getMediaUrl(media) {
+    if (!media) return '/files/team.jpg';
+
+    if (typeof media === 'string') {
+      if (/^https?:\/\//i.test(media)) return media;   // absolute
+      if (media.startsWith('/'))        return media;   // relative: /uploads/... yoki /api/media/.../view
+      return `/api/media/url?key=${encodeURIComponent(media)}`; // R2 key
+    }
+
+    if (typeof media === 'number') return `/api/media/${media}/view`;
+
+    if (media && typeof media === 'object') {
+      if (media.url)      return media.url;
+      if (media.key)      return `/api/media/url?key=${encodeURIComponent(media.key)}`;
+      if (media.imageKey) return `/api/media/url?key=${encodeURIComponent(media.imageKey)}`;
+      if (media.mediaKey) return `/api/media/url?key=${encodeURIComponent(media.mediaKey)}`;
+      if (media.id)       return `/api/media/${media.id}/view`;
+      if (media.photoId)  return `/api/media/${media.photoId}/view`;
+      if (media.mediaId)  return `/api/media/${media.mediaId}/view`;
+    }
+
+    return '/files/team.jpg';
+  }
+
+  function preview(inputEl, imgElId){
+    const file = inputEl.files?.[0];
+    const img = document.getElementById(imgElId);
+    if(file){
+      img.src = URL.createObjectURL(file);
+      img.classList.remove('d-none');
+    } else {
+      img.src = '';
+      img.classList.add('d-none');
+    }
+  }
+
+  /* ====================== Small utils ====================== */
+  function empty(v){ v=(v||'').trim(); return v===''? null : v; }
+  function emptyVal(id){ return empty(document.getElementById(id).value); }
+
+  function renderCard(listEl, items, type){
+    listEl.innerHTML = '';
+    items.forEach(x=>{
+      const title = x.title || x.name || x.slug || '—';
+
+      // coverUrl ham qo‘shildi
+      const imgSrc = getMediaUrl(
+              x.coverUrl || x.photo || x.cover || x.media || x.imageKey || x.mediaId || x.photoId || x.photoKey
+      );
+
+      // post.html slug kutadi → slug || id
+      const href  = type==='post'
+              ? `/post?slug=${encodeURIComponent(x.slug || x.id)}`
+              : type==='project'
+                      ? `/project?slug=${encodeURIComponent(x.slug || x.id)}`
+                      : type==='service'
+                              ? `/service?slug=${encodeURIComponent(x.slug || x.id)}`
+                              : '#';
+
+      listEl.insertAdjacentHTML('beforeend', `
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="card h-100">
+          <img src="${imgSrc}" class="card-img-top" alt="" loading="lazy"
+               onerror="this.src='/files/team.jpg'">
+          <div class="card-body">
+            <div class="small text-muted">${x.publishedAt || x.createdAt || ''}</div>
+            <h6 class="fw-bold">${title}</h6>
+            <a class="btn btn-sm btn-outline-primary rounded-pill"
+               target="_blank" rel="noopener"
+               href="${href}">Ko‘rish</a>
+          </div>
+        </article>
+      </div>
+    `);
+    });
+  }
+
+
+  /* ====================== CATEGORIES (select) ====================== */
+  async function fillCategories(){
+    try{
+      const {data} = await api.get('/api/categories?size=1000&sort=name,asc');
+      const items = Array.isArray(data?.content)? data.content : (Array.isArray(data)? data : []);
+      const sel = document.getElementById('pCategory');
+      sel.innerHTML = '<option value="">— Kategoriya tanlang —</option>';
+      items.forEach(c=> sel.insertAdjacentHTML('beforeend', `<option value="${c.id}">${c.name}</option>`));
+    }catch(_){ /* pass */ }
+  }
+
+
+  /* ============ TRUSTED USER LOGOS (ADMIN) ============ */
+
+  /* Endpoints (plural list) */
+  const TUL_CREATE = `/api/admin/trusted-user-logo`;                // POST
+  const TUL_LIST   = (page=0,size=10)=> `/api/admin/trusted-user-logos?page=${page}&size=${size}`; // GET
+  const TUL_ONE    = (id)=> `/api/admin/trusted-user-logo/${id}`;   // GET
+  const TUL_PATCH  = (id)=> `/api/admin/trusted-user-logo/${id}`;   // PATCH
+  const TUL_DELETE = (id)=> `/api/admin/trusted-user-logo/${id}`;   // DELETE
+
+  /* State */
+  let tulPage = 0, tulSize = 10, tulTotalPages = 1;
+
+  /* UI refs */
+  const $tulTableWrap = document.getElementById('tulTableWrap');
+  const $tulTbody     = document.getElementById('tulTbody');
+  const $tulPrev      = document.getElementById('tulPrev');
+  const $tulNext      = document.getElementById('tulNext');
+  const $tulPageInfo  = document.getElementById('tulPageInfo');
+  const $tulLoadBtn   = document.getElementById('tulLoadBtn');
+  const $tulHideBtn   = document.getElementById('tulHideBtn');
+
+  /* Create preview */
+  document.getElementById('tulLogoFile')
+          ?.addEventListener('change', e=>preview(e.target, 'tulLogoPrev'));
+
+  /* CREATE */
+  document.getElementById('tulCreateFrm')?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const username = (document.getElementById('tulUsername').value||'').trim();
+    if(!username) return alert('Username majburiy');
+
+    try{
+      const logoId = await uploadFile(document.getElementById('tulLogoFile').files[0], 'trusted');
+      const status = document.getElementById('tulStatus').value || 'DRAFT';
+      const payload = {
+        username,
+        coverMediaId: logoId ?? null,
+        status
+      };
+      await api.post(TUL_CREATE, payload);
+      notify('Trusted user logo yaratildi.');
+      // reset
+      document.getElementById('tulCreateFrm').reset();
+      document.getElementById('tulLogoPrev').classList.add('d-none');
+      await loadTul();   // refresh list
+    }catch(err){
+      console.error(err);
+      alert(err?.response?.data?.message || 'Create xato.');
+    }
+  });
+
+  /* LOAD / HIDE */
+  $tulLoadBtn?.addEventListener('click', ()=> loadTul());
+  $tulHideBtn?.addEventListener('click', ()=>{
+    $tulTableWrap.classList.add('d-none');
+    $tulHideBtn.classList.add('d-none');
+    $tulLoadBtn.classList.remove('d-none');
+  });
+
+  /* LIST */
+  async function loadTul(page=0){
+    try{
+      tulPage = page;
+      const {data} = await api.get(TUL_LIST(tulPage, tulSize));
+      // backend: Page<TrustedUserLogoDTO> bo‘lsa -> data.content
+      const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+      tulTotalPages = (data?.totalPages ?? data?.page?.totalPages ?? 1);
+
+      $tulTbody.innerHTML = '';
+      items.forEach(it=>{
+        // backend DTO’da eng qulayi: logoUrl => "/api/media/{id}/view"
+        const img = getMediaUrl(it.logoUrl || it.logoId || it.logo?.id || it.logo);
+        const isPub = (it.status === 'PUBLISHED');
+
+        $tulTbody.insertAdjacentHTML('beforeend', `
+        <tr class="row-click" data-id="${it.id}">
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td class="fw-semibold">${it.username || '—'}</td>
+          <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>
+          <td class="td-actions">
+            <button class="btn btn-sm ${isPub?'btn-warning':'btn-success'}" data-action="toggle" data-id="${it.id}" data-status="${it.status}">${isPub?'Draftga qaytarish':'Publish'}</button>
+            <button class="btn btn-sm btn-dark" data-action="edit" data-id="${it.id}">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${it.id}">Delete</button>
+          </td>
+        </tr>
+      `);
+      });
+
+      if(items.length===0){
+        $tulTbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Hali yozuvlar yo‘q.</td></tr>`;
+      }
+
+      $tulTableWrap.classList.remove('d-none');
+      $tulHideBtn?.classList.remove('d-none');
+      $tulLoadBtn?.classList.add('d-none');
+
+      $tulPrev.disabled = (tulPage<=0);
+      $tulNext.disabled = (tulPage>=tulTotalPages-1);
+      $tulPageInfo.textContent = `Page ${tulPage+1} / ${tulTotalPages}`;
+    }catch(e){
+      console.error(e);
+      alert('Trusted listni yuklashda xato.');
+    }
+  }
+  $tulPrev?.addEventListener('click', ()=> loadTul(Math.max(0, tulPage-1)));
+  $tulNext?.addEventListener('click', ()=> loadTul(tulPage+1));
+
+  /* Delegation: toggle / edit / delete */
+  $tulTbody?.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const id  = +btn.dataset.id;
+    const act = btn.dataset.action;
+
+    if(act==='toggle') return toggleTulStatus(id, btn.dataset.status);
+    if(act==='edit')   return openTulEdit(id);
+    if(act==='delete') return deleteTul(id);
+  });
+
+  /* Toggle PUBLISHED <-> DRAFT */
+  async function toggleTulStatus(id, cur){
+    const next = (cur==='PUBLISHED') ? 'DRAFT' : 'PUBLISHED';
+    try{
+      await api.patch(TUL_PATCH(id), { status: next });
+      notify('Status yangilandi: ' + next);
+      loadTul(tulPage);
+    }catch(e){
+      console.error(e);
+      alert('Status yangilanishida xato.');
+    }
+  }
+
+  /* DELETE (soft) */
+  async function deleteTul(id){
+    if(!confirm('O‘chirishni tasdiqlaysizmi?')) return;
+    try{
+      await api.delete(TUL_DELETE(id));
+      notify('O‘chirildi.');
+      loadTul(tulPage);
+    }catch(e){
+      console.error(e);
+      alert('O‘chirishda xato.');
+    }
+  }
+
+  /* EDIT MODAL */
+  const tulEditModal = new bootstrap.Modal(document.getElementById('tulEditModal'));
+
+  async function openTulEdit(id){
+    try{
+      const dto = await api.get(TUL_ONE(id)).then(r=>r.data);
+      document.getElementById('tulEditId').value = dto.id;
+      document.getElementById('tulEditUsername').value = dto.username || '';
+      document.getElementById('tulEditStatus').value   = dto.status || 'DRAFT';
+      document.getElementById('tulEditLogoFile').value = '';
+      tulEditModal.show();
+    }catch(e){
+      console.error(e);
+      alert('Ma’lumotlarni olishda xato.');
+    }
+  }
+
+  /* Save edit */
+  document.getElementById('tulEditSaveBtn')?.addEventListener('click', async ()=>{
+    const id = +document.getElementById('tulEditId').value;
+    const username = (document.getElementById('tulEditUsername').value||'').trim();
+    if(!username) return alert('Username majburiy');
+
+    const status = document.getElementById('tulEditStatus').value;
+    const file   = document.getElementById('tulEditLogoFile').files?.[0];
+
+    try{
+      const patch = { username, status };
+      if(file){
+        const mid = await uploadFile(file, 'trusted');
+        patch.coverMediaId = mid ?? 0;
+      }
+      await api.patch(TUL_PATCH(id), patch);
+      notify('Yangilandi.');
+      tulEditModal.hide();
+      loadTul(tulPage);
+    }catch(e){
+      console.error(e);
+      alert('Update xato.');
+    }
+  });
+
+
+
+  /* ============ HOMEPAGE KPI (ADMIN) ============ */
+
+  const KPI_LIST = '/api/admin/home/kpis';                // GET: all
+  const KPI_ONE  = (id) => `/api/admin/home/kpis/${id}`;  // GET: one
+  const KPI_POST = '/api/admin/home/kpis';                // POST: create
+  const KPI_PUT  = (id) => `/api/admin/home/kpis/${id}`;  // PUT: update
+  const KPI_DEL  = (id) => `/api/admin/home/kpis/${id}`;  // DELETE: delete
+
+  const $kpiTableWrap = document.getElementById('kpiTableWrap');
+  const $kpiTbody     = document.getElementById('kpiTbody');
+  const $kpiLoadBtn   = document.getElementById('kpiLoadBtn');
+  const $kpiHideBtn   = document.getElementById('kpiHideBtn');
+  const $kpiAddBtn    = document.getElementById('kpiAddBtn');
+
+  function normalizeKpiList(data){
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.content)) return data.content;
+    return [];
+  }
+
+  function renderKpiTable(items){
+    $kpiTbody.innerHTML = '';
+
+    items.forEach(k => {
+      const badgeEnabled = k.enabled
+              ? '<span class="badge bg-success">ON</span>'
+              : '<span class="badge bg-secondary">OFF</span>';
+
+      const badgeComp = k.computed
+              ? '<span class="badge bg-info text-dark">AUTO</span>'
+              : '<span class="badge bg-light text-dark">MANUAL</span>';
+
+      $kpiTbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td class="small text-muted">${k.code || '—'}</td>
+          <td class="fw-semibold">${k.value ?? 0}</td>
+          <td>${k.suffix || ''}</td>
+          <td>${k.label || ''}</td>
+          <td><code class="small-mono">${k.iconClass || ''}</code></td>
+          <td>${badgeEnabled}</td>
+          <td>${badgeComp}</td>
+          <td>${k.sortOrder ?? 0}</td>
+          <td class="td-actions">
+            <button class="btn btn-sm btn-dark me-1" data-kpi-edit="${k.id}">
+              <i class="bi bi-pencil-square me-1"></i>Edit
+            </button>
+            <button class="btn btn-sm btn-outline-danger" data-kpi-del="${k.id}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `);
+    });
+
+    if (items.length === 0){
+      $kpiTbody.innerHTML =
+              '<tr><td colspan="9" class="text-center text-muted py-4">Hali KPI yozuvlari yo‘q. “Add KPI” tugmasi orqali yangi kartka yarating.</td></tr>';
+    }
+
+    $kpiTableWrap.classList.remove('d-none');
+    $kpiHideBtn?.classList.remove('d-none');
+    $kpiLoadBtn?.classList.add('d-none');
+    $kpiAddBtn?.classList.remove('d-none');
+  }
+
+  async function loadKpis(){
+    try{
+      const {data} = await api.get(KPI_LIST);
+      const items = normalizeKpiList(data);
+      renderKpiTable(items);
+    }catch(err){
+      // Agar list bo'sh bo'lgani uchun server 404 qaytarsa ham "empty table" deb qabul qilamiz
+      if (err.response && err.response.status === 404){
+        renderKpiTable([]);
+        return;
+      }
+      console.error(err);
+      alert('KPI ro‘yxatini yuklashda xato.');
+    }
+  }
+
+  $kpiLoadBtn?.addEventListener('click', () => loadKpis());
+  $kpiHideBtn?.addEventListener('click', () => {
+    $kpiTableWrap.classList.add('d-none');
+    $kpiHideBtn.classList.add('d-none');
+    $kpiLoadBtn.classList.remove('d-none');
+    $kpiAddBtn.classList.add('d-none');
+  });
+
+  /* ===== MODAL ===== */
+  const kpiEditModal = new bootstrap.Modal(document.getElementById('kpiEditModal'));
+
+  function updateKpiComputedUi(){
+    const chk  = document.getElementById('kpiEditComputed');
+    const inp  = document.getElementById('kpiEditValue');
+    const help = document.getElementById('kpiValueHelp');
+
+    if (chk.checked){
+      inp.setAttribute('disabled', 'disabled');
+      help.textContent = 'Bu KPI backend tomonidan avtomatik hisoblanadi (value maydoni o‘qilmaydi).';
+    } else {
+      inp.removeAttribute('disabled');
+      help.textContent = 'Raqam (0, 12, 99...).';
+    }
+  }
+
+  document.getElementById('kpiEditComputed')
+          ?.addEventListener('change', updateKpiComputedUi);
+
+  function resetKpiFormForCreate(){
+    document.getElementById('kpiEditId').value      = '';
+    document.getElementById('kpiEditCode').value    = '';
+    document.getElementById('kpiEditValue').value   = '';
+    document.getElementById('kpiEditSuffix').value  = '';
+    document.getElementById('kpiEditLabel').value   = '';
+    document.getElementById('kpiEditIcon').value    = '';
+    document.getElementById('kpiEditOrder').value   = '0';
+    document.getElementById('kpiEditEnabled').checked  = true;
+    document.getElementById('kpiEditComputed').checked = false;
+    updateKpiComputedUi();
+    document.getElementById('kpiEditTitle').textContent = 'Add KPI';
+  }
+
+  function fillKpiFormForEdit(dto){
+    document.getElementById('kpiEditId').value      = dto.id;
+    document.getElementById('kpiEditCode').value    = dto.code || '';
+    document.getElementById('kpiEditValue').value   = dto.value ?? 0;
+    document.getElementById('kpiEditSuffix').value  = dto.suffix || '';
+    document.getElementById('kpiEditLabel').value   = dto.label || '';
+    document.getElementById('kpiEditIcon').value    = dto.iconClass || '';
+    document.getElementById('kpiEditOrder').value   = dto.sortOrder ?? 0;
+    document.getElementById('kpiEditEnabled').checked  = !!dto.enabled;
+    document.getElementById('kpiEditComputed').checked = !!dto.computed;
+    updateKpiComputedUi();
+    document.getElementById('kpiEditTitle').textContent = 'Edit KPI';
+  }
+
+  // “Add KPI” tugmasi – create mode
+  $kpiAddBtn?.addEventListener('click', () => {
+    resetKpiFormForCreate();
+    kpiEditModal.show();
+  });
+
+  // Jadvaldagi Edit / Delete tugmalari
+  $kpiTbody?.addEventListener('click', async (e) => {
+    const editBtn = e.target.closest('button[data-kpi-edit]');
+    if (editBtn){
+      const id = Number(editBtn.dataset.kpiEdit);
+      try{
+        const dto = await api.get(KPI_ONE(id)).then(r => r.data);
+        fillKpiFormForEdit(dto);
+        kpiEditModal.show();
+      }catch(err){
+        console.error(err);
+        alert('KPI ma’lumotlarini olishda xato.');
+      }
+      return;
+    }
+
+    const delBtn = e.target.closest('button[data-kpi-del]');
+    if (delBtn){
+      const id  = Number(delBtn.dataset.kpiDel);
+      const row = delBtn.closest('tr');
+      const code = row?.querySelector('td')?.textContent?.trim() || id;
+
+      if (!confirm(`“${code}” KPI ni o‘chirmoqchimisiz?`)) return;
+
+      try{
+        await api.delete(KPI_DEL(id));
+        notify('KPI o‘chirildi.');
+        loadKpis();
+      }catch(err){
+        console.error(err);
+        alert('KPI o‘chirishda xato.');
+      }
+    }
+  });
+
+  // Save (create yoki update)
+  document.getElementById('kpiEditSaveBtn')
+          ?.addEventListener('click', async () => {
+            const id        = document.getElementById('kpiEditId').value;
+            const isNew     = !id;
+            const isComputed= document.getElementById('kpiEditComputed').checked;
+            const valInput  = document.getElementById('kpiEditValue');
+
+            const payload = {
+              code:     emptyVal('kpiEditCode'),
+              value:    isComputed
+                      ? null
+                      : (valInput.value === '' ? null : Number(valInput.value)),
+              suffix:   emptyVal('kpiEditSuffix'),
+              label:    emptyVal('kpiEditLabel'),
+              iconClass:emptyVal('kpiEditIcon'),
+              sortOrder:(document.getElementById('kpiEditOrder').value === '')
+                      ? null
+                      : Number(document.getElementById('kpiEditOrder').value),
+              enabled:  document.getElementById('kpiEditEnabled').checked,
+              computed: isComputed
+            };
+
+            try{
+              if (isNew){
+                await api.post(KPI_POST, payload);
+                notify('KPI yaratildi.');
+              } else {
+                await api.put(KPI_PUT(id), payload);
+                notify('KPI yangilandi.');
+              }
+              kpiEditModal.hide();
+              loadKpis();
+            }catch(err){
+              console.error(err);
+              alert('KPI saqlashda xato.');
+            }
+          });
+
+
+
+
+  /* ===== Team Admin (Media-integrated) ===== */
+  const TM_API = (page=0,size=10)=> `/api/admin/team-members?page=${page}&size=${size}&sort=orderIndex,asc`;
+  const TM_ONE = (id)=> `/api/admin/team-member/${id}`;
+  const TM_CREATE = `/api/admin/team-member`;
+  const MEDIA_UPLOAD = '/api/media/upload?folder=team';
+
+  /* small icon helper */
+  const iconFor = net => ({
+    telegram:'bi-telegram', linkedin:'bi-linkedin', x:'bi-twitter-x',
+    twitter:'bi-twitter-x', facebook:'bi-facebook', instagram:'bi-instagram'
+  }[String(net||'').toLowerCase()] || 'bi-link-45deg');
+
+  /* social row factory */
+  const socialRow = (wrapId, data={})=>{
+    const row = document.createElement('div');
+    row.className = 'col-12';
+    row.innerHTML = `
+    <div class="row g-2 align-items-center border rounded p-2">
+      <div class="col-md-3"><input class="form-control tm-net" placeholder="Network" value="${data.network||''}"></div>
+      <div class="col-md-5"><input class="form-control tm-url" placeholder="Profile URL" value="${data.url||''}"></div>
+      <div class="col-md-3"><input class="form-control tm-icon" placeholder="Icon class (bi-..)" value="${data.iconClass||iconFor(data.network)}"></div>
+      <div class="col-md-1 d-grid"><button class="btn btn-outline-danger tm-del" type="button"><i class="bi bi-x-lg"></i></button></div>
+    </div>`;
+    row.querySelector('.tm-del').onclick = () => row.remove();
+    document.getElementById(wrapId).appendChild(row);
+  };
+
+  /* collect socials (max 4) */
+  const collectSocials = (wrapId)=>{
+    const list = [];
+    document.querySelectorAll(`#${wrapId} .row`).forEach(r=>{
+      const n = r.querySelector('.tm-net').value.trim();
+      const u = r.querySelector('.tm-url').value.trim();
+      let i = r.querySelector('.tm-icon').value.trim();
+      if(!i) i = iconFor(n);
+      if(n && u) list.push({ network:n, url:u, iconClass:i });
+    });
+    return list.slice(0,4);
+  };
+
+  /* file previews */
+  document.getElementById('tmPhoto')?.addEventListener('change', e=>preview(e.target,'tmPhotoPrev'));
+  document.getElementById('tmEditPhoto')?.addEventListener('change', e=>preview(e.target,'tmEditPhotoPrev'));
+
+  /* add social buttons */
+  document.getElementById('tmAddSocial')?.addEventListener('click', ()=>{
+    if(document.querySelectorAll('#tmSocialWrap .row').length>=4) return;
+    socialRow('tmSocialWrap');
+  });
+  document.getElementById('tmEditAddSocial')?.addEventListener('click', ()=>{
+    if(document.querySelectorAll('#tmEditSocialWrap .row').length>=4) return;
+    socialRow('tmEditSocialWrap');
+  });
+
+  /* CREATE */
+  document.getElementById('tmCreateFrm')?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const name = (document.getElementById('tmName').value||'').trim();
+    const role = (document.getElementById('tmRole').value||'').trim();
+    if(!name || !role) return alert('Name va Role majburiy');
+
+    try{
+      const file = document.getElementById('tmPhoto').files[0];
+      const form = new FormData();
+      form.append('file', file);
+      form.append('folder', 'team');
+      const {data:media} = await api.post('/api/media/upload', form, { headers:{'Content-Type':'multipart/form-data'} });
+
+      const payload = {
+        fullName: name,
+        roleTitle: role,
+        status: document.getElementById('tmStatus').value || 'DRAFT',
+        orderIndex: +document.getElementById('tmOrder').value || 0,
+        photoMediaId: media?.id,
+        socials: collectSocials('tmSocialWrap')
+      };
+      await api.post(TM_CREATE, payload);
+      notify('Team member created.');
+      document.getElementById('tmCreateFrm').reset();
+      document.getElementById('tmPhotoPrev').classList.add('d-none');
+      document.getElementById('tmSocialWrap').innerHTML='';
+      loadTeam();
+    }catch(err){
+      console.error(err);
+      alert(err?.response?.data?.message || 'Create failed');
+    }
+  });
+
+  /* LIST / PAGER */
+  let tmPage=0, tmSize=10, tmTotal=1;
+  const $tmTableWrap = document.getElementById('tmTableWrap');
+  const $tmHideBtn   = document.getElementById('tmHideBtn');
+  const $tmLoadBtn   = document.getElementById('tmLoadBtn');
+  const $tmTbody     = document.getElementById('tmTbody');
+
+  async function loadTeam(page=0){
+    try{
+      tmPage = page;
+      const {data} = await api.get(TM_API(tmPage, tmSize));
+      const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+      tmTotal = (data?.totalPages ?? 1);
+
+      $tmTbody.innerHTML='';
+      items.forEach(m=>{
+        const img = getMediaUrl(m.photoUrl || m.photoId || m.photo || m.photoMediaId);
+        const isPub = m.status==='PUBLISHED';
+        const btn  = isPub? 'btn-warning':'btn-success';
+        const txt  = isPub? 'Draftga qaytarish':'Publish';
+        $tmTbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td class="fw-semibold">${m.fullName||'—'}</td>
+          <td>${m.roleTitle||'—'}</td>
+          <td>${isPub?'<span class="badge bg-success">PUBLISHED</span>':'<span class="badge bg-secondary">DRAFT</span>'}</td>
+          <td>
+            <button class="btn btn-sm ${btn}" data-act="toggle" data-id="${m.id}" data-status="${m.status}">${txt}</button>
+            <button class="btn btn-sm btn-dark" data-act="edit" data-id="${m.id}">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" data-act="del" data-id="${m.id}">Delete</button>
+          </td>
+        </tr>
+      `);
+      });
+
+      if(items.length===0){
+        $tmTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Hali team member yo‘q.</td></tr>`;
+      }
+
+      $tmTableWrap.classList.remove('d-none');
+      $tmHideBtn.classList.remove('d-none');
+      $tmLoadBtn.classList.add('d-none');
+
+      document.getElementById('tmPrev').disabled = (tmPage<=0);
+      document.getElementById('tmNext').disabled = (tmPage>=tmTotal-1);
+      document.getElementById('tmPageInfo').textContent = `Page ${tmPage+1} / ${tmTotal}`;
+    }catch(e){
+      console.error(e);
+      alert('Team listni yuklashda xato.');
+    }
+  }
+  document.getElementById('tmLoadBtn')?.addEventListener('click', ()=> loadTeam());
+  document.getElementById('tmHideBtn')?.addEventListener('click', ()=>{
+    $tmTableWrap.classList.add('d-none');
+    $tmHideBtn.classList.add('d-none');
+    $tmLoadBtn.classList.remove('d-none');
+  });
+  document.getElementById('tmPrev')?.addEventListener('click', ()=> loadTeam(Math.max(0, tmPage-1)));
+  document.getElementById('tmNext')?.addEventListener('click', ()=> loadTeam(tmPage+1));
+
+  /* table actions */
+  $tmTbody?.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-act]');
+    if(!btn) return;
+    const id = +btn.dataset.id;
+    const act = btn.dataset.act;
+    if(act==='toggle'){
+      const next = (btn.dataset.status==='PUBLISHED') ? 'DRAFT' : 'PUBLISHED';
+      await api.patch(TM_ONE(id), { status: next });
+      notify('Status yangilandi: '+next);
+      return loadTeam(tmPage);
+    }
+    if(act==='del'){
+      if(!confirm('O‘chirishni tasdiqlaysizmi?')) return;
+      await api.delete(TM_ONE(id));
+      notify('Member o‘chirildi.');
+      return loadTeam(tmPage);
+    }
+    if(act==='edit'){
+      openEditMember(id);
+    }
+  });
+
+  /* EDIT MODAL */
+  const tmEditModal = new bootstrap.Modal('#tmEditModal');
+
+  async function openEditMember(id){
+    try{
+      const m = await api.get(TM_ONE(id)).then(r=>r.data);
+      document.getElementById('tmEditId').value = m.id;
+      document.getElementById('tmEditName').value = m.fullName||'';
+      document.getElementById('tmEditRole').value = m.roleTitle||'';
+      document.getElementById('tmEditStatus').value = m.status||'DRAFT';
+      document.getElementById('tmEditOrder').value = m.orderIndex ?? 0;
+      const wrap = document.getElementById('tmEditSocialWrap'); wrap.innerHTML='';
+      (m.socials||[]).forEach(s=> socialRow('tmEditSocialWrap', s));
+      // clear preview
+      document.getElementById('tmEditPhoto').value = '';
+      document.getElementById('tmEditPhotoPrev').classList.add('d-none');
+      tmEditModal.show();
+    }catch(e){
+      console.error(e);
+      alert('Ma’lumotlarni olishda xato.');
+    }
+  }
+
+  document.getElementById('tmEditSaveBtn')?.addEventListener('click', async ()=>{
+    const id = +document.getElementById('tmEditId').value;
+    const name = (document.getElementById('tmEditName').value||'').trim();
+    const role = (document.getElementById('tmEditRole').value||'').trim();
+    if(!name || !role) return alert('Name va Role majburiy');
+
+    try{
+      const patch = {
+        fullName: name,
+        roleTitle: role,
+        status: document.getElementById('tmEditStatus').value || 'DRAFT',
+        orderIndex: +document.getElementById('tmEditOrder').value || 0,
+        socials: collectSocials('tmEditSocialWrap')
+      };
+      const f = document.getElementById('tmEditPhoto').files?.[0];
+      if(f){
+        const form = new FormData();
+        form.append('file', f);
+        form.append('folder', 'team');
+        const {data:media} = await api.post('/api/media/upload', form, { headers:{'Content-Type':'multipart/form-data'} });
+        patch.photoMediaId = media?.id;
+      }
+      await api.patch(TM_ONE(id), patch);
+      notify('Member yangilandi.');
+      tmEditModal.hide();
+      loadTeam(tmPage);
+    }catch(e){
+      console.error(e);
+      alert('Update xato.');
+    }
+  });
+
+
+  /* ====================== POSTS (ADMIN) ====================== */
+  /* API endpoints */
+  const POST_LIST   = (page=0,size=10)=> `/api/admin/posts?page=${page}&size=${size}&sort=createdAt,desc`;
+  const POST_CREATE = '/api/admin/posts';
+  const POST_ONE    = (id)=> `/api/admin/posts/${id}`;
+  const POST_WFILE  = (id)=> `/api/admin/posts/${id}/with-file`; // PUT (multipart)
+
+  /* State */
+  let postPage = 0, postSize = 10, postTotalPages = 0;
+
+  /* UI refs */
+  const $postTableWrap = document.getElementById('postTableWrap');
+  const $postTbody     = document.getElementById('postTbody');
+  const $postPrev      = document.getElementById('postPrev');
+  const $postNext      = document.getElementById('postNext');
+  const $postPageInfo  = document.getElementById('postPageInfo');
+
+  /* Create form: cover preview */
+  document.getElementById('postCoverFile')
+          .addEventListener('change', e=>preview(e.target,'postCoverPrev'));
+
+  /* Create form: submit */
+  document.getElementById('postCreateFrm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const title = document.getElementById('postTitle').value.trim();
+    if(!title) return alert('Title majburiy');
+
+    try{
+      const coverId = await uploadFile(document.getElementById('postCoverFile').files[0], 'posts');
+      const catId   = Number(document.getElementById('postCategory').value) || null;
+
+      const payload = {
+        title,
+        summary: document.getElementById('postSummary').value || null,
+        content: document.getElementById('postContent').value || null,
+        categoryIds: catId ? [catId] : [],
+        coverMediaId: coverId || null,
+        hashTag: emptyVal('pHash')
+      };
+
+      const {data} = await api.post(POST_CREATE, payload);
+      notify('Post yaratildi: #' + (data?.id ?? '—'));
+
+      if(document.getElementById('postPublish').value === 'yes' && data?.id){
+        await api.put(POST_ONE(data.id), { status: 'PUBLISHED' });
+        notify('Post published.');
+      }
+
+      loadPosts();
+    }catch(err){
+      console.error(err);
+      alert(err?.response?.data?.message || 'Post yaratishda xato');
+    }
+  });
+
+  /* Load / Hide */
+  document.getElementById('postLoadBtn').onclick = ()=> loadPosts();
+  document.getElementById('postHideBtn').onclick = ()=>{
+    $postTableWrap.classList.add('d-none');
+    document.getElementById('postHideBtn').classList.add('d-none');
+    document.getElementById('postLoadBtn').classList.remove('d-none');
+  };
+
+  async function loadPosts(page=0){
+    try{
+      postPage = page;
+      const {data} = await api.get(POST_LIST(postPage, postSize));
+      const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data)? data : []);
+      postTotalPages = (data?.totalPages ?? 1);
+
+      $postTbody.innerHTML = '';
+      items.forEach(p=>{
+        const img  = getMediaUrl(p.coverUrl || p.coverMediaId || p.photo);
+        const pub  = p.publishedAt ? new Date(p.publishedAt).toLocaleString() : '';
+        const isPub= p.status === 'PUBLISHED';
+        const btn  = isPub ? 'btn-warning' : 'btn-success';
+        const txt  = isPub ? 'Draftga qaytarish' : 'Publish';
+
+        $postTbody.insertAdjacentHTML('beforeend', `
+        <tr class="row-click" data-id="${p.id}" data-slug="${p.slug || ''}">
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td class="fw-semibold post-title-line">${p.title || '—'}</td>
+          <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>
+          <td class="small">${pub}</td>
+          <td class="td-actions">
+            <button class="btn btn-sm ${btn}" data-action="toggle" data-id="${p.id}" data-status="${p.status}">${txt}</button>
+            <button class="btn btn-sm btn-dark" data-action="edit" data-id="${p.id}">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}">Delete</button>
+          </td>
+        </tr>
+      `);
+      });
+
+      if(items.length===0){
+        $postTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Hali postlar yo‘q.</td></tr>`;
+      }
+
+      // show wrap + pager
+      $postTableWrap.classList.remove('d-none');
+      document.getElementById('postHideBtn').classList.remove('d-none');
+      document.getElementById('postLoadBtn').classList.add('d-none');
+
+      $postPrev.disabled = (postPage<=0);
+      $postNext.disabled = (postPage>=postTotalPages-1);
+      $postPageInfo.textContent = `Page ${postPage+1} / ${postTotalPages}`;
+    }catch(e){
+      console.error(e);
+      alert('Postlarni yuklashda xato.');
+    }
+  }
+
+  $postPrev.onclick = ()=> loadPosts(Math.max(0, postPage-1));
+  $postNext.onclick = ()=> loadPosts(postPage+1);
+
+  /* Row delegation: actions + row click for "view" */
+  $postTbody.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-action]');
+    if(btn){
+      const id = +btn.dataset.id;
+      const act = btn.dataset.action;
+      if(act==='toggle') togglePostStatus(id, btn.dataset.status);
+      else if(act==='edit') openEditPost(id);
+      else if(act==='delete') deletePost(id);
+      return;
+    }
+    const tr = e.target.closest('tr.row-click');
+    if(tr){
+      const slug = tr.dataset.slug || tr.dataset.id;
+      window.open(`/post?slug=${encodeURIComponent(slug)}`, '_blank');
+    }
+  });
+
+  /* Toggle PUBLISHED <-> DRAFT */
+  async function togglePostStatus(id, cur){
+    const next = (cur==='PUBLISHED') ? 'DRAFT' : 'PUBLISHED';
+    try{
+      await api.put(POST_ONE(id), { status: next });
+      notify('Status yangilandi: ' + next);
+      loadPosts(postPage);
+    }catch(e){
+      console.error(e);
+      alert('Status yangilanishida xato.');
+    }
+  }
+
+  /* Delete */
+  async function deletePost(id){
+    if(!confirm('O‘chirishni tasdiqlaysizmi?')) return;
+    try{
+      await api.delete(POST_ONE(id));
+      notify('Post o‘chirildi.');
+      loadPosts(postPage);
+    }catch(e){
+      console.error(e);
+      alert('O‘chirishda xato.');
+    }
+  }
+
+  /* Edit modal */
+  const postEditModal = new bootstrap.Modal(document.getElementById('postEditModal'));
+
+  async function openEditPost(id){
+    try{
+      // post + categories
+      const [post, cats] = await Promise.all([
+        api.get(POST_ONE(id)).then(r=>r.data),
+        api.get('/api/categories?size=1000&sort=name,asc').then(r=>{
+          const d=r.data; return Array.isArray(d?.content)? d.content : (Array.isArray(d)? d : []);
+        })
+      ]);
+
+      const sel = document.getElementById('postEditCategories');
+      sel.innerHTML = '';
+      cats.forEach(c=> sel.insertAdjacentHTML('beforeend', `<option value="${c.id}">${c.name}</option>`));
+      (post.categoryIds||[]).forEach(cid=>{
+        const o = sel.querySelector(`option[value="${cid}"]`); if(o) o.selected=true;
+      });
+
+      document.getElementById('postEditId').value      = post.id;
+      document.getElementById('postEditTitle').value   = post.title || '';
+      document.getElementById('postEditStatus').value  = post.status || 'DRAFT';
+      document.getElementById('postEditSummary').value = post.summary || '';
+      document.getElementById('postEditContent').value = post.content || '';
+      document.getElementById('postEditHashTag').value = post.hashTag || '';
+      document.getElementById('postEditCover').value   = '';
+
+      postEditModal.show();
+    }catch(e){
+      console.error(e);
+      alert('Post ma’lumotlarini olishda xato.');
+    }
+  }
+
+  /* Save changes (modal) */
+  document.getElementById('postEditSaveBtn').onclick = async ()=>{
+    const id = +document.getElementById('postEditId').value;
+    const title   = document.getElementById('postEditTitle').value.trim();
+    if(!title) return alert('Title majburiy');
+
+    const status  = document.getElementById('postEditStatus').value;
+    const summary = document.getElementById('postEditSummary').value;
+    const content = document.getElementById('postEditContent').value;
+    const hashTag = document.getElementById('postEditHashTag').value;
+    const catSel  = document.getElementById('postEditCategories');
+    const categoryIds = Array.from(catSel.selectedOptions).map(o=> +o.value);
+    const file    = document.getElementById('postEditCover').files?.[0];
+
+    try{
+      if(file){
+        const dto = { title, status, summary, content, hashTag, categoryIds };
+        const form = new FormData();
+        form.append('data', new Blob([JSON.stringify(dto)], {type:'application/json'}));
+        form.append('file', file);
+        await api.put(POST_WFILE(id), form, { headers:{'Content-Type':'multipart/form-data'} });
+      }else{
+        await api.put(POST_ONE(id), { title, status, summary, content, hashTag, categoryIds });
+      }
+      notify('Post yangilandi.');
+      postEditModal.hide();
+      loadPosts(postPage);
+    }catch(e){
+      console.error(e);
+      alert('Update xato.');
+    }
+  };
+
+  /* Create form uchun kategoriyalar */
+  (async function fillPostCreateCategories(){
+    try{
+      const {data} = await api.get('/api/categories?size=1000&sort=name,asc');
+      const items = Array.isArray(data?.content)? data.content : (Array.isArray(data)? data : []);
+      const sel = document.getElementById('postCategory');
+      sel.innerHTML = '<option value=""> 📂 Kategoriya tanlang</option>';
+      items.forEach(c=> sel.insertAdjacentHTML('beforeend', `<option value="${c.id}">${c.name}</option>`));
+    }catch(_){}
+  })();
+
+
+  /* ====================== SERVICES (ADMIN) ====================== */
+
+  /* Endpoints */
+  const SVC_LIST   = (page=0,size=10)=> `/api/admin/services?page=${page}&size=${size}&sort=createdAt,desc`;
+  const SVC_ONE    = (id)=> `/api/admin/services/${id}`;
+  const SVC_CREATE = `/api/admin/services`;
+  const SVC_PATCH  = (id)=> `/api/admin/services/${id}`;
+  const SVC_DELETE = (id)=> `/api/admin/services/${id}`;
+
+  /* State */
+  let svcPage = 0, svcSize = 10, svcTotalPages = 0;
+
+  /* UI refs (E’LON BIR MARTA) */
+  const $svcTableWrap = document.getElementById('svcTableWrap');
+  const $svcTbody     = document.getElementById('svcTbody');
+  const $svcPrev      = document.getElementById('svcPrev');
+  const $svcNext      = document.getElementById('svcNext');
+  const $svcPageInfo  = document.getElementById('svcPageInfo');
+  const $svcLoadBtn   = document.getElementById('svcLoadBtn');
+  const $svcHideBtn   = document.getElementById('svcHideBtn');
+
+  /* Create form: preview */
+  ['sHeroFile','sAuthorFile','sServiceIconFile','sLeftFile','sRightFile'].forEach(id=>{
+    const el = document.getElementById(id);
+    const prev = id.replace('File','Prev');
+    if(el) el.addEventListener('change', e=>preview(e.target, prev));
+  });
+
+  /* CREATE */
+  document.getElementById('frmSvc').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+
+    const raw = (document.getElementById('sRaw').value||'').trim();
+    try{
+      let payload;
+      if(raw){
+        payload = JSON.parse(raw);
+      }else{
+        const title    = (document.getElementById('sTitle').value||'').trim();
+        if(!title) return alert('Title majburiy');
+
+        const quoteAuthor= (document.getElementById('sQuoteAuthor').value||null);
+        const quoteText= (document.getElementById('sQuoteText').value||null);
+        const quoteRole= (document.getElementById('sQuoteRole').value||null);
+        const subtitle = (document.getElementById('sSubtitle').value||null);
+        const overview = (document.getElementById('sOverview').value||null);
+        const bullets  = (document.getElementById('sBullets').value||null); // backend split qiladi
+        const status   = document.getElementById('sStatus').value || 'DRAFT';
+
+        // Rasmlarni yuklash
+        const heroId = await uploadFile(document.getElementById('sHeroFile').files[0], 'services');
+        const authorId = await uploadFile(document.getElementById('sAuthorFile').files[0], 'services');
+        const iconId = await uploadFile(document.getElementById('sServiceIconFile').files[0], 'services');
+        const leftId = await uploadFile(document.getElementById('sLeftFile').files[0], 'services');
+        const rightId= await uploadFile(document.getElementById('sRightFile').files[0], 'services');
+
+        payload = {
+          title,quoteAuthor,quoteText,quoteRole, subtitle, overview, bullets,
+          heroPhotoId: heroId || null,
+          quoteAuthorPhotoId: authorId || null,
+          imageLeftId: leftId || null,
+          imageRightId: rightId || null,
+          iconId: iconId || null,
+          status
+        };
+      }
+
+      const {data} = await api.post(SVC_CREATE, payload);
+      notify('Service yaratildi: #' + (data?.id ?? '—'));
+      await loadServices(); // ro‘yxatni yangilash
+    }catch(err){
+      console.error(err);
+      alert(err?.response?.data?.message || 'Service yaratishda xato');
+    }
+  });
+
+  /* Load buttons */
+  document.getElementById('sTryList')?.addEventListener('click', ()=> loadServices());
+  $svcLoadBtn?.addEventListener('click', ()=> loadServices());
+  $svcHideBtn?.addEventListener('click', ()=>{
+    $svcTableWrap.classList.add('d-none');
+    $svcHideBtn.classList.add('d-none');
+    $svcLoadBtn.classList.remove('d-none');
+  });
+
+  /* LIST */
+  async function loadServices(page=0){
+    try{
+      svcPage = page;
+      const {data} = await api.get(SVC_LIST(svcPage, svcSize));
+      const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data)? data : []);
+      svcTotalPages = (data?.totalPages ?? 1);
+
+      $svcTbody.innerHTML = '';
+      items.forEach(s=>{
+        const img  = getMediaUrl(s.heroPhotoUrl || s.imageLeftUrl || s.imageRightUrl);
+        const pub  = s.publishedAt ? new Date(s.publishedAt).toLocaleString() : '';
+        const isPub= s.status === 'PUBLISHED';
+        const btn  = isPub ? 'btn-warning' : 'btn-success';
+        const txt  = isPub ? 'Draftga qaytarish' : 'Publish';
+
+        $svcTbody.insertAdjacentHTML('beforeend', `
+        <tr class="row-click" data-id="${s.id}" data-slug="${s.slug||''}">
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td class="fw-semibold svc-title">${s.title||'—'}</td>
+          <td>${isPub?'<span class="badge bg-success">PUBLISHED</span>':'<span class="badge bg-secondary">DRAFT</span>'}</td>
+          <td class="small">${pub}</td>
+          <td>
+            <button class="btn btn-sm ${btn}" data-action="toggle" data-id="${s.id}" data-status="${s.status}">${txt}</button>
+            <button class="btn btn-sm btn-dark" data-action="edit" data-id="${s.id}">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${s.id}">Delete</button>
+          </td>
+        </tr>
+      `);
+      });
+
+      if(items.length===0){
+        $svcTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Hali services yo‘q.</td></tr>`;
+      }
+
+      // show + pager
+      $svcTableWrap.classList.remove('d-none');
+      $svcHideBtn?.classList.remove('d-none');
+      $svcLoadBtn?.classList.add('d-none');
+
+      if ($svcPrev) $svcPrev.disabled = (svcPage<=0);
+      if ($svcNext) $svcNext.disabled = (svcPage>=svcTotalPages-1);
+      if ($svcPageInfo) $svcPageInfo.textContent = `Page ${svcPage+1} / ${svcTotalPages}`;
+    }catch(e){
+      console.error(e);
+      alert('Servicesni yuklashda xato.');
+    }
+  }
+
+  $svcPrev?.addEventListener('click', ()=> loadServices(Math.max(0, svcPage-1)));
+  $svcNext?.addEventListener('click', ()=> loadServices(svcPage+1));
+
+  /* Row delegation */
+  $svcTbody.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-action]');
+    if(btn){
+      const id  = +btn.dataset.id;
+      const act = btn.dataset.action;
+      if(act==='toggle') return toggleSvcStatus(id, btn.dataset.status);
+      if(act==='edit')   return openEditService(id);
+      if(act==='delete') return deleteService(id);
+    }
+    const tr = e.target.closest('tr.row-click');
+    if(tr){
+      const slug = tr.dataset.slug || tr.dataset.id;
+      window.open(`/service?slug=${encodeURIComponent(slug)}`, '_blank');
+    }
+  });
+
+  /* Toggle status */
+  async function toggleSvcStatus(id, cur){
+    const next = (cur==='PUBLISHED') ? 'DRAFT' : 'PUBLISHED';
+    try{
+      await api.patch(SVC_PATCH(id), { status: next });
+      notify('Status yangilandi: ' + next);
+      loadServices(svcPage);
+    }catch(e){
+      console.error(e);
+      alert('Status yangilanishida xato.');
+    }
+  }
+
+  /* Delete */
+  async function deleteService(id){
+    if(!confirm('O‘chirishni tasdiqlaysizmi?')) return;
+    try{
+      await api.delete(SVC_DELETE(id));
+      notify('Service o‘chirildi.');
+      loadServices(svcPage);
+    }catch(e){
+      console.error(e);
+      alert('O‘chirishda xato.');
+    }
+  }
+
+  /* Edit modal */
+  const svcEditModal = new bootstrap.Modal(document.getElementById('svcEditModal'));
+
+  async function openEditService(id){
+    try{
+      const s = await api.get(SVC_ONE(id)).then(r=>r.data);
+
+      document.getElementById('svcEditId').value       = s.id;
+      document.getElementById('svcEditTitle').value    = s.title || '';
+      document.getElementById('svcEditQuoteAuthor').value    = s.quoteAuthor || '';
+      document.getElementById('svcEditQuoteText').value    = s.quoteText || '';
+      document.getElementById('svcEditQuoteRole').value    = s.quoteRole || '';
+      document.getElementById('svcEditStatus').value   = s.status || 'DRAFT';
+      document.getElementById('svcEditSubtitle').value = s.subtitle || '';
+      document.getElementById('svcEditOverview').value = s.overview || '';
+      document.getElementById('svcEditBullets').value  = (s.bullets||[]).join('\n');
+
+      ['svcEditHero','svcEditAuthor','svcEditServiceIcon','svcEditLeft','svcEditRight'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.value='';
+      });
+
+      svcEditModal.show();
+    }catch(e){
+      console.error(e);
+      alert('Service ma’lumotlarini olishda xato.');
+    }
+  }
+
+  /* Save edit */
+  document.getElementById('svcEditSaveBtn').addEventListener('click', async ()=>{
+    const id = +document.getElementById('svcEditId').value;
+    const title    = document.getElementById('svcEditTitle').value.trim();
+    if(!title) return alert('Title majburiy');
+
+    const status   = document.getElementById('svcEditStatus').value;
+    const quoteAuthor= document.getElementById('svcEditQuoteAuthor').value;
+    const quoteText= document.getElementById('svcEditQuoteText').value;
+    const quoteRole= document.getElementById('svcEditQuoteRole').value;
+    const subtitle = document.getElementById('svcEditSubtitle').value;
+    const overview = document.getElementById('svcEditOverview').value;
+    const bullets  = document.getElementById('svcEditBullets').value; // server split qiladi
+
+    const heroF = document.getElementById('svcEditHero').files?.[0];
+    const authorF= document.getElementById('svcEditAuthor').files?.[0];
+    const serviceIconF= document.getElementById('svcEditServiceIcon').files?.[0];
+    const leftF = document.getElementById('svcEditLeft').files?.[0];
+    const rightF= document.getElementById('svcEditRight').files?.[0];
+
+    try{
+      const heroId  = heroF  ? await uploadFile(heroF, 'services')  : undefined;
+      const authorId = authorF ? await uploadFile(authorF, 'services') : undefined;
+      const iconId = serviceIconF ? await uploadFile(serviceIconF, 'services') : undefined;
+      const leftId  = leftF  ? await uploadFile(leftF, 'services')  : undefined;
+      const rightId = rightF ? await uploadFile(rightF, 'services') : undefined;
+
+      const patch = { title, status,quoteAuthor,quoteText,quoteRole, subtitle, overview, bullets };
+      if(heroId!==undefined)  patch.heroPhotoId = (heroId ?? 0);
+      if(authorId!==undefined) patch.quoteAuthorPhotoId= (authorId ?? 0);
+      if(iconId!==undefined) patch.iconId= (iconId ?? 0);
+      if(leftId!==undefined)  patch.imageLeftId = (leftId ?? 0);
+      if(rightId!==undefined) patch.imageRightId= (rightId ?? 0);
+
+      await api.patch(SVC_PATCH(id), patch);
+      notify('Service yangilandi.');
+      svcEditModal.hide();
+      loadServices(svcPage);
+    }catch(e){
+      console.error(e);
+      alert('Update xato.');
+    }
+  });
+
+
+    /* ====================== PRICING (ADMIN) ====================== */
+
+    /** Endpoints (backend logikasiga mos) */
+    const PF_BASE = '/api/admin/pricing/features';
+    const PP_BASE = '/api/admin/pricing/plans';
+
+    /** State */
+    let pricingFeatures = []; // PricingFeatureDto[]
+    let pricingPlans    = []; // PricingPlanResponseDto[]
+
+    /** DOM refs: FEATURES */
+    const $pfTableWrap   = document.getElementById('pfTableWrap');
+    const $pfTbody       = document.getElementById('pfTbody');
+    const $pfReloadBtn   = document.getElementById('pfReloadBtn');
+
+    /** DOM refs: PLANS */
+    const $ppTableWrap   = document.getElementById('ppTableWrap');
+    const $ppTbody       = document.getElementById('ppTbody');
+    const $ppReloadBtn   = document.getElementById('ppReloadBtn');
+
+    /* ====================== HELPERS ====================== */
+
+    function ppRenderFeatureOptions() {
+      if (!pricingFeatures.length) {
+        return '<option value="">— Featurelar mavjud emas —</option>';
+      }
+      return [
+        '<option value="">— Feature tanlang —</option>',
+        ...pricingFeatures.map(f => {
+          const cat   = f.categoryName || '';
+          const label = f.title || f.code;
+          const prefix = cat ? `[${cat}] ` : '';
+          const priceText = (f.basePriceAmount != null)
+                  ? ` — ${f.basePriceAmount} ${(f.basePriceUnit || '')}`.trim()
+                  : '';
+          return `<option value="${f.id}">${prefix}${label}${priceText}</option>`;
+        })
+      ].join('');
+    }
+
+    function renderAvailabilityOptions(selected) {
+      const opts = [
+        { val: 'INCLUDED',     label: 'INCLUDED (Bor)' },
+        { val: 'OPTIONAL',     label: 'OPTIONAL (Qo‘shimcha)' },
+        { val: 'NOT_INCLUDED', label: 'NOT_INCLUDED (Yo‘q)' }
+      ];
+      return opts.map(o =>
+              `<option value="${o.val}" ${o.val === selected ? 'selected' : ''}>${o.label}</option>`
+      ).join('');
+    }
+
+    /** Plan feature row (create & edit) — faqat feature + availability + note */
+    function ppCreateFeatureRow(containerId, rowData) {
+      const wrap = document.createElement('div');
+      wrap.className = 'col-12';
+
+      const selectedFeatureId = rowData?.featureId ? String(rowData.featureId) : '';
+      const selectedAvail     = rowData?.availability || '';
+      const noteVal           = rowData?.note || '';
+
+      wrap.innerHTML = `
+      <div class="row g-2 align-items-center pp-feature-row">
+        <div class="col-md-5">
+          <select class="form-select pp-feature-select">
+            ${ppRenderFeatureOptions()}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select pp-feature-availability">
+            <option value="">— Availability tanlang —</option>
+            ${renderAvailabilityOptions(selectedAvail)}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <input class="form-control pp-feature-note"
+                 placeholder="Izoh (ixtiyoriy)">
+        </div>
+        <div class="col-md-1 d-flex justify-content-end">
+          <button type="button" class="btn btn-sm btn-outline-danger pp-feature-remove">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      </div>
+    `;
+
+      const sel       = wrap.querySelector('.pp-feature-select');
+      const noteInput = wrap.querySelector('.pp-feature-note');
+
+      if (selectedFeatureId) sel.value = selectedFeatureId;
+      if (noteVal)           noteInput.value = noteVal;
+
+      wrap.querySelector('.pp-feature-remove').onclick = () => wrap.remove();
+      document.getElementById(containerId).appendChild(wrap);
+    }
+
+    function ppCollectFeatures(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return [];
+      const rows = Array.from(container.querySelectorAll('.pp-feature-row'));
+      const list = [];
+
+      rows.forEach(r => {
+        const featureId    = (r.querySelector('.pp-feature-select')?.value || '').trim();
+        const availability = (r.querySelector('.pp-feature-availability')?.value || '').trim();
+        const note         = (r.querySelector('.pp-feature-note')?.value || '').trim();
+
+        if (featureId && availability) {
+          list.push({
+            featureId: Number(featureId),
+            availability,
+            note: note || null
+          });
+        }
+      });
+      return list;
+    }
+
+    function ppCollectPlanPayload(prefix, featureContainerId) {
+      const v = id => (document.getElementById(prefix + id)?.value || '').trim();
+      const num = id => {
+        const val = v(id);
+        return val === '' ? null : Number(val);
+      };
+
+      const payload = {
+        name: v('Name') || null,
+        slug: v('Slug') || null,
+        code: v('Code') || null,
+        tagline: v('Tagline') || null,
+        priceAmount: num('PriceAmount'),
+        priceUnit: v('PriceUnit') || null,
+        displayOrder: num('DisplayOrder'),
+        popular: !!document.getElementById(prefix + 'Popular')?.checked,
+        custom: !!document.getElementById(prefix + 'Custom')?.checked,
+        active: !!document.getElementById(prefix + 'Active')?.checked
+      };
+
+      if (featureContainerId) {
+        payload.features = ppCollectFeatures(featureContainerId);
+      }
+
+      return payload;
+    }
+
+    /* ====================== FEATURES CRUD ====================== */
+
+    async function pfLoadAll() {
+      try {
+        const { data } = await api.get(PF_BASE);
+        const items = Array.isArray(data) ? data : [];
+        pricingFeatures = items;
+
+        $pfTableWrap.classList.remove('d-none');
+        $pfTbody.innerHTML = '';
+
+        items.forEach(f => {
+          const tr = document.createElement('tr');
+          const priceText = (f.basePriceAmount != null)
+                  ? `${f.basePriceAmount} ${(f.basePriceUnit || '')}`.trim()
+                  : '';
+
+          tr.innerHTML = `
+          <td>
+            <div class="fw-semibold">${f.title || ''}</div>
+          </td>
+          <td><code class="small-mono">${f.code || ''}</code></td>
+          <td>${f.categoryName || ''}</td>
+          <td>${typeof f.displayOrder === 'number' ? f.displayOrder : ''}</td>
+          <td>${priceText}</td>
+          <td class="td-actions" style="width:160px">
+            <button type="button" class="btn btn-sm btn-outline-primary me-1 pf-edit" data-id="${f.id}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger pf-del" data-id="${f.id}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+          $pfTbody.appendChild(tr);
+        });
+
+        // handlers
+        $pfTbody.querySelectorAll('.pf-edit').forEach(btn => {
+          btn.onclick = () => pfOpenEdit(btn.dataset.id);
+        });
+        $pfTbody.querySelectorAll('.pf-del').forEach(btn => {
+          btn.onclick = () => pfDelete(btn.dataset.id);
+        });
+      } catch (e) {
+        console.error('[PF] load error', e);
+      }
+    }
+
+    $pfReloadBtn?.addEventListener('click', pfLoadAll);
+
+    /* CREATE FEATURE */
+    document.getElementById('pfCreateForm')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const code         = (document.getElementById('pfCode').value || '').trim();
+      const title        = (document.getElementById('pfTitle').value || '').trim();
+      const categoryName = (document.getElementById('pfCategoryName').value || '').trim();
+      const displayOrder = Number(document.getElementById('pfDisplayOrder').value || 0);
+
+      const basePriceAmountStr = (document.getElementById('pfBasePriceAmount').value || '').trim();
+      const basePriceAmount = basePriceAmountStr === '' ? null : Number(basePriceAmountStr);
+      const basePriceUnit = (document.getElementById('pfBasePriceUnit').value || '').trim() || null;
+
+      if (!code || !title || !categoryName) {
+        return alert('Code, Title va Category name majburiy.');
+      }
+
+      const payload = {
+        code,
+        title,
+        categoryName,
+        displayOrder,
+        basePriceAmount,
+        basePriceUnit
+      };
+
+      try {
+        await api.post(PF_BASE, payload);
+        notify('Feature yaratildi.');
+        e.target.reset();
+        document.getElementById('pfDisplayOrder').value = '0';
+        await pfLoadAll();
+      } catch (e2) {
+        console.error('[PF] create error', e2);
+      }
+    });
+
+    /* EDIT FEATURE MODAL */
+    const pfEditModal = document.getElementById('pfEditModal')
+            ? new bootstrap.Modal(document.getElementById('pfEditModal'))
+            : null;
+
+    function pfOpenEdit(id) {
+      const feature = pricingFeatures.find(f => String(f.id) === String(id));
+      if (!feature) return;
+
+      document.getElementById('pfEditId').value = feature.id;
+      document.getElementById('pfEditCode').value = feature.code || '';
+      document.getElementById('pfEditTitle').value = feature.title || '';
+      document.getElementById('pfEditCategoryName').value = feature.categoryName || '';
+      document.getElementById('pfEditDisplayOrder').value =
+              typeof feature.displayOrder === 'number' ? feature.displayOrder : 0;
+      document.getElementById('pfEditBasePriceAmount').value =
+              feature.basePriceAmount != null ? feature.basePriceAmount : '';
+      document.getElementById('pfEditBasePriceUnit').value =
+              feature.basePriceUnit || '';
+
+      pfEditModal?.show();
+    }
+
+    document.getElementById('pfEditSaveBtn')?.addEventListener('click', async () => {
+      const id = document.getElementById('pfEditId').value;
+      if (!id) return;
+
+      const basePriceAmountStr = (document.getElementById('pfEditBasePriceAmount').value || '').trim();
+      const basePriceAmount = basePriceAmountStr === '' ? null : Number(basePriceAmountStr);
+      const basePriceUnit = (document.getElementById('pfEditBasePriceUnit').value || '').trim() || null;
+
+      const payload = {
+        code: (document.getElementById('pfEditCode').value || '').trim(),
+        title: (document.getElementById('pfEditTitle').value || '').trim(),
+        categoryName: (document.getElementById('pfEditCategoryName').value || '').trim(),
+        displayOrder: Number(document.getElementById('pfEditDisplayOrder').value || 0),
+        basePriceAmount,
+        basePriceUnit
+      };
+
+      if (!payload.code || !payload.title || !payload.categoryName) {
+        return alert('Code, Title va Category name majburiy.');
+      }
+
+      try {
+        await api.put(`${PF_BASE}/${id}`, payload);
+        notify('Feature yangilandi.');
+        pfEditModal?.hide();
+        await pfLoadAll();
+      } catch (e) {
+        console.error('[PF] save error', e);
+      }
+    });
+
+    async function pfDelete(id) {
+      if (!confirm('Ushbu feature’ni o‘chirishni xohlaysizmi?')) return;
+      try {
+        await api.delete(`${PF_BASE}/${id}`);
+        notify('Feature o‘chirildi.');
+        await pfLoadAll();
+      } catch (e) {
+        console.error('[PF] delete error', e);
+      }
+    }
+
+    /* ====================== PLANS CRUD ====================== */
+
+    async function ppLoad() {
+      try {
+        const { data } = await api.get(PP_BASE);
+        const items = Array.isArray(data) ? data : [];
+        pricingPlans = items;
+
+        $ppTableWrap.classList.remove('d-none');
+        $ppTbody.innerHTML = '';
+
+        items
+                .slice()
+                .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))
+                .forEach(p => {
+                  const tr = document.createElement('tr');
+
+                  const price = p.custom
+                          ? (p.priceUnit || 'Kelishuv asosida')
+                          : (p.priceAmount != null
+                                  ? `${p.priceAmount} ${(p.priceUnit || '')}`
+                                  : '—');
+
+                  const flags = [
+                    p.popular ? '<span class="badge bg-success me-1">Popular</span>' : '',
+                    p.custom ? '<span class="badge bg-dark me-1">Custom</span>' : '',
+                    p.active
+                            ? '<span class="badge bg-primary">Active</span>'
+                            : '<span class="badge bg-secondary">Inactive</span>'
+                  ].join(' ');
+
+                  tr.innerHTML = `
+            <td>
+              <div class="fw-semibold">${p.name || '—'}</div>
+              <div class="small text-muted">${p.tagline || ''}</div>
+            </td>
+            <td>${price}</td>
+            <td>${p.displayOrder ?? ''}</td>
+            <td>${flags}</td>
+            <td class="td-actions">
+              <button type="button" class="btn btn-sm btn-outline-primary me-1 pp-edit" data-id="${p.id}">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger pp-del" data-id="${p.id}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          `;
+                  $ppTbody.appendChild(tr);
+                });
+
+        // handlers
+        $ppTbody.querySelectorAll('.pp-edit').forEach(btn => {
+          btn.onclick = () => ppOpenEdit(btn.dataset.id);
+        });
+        $ppTbody.querySelectorAll('.pp-del').forEach(btn => {
+          btn.onclick = () => ppDelete(btn.dataset.id);
+        });
+      } catch (e) {
+        console.error('[PP] load error', e);
+      }
+    }
+
+    $ppReloadBtn?.addEventListener('click', async () => {
+      await pfLoadAll(); // selectlar uchun
+      await ppLoad();
+    });
+
+    /* CREATE PLAN */
+    document.getElementById('ppCreateForm')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const payload = ppCollectPlanPayload('pp', 'ppFeatureRows');
+      if (!payload.name || !payload.slug || !payload.code) {
+        return alert('Name, Slug va Code majburiy.');
+      }
+
+      try {
+        await api.post(PP_BASE, payload);
+        notify('Pricing plan yaratildi.');
+        e.target.reset();
+        document.getElementById('ppDisplayOrder').value = '0';
+        document.getElementById('ppFeatureRows').innerHTML = '';
+        document.getElementById('ppActive').checked = true;
+        await ppLoad();
+      } catch (e2) {
+        console.error('[PP] create error', e2);
+      }
+    });
+
+    /* EDIT PLAN MODAL */
+    const ppEditModal = document.getElementById('ppEditModal')
+            ? new bootstrap.Modal(document.getElementById('ppEditModal'))
+            : null;
+
+    async function ppOpenEdit(id) {
+      // functsion ishlashi uchun list yuklangan bo‘lishi kerak
+      if (!pricingPlans.length) {
+        await ppLoad();
+      }
+      if (!pricingFeatures.length) {
+        await pfLoadAll();
+      }
+
+      const plan = pricingPlans.find(p => String(p.id) === String(id));
+      if (!plan) return;
+
+      document.getElementById('ppEditId').value = plan.id;
+      document.getElementById('ppEditName').value = plan.name || '';
+      document.getElementById('ppEditSlug').value = plan.slug || '';
+      document.getElementById('ppEditCode').value = plan.code || '';
+      document.getElementById('ppEditTagline').value = plan.tagline || '';
+      document.getElementById('ppEditPriceAmount').value =
+              plan.priceAmount != null ? plan.priceAmount : '';
+      document.getElementById('ppEditPriceUnit').value = plan.priceUnit || '';
+      document.getElementById('ppEditDisplayOrder').value =
+              plan.displayOrder != null ? plan.displayOrder : 0;
+      document.getElementById('ppEditPopular').checked = plan.popular === true;
+      document.getElementById('ppEditCustom').checked = plan.custom === true;
+      document.getElementById('ppEditActive').checked = plan.active !== false;
+
+      const container = document.getElementById('ppEditFeatureRows');
+      container.innerHTML = '';
+      const features = Array.isArray(plan.features) ? plan.features : [];
+      if (features.length) {
+        features.forEach(f => ppCreateFeatureRow('ppEditFeatureRows', f));
+      }
+
+      ppEditModal?.show();
+    }
+
+    document.getElementById('ppEditAddFeatureRow')?.addEventListener('click', async () => {
+      if (!pricingFeatures.length) await pfLoadAll();
+      ppCreateFeatureRow('ppEditFeatureRows');
+    });
+
+    document.getElementById('ppEditSaveBtn')?.addEventListener('click', async () => {
+      const id = document.getElementById('ppEditId').value;
+      if (!id) return;
+
+      const payload = ppCollectPlanPayload('ppEdit', 'ppEditFeatureRows');
+      if (!payload.name || !payload.slug || !payload.code) {
+        return alert('Name, Slug va Code majburiy.');
+      }
+
+
+      try {
+        // PUT so'rovni to'g'ridan-to'g'ri axios bilan yuboramiz
+        await api.put(`${PP_BASE}/${id}`, payload);
+
+        notify('Pricing plan yangilandi.');
+        ppEditModal?.hide();
+        await ppLoad();
+      } catch (e) {
+        console.error('[PP] save error', e);
+        alert('Xatolik: ' + (e.response?.data?.message || e.message || 'Unknown error'));
+      }
+
+    });
+
+    /* DELETE PLAN */
+    async function ppDelete(id) {
+      if (!confirm('Ushbu tarifni o‘chirishni xohlaysizmi?')) return;
+      try {
+        await api.delete(`${PP_BASE}/${id}`);
+        notify('Pricing plan o‘chirildi.');
+        await ppLoad();
+      } catch (e) {
+        console.error('[PP] delete error', e);
+      }
+    }
+
+    /* ADD FEATURE ROW (CREATE FORM) */
+    document.getElementById('ppAddFeatureRow')?.addEventListener('click', async () => {
+      if (!pricingFeatures.length) await pfLoadAll();
+      ppCreateFeatureRow('ppFeatureRows');
+    });
+
+
+
+  /* ====================== PROJECTS (ADMIN) ====================== */
+
+  /* ====================== PROJECTS (ADMIN) ====================== */
+
+  /* Endpoints (sen bergan controllerlarga mos) */
+  const PRJ_LIST   = (page=0,size=10)=> `/api/admin/admin-projects?page=${page}&size=${size}`;
+  const PRJ_CREATE = `/api/admin/projects`;
+  const PRJ_UPDATE = (id)=> `/api/admin/projects/${id}`;   // PUT
+  const PRJ_DELETE = (id)=> `/api/admin/projects/${id}`;   // DELETE
+  const PRJ_PUBLIC_ONE = (slug)=> `/api/projects/${encodeURIComponent(slug)}`;
+
+  /* State */
+  let prjPage = 0, prjSize = 10, prjTotalPages = 1;
+
+  /* UI refs */
+  const $prjTableWrap = document.getElementById('prjTableWrap');
+  const $prjTbody     = document.getElementById('prjTbody');
+  const $prjPrev      = document.getElementById('prjPrev');
+  const $prjNext      = document.getElementById('prjNext');
+  const $prjPageInfo  = document.getElementById('prjPageInfo');
+  const $prjLoadBtn   = document.getElementById('prjLoadBtn');
+  const $prjHideBtn   = document.getElementById('prjHideBtn');
+
+  /* Create form: fayl previewlari */
+  ['jCoverFile','jApproachFile'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', e=>preview(e.target, id.replace('File','Prev')));
+  });
+
+  /* CREATE */
+  document.getElementById('frmPrj').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const raw = (document.getElementById('jRaw').value||'').trim();
+
+    try{
+      let payload;
+      if(raw){
+        payload = JSON.parse(raw);
+      }else{
+        const title = (document.getElementById('jTitle').value||'').trim();
+        if(!title) return alert('Title majburiy');
+
+        // Rasmlar → mediaId’lar
+        const coverId         = await uploadFile(document.getElementById('jCoverFile').files[0], 'projects');
+        const galleryIds      = await uploadMany(document.getElementById('jGalleryFiles').files, 'projects');
+        const approachPhotoId = await uploadFile(document.getElementById('jApproachFile').files[0], 'projects');
+
+        // Images DTO
+        const images = [];
+        if (coverId) {
+          images.push({ mediaId: coverId, slot: 'COVER', sortOrder: 0, altText: null, caption: null });
+        }
+        (galleryIds || []).forEach((id, idx)=>{
+          images.push({ mediaId: id, slot: 'GALLERY', sortOrder: images.length+1, altText: null, caption: null });
+        });
+        if (approachPhotoId) {
+          images.push({ mediaId: approachPhotoId, slot: 'APPROACH', sortOrder: 999, altText: null, caption: null });
+        }
+
+        // Sanalar (YYYY-MM-DD ko‘rinishida yuboramiz)
+        const startDate = document.getElementById('jStart').value || null;
+        const endDate   = document.getElementById('jEnd').value   || null;
+        if (startDate && endDate && endDate < startDate) {
+          return alert('End date start date’dan oldin bo‘lolmaydi.');
+        }
+
+        payload = {
+          title,
+          overview:      emptyVal('jOverview'),
+          clientName:    emptyVal('jClient'),
+          location:      emptyVal('jLocation'),
+          service:       emptyVal('jServiceName'),   // <<< DTO field = service
+          duration:      emptyVal('jDuration'),
+          approach:      emptyVal('jApproach'),
+          conclusion:    emptyVal('jConclusion'),
+          howWeStarted:  emptyVal('jStarted'),
+          projectStatus: emptyVal('jPrjStatus'),
+          startDate, endDate,
+          images
+        };
+
+        // Publish?
+        if (document.getElementById('jPublish').value === 'yes') {
+          payload.status = 'PUBLISHED';
+        }
+      }
+
+      const {data} = await api.post(PRJ_CREATE, payload);
+      if (!data || !data.id) throw new Error('Project yaratildi, ammo ID qaytmadi.');
+      notify('Project yaratildi: #' + data.id);
+      await loadProjects();
+    }catch(err){
+      console.error(err);
+      alert(err?.response?.data?.message || 'Project yaratishda xato');
+    }
+  });
+
+  /* LOAD / HIDE tugmalari */
+  $prjLoadBtn?.addEventListener('click', ()=> loadProjects());
+  $prjHideBtn?.addEventListener('click', ()=>{
+    $prjTableWrap.classList.add('d-none');
+    $prjHideBtn.classList.add('d-none');
+    $prjLoadBtn.classList.remove('d-none');
+  });
+
+  /* LIST */
+  async function loadProjects(page=0){
+    try{
+      prjPage = page;
+      const {data} = await api.get(PRJ_LIST(prjPage, prjSize));
+      const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data)? data : []);
+      // Spring Page uchun ikki formatni ham qo'llab:
+      prjTotalPages = (data?.totalPages ?? data?.page?.totalPages ?? 1);
+
+      $prjTbody.innerHTML = '';
+      items.forEach(p=>{
+        const isPub = p.status === 'PUBLISHED';
+        const btn   = isPub ? 'btn-warning' : 'btn-success';
+        const txt   = isPub ? 'Draftga qaytarish' : 'Publish';
+        const pub   = p.publishedAt ? new Date(p.publishedAt).toLocaleString() : '';
+
+        // ✱ MUHIM: coverUrl dan foydalanamiz (getMediaUrl https/http yoki / bilan boshlangan yo'llarni tushunadi)
+        const img   = getMediaUrl(p.coverUrl) || '/files/team.jpg';
+        const client= p.client || p.clientName || '—';
+
+        $prjTbody.insertAdjacentHTML('beforeend', `
+        <tr class="row-click" data-id="${p.id}" data-slug="${p.slug||''}">
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td class="fw-semibold prj-title">${p.title || '—'}</td>
+          <td class="small">${client}</td>
+          <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>
+          <td class="small">${pub}</td>
+          <td>
+            <button class="btn btn-sm ${btn}" data-action="toggle" data-id="${p.id}" data-status="${p.status}">${txt}</button>
+            <button class="btn btn-sm btn-dark" data-action="edit" data-id="${p.id}" data-slug="${p.slug||''}">Edit</button>
+            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}">Delete</button>
+          </td>
+        </tr>
+      `);
+      });
+
+      if(items.length===0){
+        $prjTbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Hali projects yo‘q.</td></tr>`;
+      }
+
+      $prjTableWrap.classList.remove('d-none');
+      $prjHideBtn?.classList.remove('d-none');
+      $prjLoadBtn?.classList.add('d-none');
+
+      $prjPrev.disabled = (prjPage<=0);
+      $prjNext.disabled = (prjPage>=prjTotalPages-1);
+      $prjPageInfo.textContent = `Page ${prjPage+1} / ${prjTotalPages}`;
+    }catch(e){
+      console.error(e);
+      alert('Projectsni yuklashda xato.');
+    }
+  }
+
+  $prjPrev?.addEventListener('click', ()=> loadProjects(Math.max(0, prjPage-1)));
+  $prjNext?.addEventListener('click', ()=> loadProjects(prjPage+1));
+
+  /* Row delegation */
+  $prjTbody.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-action]');
+    if(btn){
+      const id   = +btn.dataset.id;
+      const act  = btn.dataset.action;
+      const slug = btn.dataset.slug || btn.closest('tr')?.dataset.slug || '';
+      if(act==='toggle') return toggleProjectStatus(id, btn.dataset.status);
+      if(act==='edit')   return openEditProject(id, slug);
+      if(act==='delete') return deleteProject(id);
+    }
+    const tr = e.target.closest('tr.row-click');
+    if(tr){
+      const slug = tr.dataset.slug || tr.dataset.id;
+      window.open(`/project?slug=${encodeURIComponent(slug)}`, '_blank');
+    }
+  });
+
+  /* Toggle DRAFT <-> PUBLISHED */
+  async function toggleProjectStatus(id, cur){
+    const next = (cur==='PUBLISHED') ? 'DRAFT' : 'PUBLISHED';
+    try{
+      await api.put(PRJ_UPDATE(id), { status: next });
+      notify('Status yangilandi: ' + next);
+      loadProjects(prjPage);
+    }catch(e){
+      console.error(e);
+      alert('Status yangilanishida xato.');
+    }
+  }
+
+  /* DELETE */
+  async function deleteProject(id){
+    if(!confirm('O‘chirishni tasdiqlaysizmi?')) return;
+    try{
+      await api.delete(PRJ_DELETE(id));
+      notify('Project o‘chirildi.');
+      loadProjects(prjPage);
+    }catch(e){
+      console.error(e);
+      alert('O‘chirishda xato.');
+    }
+  }
+
+  /* ====== EDIT ====== */
+  const prjEditModal = new bootstrap.Modal(document.getElementById('prjEditModal'));
+
+  async function openEditProject(id, slug){
+    try{
+      // Admin’da GET /api/admin/projects/{id} yo‘q, public detallardan olamiz
+      let dto = {};
+      if (slug) {
+        dto = await api.get(PRJ_PUBLIC_ONE(slug)).then(r=>r.data);
+      }
+
+      document.getElementById('prjEditId').value          = id;
+      document.getElementById('prjEditTitle').value       = dto.title || '';
+      document.getElementById('prjEditStatus').value      = 'DRAFT'; // haqiqiy status listdan olinadi
+      document.getElementById('prjEditClient').value      = dto.clientName || '';
+      document.getElementById('prjEditLocation').value    = dto.location || '';
+      document.getElementById('prjEditServiceName').value = dto.service || '';
+      document.getElementById('prjEditDuration').value    = dto.duration || '';
+      document.getElementById('prjEditStart').value       = ''; // public DTO’da startDate yo‘q — qo‘lda kiritasiz
+      document.getElementById('prjEditEnd').value         = '';
+      document.getElementById('prjEditPrjStatus').value   = ''; // public DTO’da projectStatus yo‘q
+      document.getElementById('prjEditOverview').value    = dto.overview || '';
+      document.getElementById('prjEditStarted').value     = dto.howWeStarted || '';
+      document.getElementById('prjEditApproach').value    = dto.approach || '';
+      document.getElementById('prjEditConclusion').value  = dto.conclusion || '';
+
+      ['prjEditCover','prjEditGallery','prjEditApproachFile'].forEach(fid=>{
+        const f = document.getElementById(fid); if(f) f.value='';
+      });
+
+      prjEditModal.show();
+    }catch(e){
+      console.error(e);
+      alert('Project ma’lumotlarini olishda xato.');
+    }
+  }
+
+  /* Save edit (PUT /api/admin/projects/{id}) */
+  document.getElementById('prjEditSaveBtn').addEventListener('click', async ()=>{
+    const id    = +document.getElementById('prjEditId').value;
+    const title = (document.getElementById('prjEditTitle').value||'').trim();
+    if(!title) return alert('Title majburiy');
+
+    const patch = {
+      title,
+      status:        document.getElementById('prjEditStatus').value,
+      clientName:    emptyVal('prjEditClient'),
+      location:      emptyVal('prjEditLocation'),
+      service:       emptyVal('prjEditServiceName'),
+      duration:      emptyVal('prjEditDuration'),
+      startDate:     emptyVal('prjEditStart'),
+      endDate:       emptyVal('prjEditEnd'),
+      projectStatus: emptyVal('prjEditPrjStatus'),
+      overview:      emptyVal('prjEditOverview'),
+      howWeStarted:  emptyVal('prjEditStarted'),
+      approach:      emptyVal('prjEditApproach'),
+      conclusion:    emptyVal('prjEditConclusion')
+    };
+
+    // Rasmlar (agar biror fayl tanlansa — images maydoni yuboriladi, yo‘q bo‘lsa tegmaymiz)
+    const coverF    = document.getElementById('prjEditCover').files?.[0];
+    const galleryFs = document.getElementById('prjEditGallery').files;
+    const apprF     = document.getElementById('prjEditApproachFile').files?.[0];
+
+    try{
+      const images = [];
+      if (coverF) {
+        const idC = await uploadFile(coverF, 'projects');
+        if (idC) images.push({ mediaId: idC, slot: 'COVER', sortOrder: 0, altText:null, caption:null });
+      }
+      const galIds = await uploadMany(galleryFs, 'projects');
+      (galIds||[]).forEach(()=> {
+        const lastOrder = images.length ? (images[images.length-1].sortOrder||0) : 0;
+        images.push({ mediaId: galIds.shift(), slot: 'GALLERY', sortOrder: lastOrder+1, altText:null, caption:null });
+      });
+      if (apprF) {
+        const idA = await uploadFile(apprF, 'projects');
+        if (idA) images.push({ mediaId: idA, slot: 'APPROACH', sortOrder: 999, altText:null, caption:null });
+      }
+      if (images.length>0) patch.images = images;
+
+      await api.put(PRJ_UPDATE(id), patch);
+      notify('Project yangilandi.');
+      prjEditModal.hide();
+      loadProjects(prjPage);
+    }catch(e){
+      console.error(e);
+      alert('Update xato.');
+    }
+  });
+
+  /* ====================== CATEGORIES (ADMIN) ====================== */
+
+  /* Endpoints */
+  const CAT_LIST   = (page=0,size=12, sort='name,asc') => `/api/categories?page=${page}&size=${size}&sort=${encodeURIComponent(sort)}`;
+  const CAT_CREATE = `/api/admin/categories`;
+  const CAT_UPDATE = (id)=> `/api/admin/categories/${id}`;
+  const CAT_DELETE = (id)=> `/api/admin/categories/${id}`;
+
+  /* State */
+  let catPage = 0, catSize = 12, catTotalPages = 1;
+
+  /* UI refs */
+  const $frmCat   = document.getElementById('frmCat');
+  const $cLoadBtn = document.getElementById('cLoadBtn');
+  const $cHideBtn = document.getElementById('cHideBtn');
+  const $catWrap  = document.getElementById('catWrap');
+  const $catList  = document.getElementById('catList');
+
+
+  /* CREATE */
+  $frmCat?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const name = (document.getElementById('cName').value||'').trim();
+
+    if(!name) return alert('Name majburiy');
+    try{
+      const {data} = await api.post(CAT_CREATE, { name});
+      notify('Category yaratildi: #' + (data?.id ?? '—'));
+      document.getElementById('cName').value = '';
+      await loadCategories(catPage); // show after create
+    }catch(err){
+      console.error(err);
+      alert(err?.response?.data?.message || 'Category yaratishda xato (slug unique bo‘lishi kerak).');
+    }
+  });
+
+  /* LOAD / HIDE */
+  $cLoadBtn?.addEventListener('click', ()=> loadCategories());
+  $cHideBtn?.addEventListener('click', ()=>{
+    $catWrap.classList.add('d-none');
+    $cHideBtn.classList.add('d-none');
+    $cLoadBtn.classList.remove('d-none');
+  });
+
+  async function loadCategories(page=0){
+    try{
+      catPage = page;
+      const {data} = await api.get(CAT_LIST(catPage, catSize, 'name,asc'));
+      const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data)? data : []);
+      catTotalPages = (data?.totalPages ?? data?.page?.totalPages ?? 1);
+
+      $catList.innerHTML = '';
+      items.forEach(c=>{
+        $catList.insertAdjacentHTML('beforeend', `
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-start justify-content-between">
+                <div>
+                  <div class="small text-muted">${c.slug || ''}</div>
+                  <h6 class="fw-bold mb-2">${c.name || '—'}</h6>
+                </div>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-dark" data-action="edit" data-id="${c.id}" data-name="${c.name||''}">Edit</button>
+                  <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${c.id}">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+      });
+
+      if(items.length===0){
+        $catList.innerHTML = '<div class="text-muted">List bo‘sh.</div>';
+      }
+
+      // show after load
+      $catWrap.classList.remove('d-none');
+      $cHideBtn.classList.remove('d-none');
+      $cLoadBtn.classList.add('d-none');
+    }catch(e){
+      console.error(e);
+      alert('Categoriesni yuklashda xato.');
+    }
+  }
+
+  /* EDIT / DELETE (delegation) */
+  $catList?.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const id = +btn.dataset.id;
+
+    if(btn.dataset.action==='delete'){
+      if(!confirm('O‘chirishni tasdiqlaysizmi?')) return;
+      try{
+        await api.delete(CAT_DELETE(id));
+        notify('Category o‘chirildi.');
+        loadCategories(catPage);
+      }catch(err){
+        console.error(err);
+        alert('O‘chirishda xato.');
+      }
+    }
+
+    if(btn.dataset.action==='edit'){
+      const cur = btn.dataset.name || '';
+      const name = prompt('Yangi nom:', cur);
+      if(name==null) return;
+      try{
+        await api.put(CAT_UPDATE(id), { name });
+        notify('Category yangilandi.');
+        loadCategories(catPage);
+      }catch(err){
+        console.error(err);
+        alert('Yangilashda xato.');
+      }
+    }
+  });
+
+
+  /* ===== HOMEPAGE VIDEO (100% front-end) ===== */
+
+  // ========== Helpers ==========
+  function extractYouTubeId(url){
+    try{
+      const u = new URL((url||'').trim());
+      if (u.hostname.includes('youtu.be')) return u.pathname.split('/')[1] || '';
+      const v = u.searchParams.get('v'); if (v) return v;
+      const parts = u.pathname.split('/');
+      const i = parts.findIndex(p => p==='embed' || p==='shorts');
+      return (i!==-1 && parts[i+1]) ? parts[i+1] : '';
+    }catch{ return ''; }
+  }
+  function ytThumbUrl(id){ return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`; }
+  const log = (m)=> (window.notify ? notify(m) : console.log(m));
+
+  // ========== UI refs ==========
+  const $homeVideoUrl = document.getElementById('homeVideoUrl');
+  const $homePrevWrap = document.getElementById('homeVideoPrevWrap');
+  const $homeThumb    = document.getElementById('homeVideoThumb');
+  const $homeId       = document.getElementById('homeVideoId');
+  const $btnSave      = document.getElementById('btnSaveHomeVideo');
+  const $btnLoad      = document.getElementById('btnLoadHomeVideo');
+  const $btnClear     = document.getElementById('btnClearHomeVideo');
+  const $status       = document.getElementById('hpvStatus');
+
+  // ========== API endpoints ==========
+  const HP_GET_ADMIN = '/api/admin/homepage-video';
+  const HP_PUT_ADMIN = '/api/admin/homepage-video';
+
+  // ========== State ==========
+  let initialUrl = null;
+  let isLoading = false;
+  let isSaving  = false;
+
+  function isDirty(){ return ($homeVideoUrl.value||'') !== (initialUrl||''); }
+  function refreshSaveState(){
+    $btnSave.disabled = isLoading || isSaving || !isDirty();
+    $btnSave.textContent = isSaving ? 'Saving…' : 'Save';
+  }
+  function renderStatus(d){
+    if(! $status) return;
+    if(d?.embedId){
+      const when = d.updatedAt ? new Date(d.updatedAt).toLocaleString() : '';
+      $status.innerHTML = `Status: <span class="badge bg-success">Active</span> · Updated: ${when}`;
+    }else{
+      $status.innerHTML = `Status: <span class="badge bg-secondary">Not set</span>`;
+    }
+  }
+
+  // Live preview
+  $homeVideoUrl?.addEventListener('input', ()=>{
+    const id = extractYouTubeId($homeVideoUrl.value);
+    if(id){
+      $homeThumb.src = ytThumbUrl(id);
+      $homeId.textContent = id;
+      $homePrevWrap.classList.remove('d-none');
+    }else{
+      $homePrevWrap.classList.add('d-none');
+      $homeThumb.src = '';
+      $homeId.textContent = '—';
+    }
+    refreshSaveState();
+  });
+
+  // ===== LOAD (joriy qiymat) =====
+  $btnLoad?.addEventListener('click', loadHpv);
+  async function loadHpv(){
+    try{
+      isLoading = true; refreshSaveState();
+      const {data} = await api.get(HP_GET_ADMIN); // {url, embedId, updatedAt}
+      initialUrl = data?.url || '';
+      $homeVideoUrl.value = initialUrl;
+      $homeVideoUrl.dispatchEvent(new Event('input')); // preview refresh
+      renderStatus(data);
+      log('Loaded.');
+    }catch(e){
+      console.error(e);
+      alert('Yuklashda xato.');
+    }finally{
+      isLoading = false; refreshSaveState();
+    }
+  }
+
+  // ===== SAVE (text/plain body) =====
+  $btnSave?.addEventListener('click', async ()=>{
+    const raw = ($homeVideoUrl.value||'').trim();
+    if(raw && !extractYouTubeId(raw)) return alert('YouTube link noto‘g‘ri.');
+
+    try{
+      isSaving = true; refreshSaveState();
+      await api.put(HP_PUT_ADMIN, raw, { headers:{ 'Content-Type': 'text/plain' }});
+      initialUrl = raw;           // dirty reset
+      notify?.('Saved.');
+      await loadHpv();            // updatedAt/status yangilansin
+    }catch(e){
+      console.error(e);
+      alert(e?.response?.data?.error || e?.response?.data?.message || 'Saqlashda xato.');
+    }finally{
+      isSaving = false; refreshSaveState();
+    }
+  });
+
+  // ===== CLEAR (bo‘sh text/plain -> backend null qiladi) =====
+  $btnClear?.addEventListener('click', async ()=>{
+    if(!confirm('Videoni olib tashlaysizmi?')) return;
+    try{
+      isSaving = true; refreshSaveState();
+      await api.put(HP_PUT_ADMIN, '', { headers:{ 'Content-Type': 'text/plain' }});
+      initialUrl = '';
+      $homeVideoUrl.value = '';
+      $homeVideoUrl.dispatchEvent(new Event('input'));
+      notify?.('Removed.');
+      await loadHpv();
+    }catch(e){
+      console.error(e);
+      alert('Tozalashda xato.');
+    }finally{
+      isSaving = false; refreshSaveState();
+    }
+  });
+
+  // Init: sahifa ochilganda avtomatik yukla
+  document.addEventListener('DOMContentLoaded', loadHpv);
+
+
+
+  // === ADMIN MESSAGES MENU (fixed) ===
+  async function refreshUnreadBadge(){
+    try{
+      const res = await api.get('/api/admin/messages-unread-count'); // <-- api ishlatyapmiz
+      const count = res.data?.unread ?? 0;
+      const b = document.getElementById('badgeUnread');
+      if(!b) return;
+      if(count > 0){
+        b.textContent = count;
+        b.style.display = 'inline-block';
+      }else{
+        b.style.display = 'none';
+      }
+    }catch(e){
+      // 401/403 bo‘lsa interceptor handle qiladi, shu yerda jim turamiz
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    refreshUnreadBadge();
+    setInterval(refreshUnreadBadge, 15000);
+  });
+
+
+  /* ====================== INIT ====================== */
+  fillCategories();
+</script>
+
+
+</body>
+</html>

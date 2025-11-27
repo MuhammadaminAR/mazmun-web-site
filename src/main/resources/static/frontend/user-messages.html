@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <title>Admin — User Messages</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body{background:#f6f7fb;}
+    .app{max-width:1200px;margin:0 auto;padding:16px;}
+    .card-rounded{border-radius:16px;}
+
+    /* List items (LEFT) */
+    .msg-item{cursor:pointer;border-bottom:1px solid #eef0f4;padding:12px}
+    .msg-item.unread{background:#f7fbff}
+    .msg-snippet{color:#6b7280; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .msg-time{color:#9aa3af;font-size:.85rem}
+    .avatar{
+      width:36px;height:36px;border-radius:50%;
+      background:#e5e7eb;color:#374151;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+      margin-right:.75rem;
+    }
+
+    /* Heights / scrolling */
+    #listBox{height:70vh; overflow:auto;}
+    #detailBody{height:70vh; overflow:auto;} /* fixed, scrollable message body */
+
+    .contact-actions .btn{min-width:42px}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <div class="d-flex align-items-center mb-3">
+    <h4 class="mb-0">User Messages</h4>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary ms-3"
+            onclick="location.href='/admin'">
+      <i class="bi bi-speedometer2 me-1"></i> Admin
+    </button>
+    <div class="ms-auto small text-muted" id="who"></div>
+  </div>
+
+  <div class="row g-3">
+    <!-- LEFT: list -->
+    <div class="col-md-5">
+      <div class="card card-rounded shadow-sm">
+        <div class="card-header d-flex align-items-center">
+          <strong>Messages</strong>
+          <div class="ms-auto btn-group">
+            <button id="btnReload" class="btn btn-outline-secondary btn-sm" title="Reload"><i class="bi bi-arrow-clockwise"></i></button>
+            <button id="btnFilterUnread" class="btn btn-outline-primary btn-sm" title="Only unread">Only Unread</button>
+          </div>
+        </div>
+        <div id="listBox" class="list-group list-group-flush"></div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+          <div class="small text-muted" id="listInfo"></div>
+          <div class="d-flex gap-2">
+            <button id="btnPrev" class="btn btn-sm btn-outline-secondary">Prev</button>
+            <button id="btnNext" class="btn btn-sm btn-outline-secondary">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: detail -->
+    <div class="col-md-7">
+      <div class="card card-rounded shadow-sm">
+        <div class="card-header d-flex align-items-center">
+          <strong>Details</strong>
+          <div class="ms-auto">
+            <button id="btnMarkRead" class="btn btn-success btn-sm" disabled>
+              <i class="bi bi-check2-circle me-1"></i> Mark as Read
+            </button>
+          </div>
+        </div>
+
+        <div id="detailBody" class="card-body">
+          <div class="text-muted">Chap tomondan xabar tanlang.</div>
+        </div>
+
+        <div class="card-footer d-flex gap-2 justify-content-between">
+          <div class="contact-actions" id="contactBtns"></div>
+          <div id="copyBox" class="small">
+            <!-- JS bilan to‘ldiriladi: Number: +998 ... yoki Telegram: @username -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- toast -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast align-items-center text-bg-dark border-0" role="alert">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMsg">OK</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  /* ====================== ADMIN GATE (same as admin page) ====================== */
+  const token = localStorage.getItem('jwt');
+  if (!token) { location.href = '/admin-user/login'; }
+
+  function base64UrlDecode(str){ str=str.replace(/-/g,'+').replace(/_/g,'/'); const pad=str.length%4; if(pad) str+='='.repeat(4-pad); try{return atob(str);}catch{ return ''; } }
+  function safeJwtPayload(t){ try{ const p=t.split('.'); if(p.length!==3) return {}; const json=base64UrlDecode(p[1]); return JSON.parse(json||'{}'); }catch{ return {}; } }
+  function normalizeRoles(input){
+    if(!input) return [];
+    let arr=[];
+    if(Array.isArray(input)){
+      arr=input.flatMap(it=>{
+        if(typeof it==='string') return [it];
+        if(it && typeof it==='object') return [it.name,it.role,it.authority,it.code].filter(Boolean);
+        return [];
+      });
+    }else if(typeof input==='object'){ arr=Object.values(input).filter(v=>typeof v==='string'); }
+    return arr.filter(Boolean).map(r=>String(r).trim().toUpperCase());
+  }
+  function hasAdminRole(rolesArr){ const R=normalizeRoles(rolesArr); return R.includes('ADMIN')||R.includes('ROLE_ADMIN'); }
+
+  (async function preflightAdminGate(){
+    try{
+      const payload=safeJwtPayload(token);
+      const expMs=payload?.exp?payload.exp*1000:0;
+      if(!expMs || Date.now()>=expMs) throw new Error('Token expired');
+
+      const res=await fetch('/api/auth/me',{ headers:{Authorization:'Bearer '+token} });
+      if(!res.ok) throw new Error('ME failed '+res.status);
+      const me=await res.json();
+      if(!hasAdminRole(me?.roles)){
+        localStorage.removeItem('jwt'); location.href='/admin-user/login'; return;
+      }
+      const name = payload?.sub || payload?.username || '';
+      const rolesText = normalizeRoles(payload?.roles||payload?.authorities||[]).join(', ');
+      document.getElementById('who').textContent = name ? `${name} (${rolesText})` : '';
+    }catch(e){
+      localStorage.removeItem('jwt'); location.href='/admin-user/login';
+    }
+  })();
+
+  const api = axios.create({ baseURL:'/' });
+  api.interceptors.request.use(cfg=>{ cfg.headers=cfg.headers||{}; const t=localStorage.getItem('jwt'); if(t) cfg.headers.Authorization='Bearer '+t; return cfg; });
+  api.interceptors.response.use(
+          r=>r,
+          err=>{
+            const st=err?.response?.status;
+            if(st===401||st===403){ localStorage.removeItem('jwt');  location.href='/admin-user/login'; }
+            return Promise.reject(err);
+          }
+  );
+
+  const toast = new bootstrap.Toast(document.getElementById('toast'));
+  function notify(m){ document.getElementById('toastMsg').textContent=m; toast.show(); }
+
+  /* ====================== PAGE LOGIC ====================== */
+  let page = 0, size = 6, onlyUnread = false, selectedId = null, selectedMsg = null;
+
+  const listBox   = document.getElementById('listBox');
+  const detailBody= document.getElementById('detailBody');
+  const btnPrev   = document.getElementById('btnPrev');
+  const btnNext   = document.getElementById('btnNext');
+  const btnReload = document.getElementById('btnReload');
+  const btnFilterUnread = document.getElementById('btnFilterUnread');
+  const btnMarkRead = document.getElementById('btnMarkRead');
+  const copyBox   = document.getElementById('copyBox');
+  const listInfo  = document.getElementById('listInfo');
+  const contactBtns = document.getElementById('contactBtns');
+
+  function fmtDate(iso){
+    if(!iso) return '';
+    try{ const d=new Date(iso); return d.toLocaleString(); }catch(_){ return iso; }
+  }
+
+  function initials(full){
+    const parts=String(full||'').trim().split(/\s+/).slice(0,2);
+    return parts.map(p=>p[0]?.toUpperCase()||'').join('')||'U';
+  }
+
+  // Contact parsing (phone / telegram)
+  function parseContacts(raw){
+    raw = String(raw||'').trim();
+
+    const tg = [];
+    (raw.match(/@\w{5,32}/g)||[]).forEach(u=>{
+      const name = u.replace(/^@/, '');
+      if(!tg.includes(name)) tg.push(name);
+    });
+
+    const phones = [];
+    const tokens = raw.split(/[\s,;]+/).filter(Boolean);
+    tokens.forEach(t=>{
+      const clean = t.replace(/[^\d+()\- ]/g,'');
+      const digits = clean.replace(/\D/g,'');
+      if(digits.length>=9){
+        let e164;
+        if(clean.trim().startsWith('+')) e164 = '+'+digits;
+        else if(digits.length===12 && digits.startsWith('998')) e164 = '+'+digits;
+        else if(digits.length===9) e164 = '+998'+digits;
+        else e164 = digits;
+        if(!phones.includes(e164)) phones.push(e164);
+      }
+    });
+
+    return { phones, tg };
+  }
+
+  function escapeHtml(s){
+    return String(s ?? '')
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+  }
+
+  async function loadList(){
+    const url = `/api/admin/messages?page=${page}&size=${size}&onlyUnread=${onlyUnread}`;
+    const { data } = await api.get(url);
+    renderList(data);
+  }
+
+  function renderList(pg){
+    listBox.innerHTML = '';
+    listInfo.textContent = `Total: ${pg.totalElements}`;
+    pg.content.forEach(m=>{
+      // preview tayyorlaymiz: trim + 60ta belgi + ...
+      let preview = String(m.message || '').trim();
+      if (preview.length > 60) preview = preview.slice(0, 60) + '...';
+
+      const div = document.createElement('div');
+      div.className = 'msg-item list-group-item list-group-item-action ' + (m.read ? '' : 'unread');
+      div.innerHTML = `
+      <div class="d-flex align-items-start">
+        <div class="avatar">${escapeHtml(initials(m.fullName))}</div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold">${escapeHtml(m.fullName)}</div>
+          <div class="msg-snippet">${escapeHtml(preview)}</div>
+          <div class="msg-time">${fmtDate(m.createdAt)}</div>
+        </div>
+        ${m.read ? '' : '<span class="badge bg-primary ms-2">new</span>'}
+      </div>`;
+      div.addEventListener('click', ()=>selectMessage(m.id));
+      listBox.appendChild(div);
+    });
+    btnPrev.disabled = pg.first;
+    btnNext.disabled = pg.last;
+  }
+
+  async function selectMessage(id){
+    const { data } = await api.get(`/api/admin/messages/${id}`);
+    selectedId = id;
+    selectedMsg = data;
+    btnMarkRead.disabled = data.read;
+
+    const { phones, tg } = parseContacts(data.contact);
+    renderContacts(phones, tg);
+    renderCopyTarget(phones, tg);
+
+    detailBody.innerHTML = `
+      <div class="d-flex align-items-start mb-2">
+        <div class="avatar me-2">${escapeHtml(initials(data.fullName))}</div>
+        <div>
+          <div class="fw-bold">${escapeHtml(data.fullName)}</div>
+          <div class="text-muted small">${fmtDate(data.createdAt)}</div>
+        </div>
+      </div>
+      <hr/>
+      <div style="white-space:pre-wrap">${escapeHtml(data.message)}</div>
+    `;
+  }
+
+  function renderContacts(phones, tg){
+    contactBtns.innerHTML = '';
+    phones.forEach(p=>{
+      const a = document.createElement('a');
+      a.className = 'btn btn-outline-secondary btn-sm me-2';
+      a.href = `tel:${p}`;
+      a.title = `Call ${p}`;
+      a.innerHTML = `<i class="bi bi-telephone"></i>`;
+      contactBtns.appendChild(a);
+    });
+    tg.forEach(u=>{
+      const a = document.createElement('a');
+      a.className = 'btn btn-outline-primary btn-sm me-2';
+      a.href = `https://t.me/${encodeURIComponent(u)}`;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.title = `Open @${u}`;
+      a.innerHTML = `<i class="bi bi-telegram"></i>`;
+      contactBtns.appendChild(a);
+    });
+  }
+
+  // pager / controls
+  btnPrev.addEventListener('click', ()=>{ if(page>0){ page--; loadList(); }});
+  btnNext.addEventListener('click', ()=>{ page++; loadList(); });
+  btnReload.addEventListener('click', ()=>loadList());
+  btnFilterUnread.addEventListener('click', ()=>{
+    onlyUnread = !onlyUnread;
+    btnFilterUnread.classList.toggle('btn-primary', onlyUnread);
+    btnFilterUnread.classList.toggle('btn-outline-primary', !onlyUnread);
+    page = 0;
+    loadList();
+  });
+  btnMarkRead.addEventListener('click', async ()=>{
+    if(!selectedId) return;
+    await api.patch(`/api/admin/messages/${selectedId}/read`);
+    btnMarkRead.disabled = true;
+    loadList();
+    try{ if(window.refreshUnreadBadge) window.refreshUnreadBadge(); }catch(_){}
+  });
+
+
+  function formatPhoneDisplay(e164){
+    // Masalan: +998901234567 -> +998 90 123 45 67
+    const d = String(e164||'').replace(/[^\d]/g,'');
+    if (d.length === 12 && d.startsWith('998')) {
+      return `+998 ${d.slice(3,5)} ${d.slice(5,8)} ${d.slice(8,10)} ${d.slice(10,12)}`;
+    }
+    return e164; // boshqa holatlarda o‘zgartirmaymiz
+  }
+
+  function renderCopyTarget(phones, tg){
+    copyBox.innerHTML = '';  // tozalaymiz
+
+    // Ustunlik: avval telefon bo‘lsa — telefon, bo‘lmasa Telegram
+    let label = '', value = '', display = '';
+
+    if (phones.length > 0) {
+      label = 'Number:';
+      value = phones[0];
+      display = formatPhoneDisplay(value);
+    } else if (tg.length > 0) {
+      label = 'Telegram:';
+      value = '@' + tg[0];
+      display = value;
+    } else {
+      return; // hech narsa ko‘rsatmaymiz
+    }
+
+    // Link ko‘rinishida chiqaramiz va copy qilamiz
+    copyBox.innerHTML = `
+    <span class="text-muted me-1">${label}</span>
+    <a href="#" id="copyTarget" class="text-decoration-none">${escapeHtml(display)}</a>
+  `;
+    const a = document.getElementById('copyTarget');
+    if (a) {
+      a.addEventListener('click', async (ev)=>{
+        ev.preventDefault();
+        try{
+          await navigator.clipboard.writeText(value);
+          notify('Copied.');
+        }catch(_){
+          notify('Copy failed');
+        }
+      });
+    }
+  }
+
+
+
+  // init
+  loadList();
+</script>
+</body>
+</html>
