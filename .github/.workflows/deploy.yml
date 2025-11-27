@@ -2,7 +2,7 @@ name: CI/CD MazmunWEB
 
 on:
   push:
-    branches: [ "main" ]   # main ga push bo'lganda ishga tushadi
+    branches: [ "master" ]   # main ga push bo'lganda ishga tushadi
 
 jobs:
   build-and-deploy:
