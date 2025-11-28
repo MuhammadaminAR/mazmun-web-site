@@ -24,20 +24,20 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if(roleRepository.findAll().isEmpty()) {
-            Role role = new Role();
-            role.setRoleName(RoleName.ROLE_ADMIN);
-            roleRepository.save(role);
-            Role role2 = new Role();
-            role2.setRoleName(RoleName.ROLE_SUPER_ADMIN);
-            roleRepository.save(role2);
-        }
-        if (userRepository.findAll().isEmpty()) {
-            User user = new User();
-            user.setUsername("MazmunSuperAdmin");
-            user.setRoles(new ArrayList<>(List.of(roleRepository.findByRoleName(RoleName.ROLE_SUPER_ADMIN))));
-            user.setPassword(passwordEncoder.encode("mazmunedu#2025"));
-            userRepository.save(user);
-        }
+//        if(roleRepository.findAll().isEmpty()) {
+//            Role role = new Role();
+//            role.setRoleName(RoleName.ROLE_ADMIN);
+//            roleRepository.save(role);
+//            Role role2 = new Role();
+//            role2.setRoleName(RoleName.ROLE_SUPER_ADMIN);
+//            roleRepository.save(role2);
+//        }
+//        if (userRepository.findAll().isEmpty()) {
+//            User user = new User();
+//            user.setUsername("MazmunSuperAdmin");
+//            user.setRoles(new ArrayList<>(List.of(roleRepository.findByRoleName(RoleName.ROLE_SUPER_ADMIN))));
+//            user.setPassword(passwordEncoder.encode("mazmunedu#2025"));
+//            userRepository.save(user);
+//        }
     }
 }
