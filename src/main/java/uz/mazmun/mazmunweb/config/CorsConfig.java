@@ -17,8 +17,8 @@ public class CorsConfig {
 
         // PROD: aniq domen(lar)ni yozing
         c.setAllowedOrigins(List.of(
-                "https://mazmun.uz",
-                "https://app.mazmun.uz",
+                "https://mazmunedu.uz",
+                "https://app.mazmunedu.uz",
                 "http://localhost:8080"    // dev front
         ));
 
