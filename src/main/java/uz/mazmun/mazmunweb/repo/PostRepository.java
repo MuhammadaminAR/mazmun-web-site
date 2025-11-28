@@ -42,7 +42,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                                @Param("tag") String tag,
                                Pageable pageable);
 
-
+    Page<Post> findAllByDeletedFalse(Pageable pageable);
 
 
 }
