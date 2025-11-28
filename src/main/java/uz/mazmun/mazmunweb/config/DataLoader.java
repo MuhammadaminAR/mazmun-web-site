@@ -13,7 +13,7 @@ import uz.mazmun.mazmunweb.repo.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Component
 @RequiredArgsConstructor
 public class DataLoader implements CommandLineRunner {
 
