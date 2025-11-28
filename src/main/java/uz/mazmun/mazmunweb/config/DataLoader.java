@@ -14,9 +14,7 @@ import uz.mazmun.mazmunweb.repo.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor
-@Profile("!prod-init")
 public class DataLoader implements CommandLineRunner {
 
 
