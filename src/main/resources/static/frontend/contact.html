@@ -384,6 +384,23 @@
       align-items:center;justify-content:center;background:#eef4ff;color:#2b6bff;margin-right:10px;
     }
 
+    /* "Bizga murojaat qiling" – mobile’da 3 qatorda chiqishi uchun */
+    @media (max-width: 575.98px) {
+      #contactTitle .hero-rest-message,
+      #contactTitle .hero-accent-message {
+        display: block;      /* har biri alohida qatorda */
+      }
+    }
+
+    /* Katta ekranlarda esa yana bitta qatorda tursin desangiz: */
+    @media (min-width: 576px) {
+      #contactTitle .hero-rest-message,
+      #contactTitle .hero-accent-message {
+        display: inline;
+      }
+    }
+
+
     /* ===== FAQ ===== */
     .faq .q{
       display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -678,11 +695,10 @@
       <div class="row g-4">
         <div class="col-lg-6">
           <div class="small text-muted mb-2">[Murojaat]</div>
-          <h2 class="hero-line">
-            <span class="no-wrap">
-              <span class="hero-rest-message">Bizga </span>
-              <span class="hero-accent-message hero-inline">murojaat qiling</span>
-            </span>
+          <h2 id="contactTitle" class="hero-line">
+            <span class="hero-rest-message">Bizga</span>
+            <span class="hero-accent-message">murojaat</span>
+            <span class="hero-accent-message">qiling</span>
           </h2>
           <p class="lead" style="color:#4d5566">
             Savol, taklif yoki hamkorlik bo‘yicha yozing — odatda 1 ish kuni
