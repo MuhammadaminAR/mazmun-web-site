@@ -13,7 +13,11 @@ public class WebController {
     }
 
     @GetMapping("/home")
-    public String legacyHomeRedirect() {
+    public String legacyHomeRedirect1() {
+        return "redirect:/";
+    }
+    @GetMapping("/home/")
+    public String legacyHomeRedirect2() {
         return "redirect:/";
     }
     @GetMapping("/admin-user/login")
