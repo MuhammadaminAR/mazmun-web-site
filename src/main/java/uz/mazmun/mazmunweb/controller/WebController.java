@@ -7,11 +7,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class WebController {
 
-    @GetMapping({"/","/home"})
+    @GetMapping("/")
     public String home(){
         return "forward:/frontend/home-page.html";
     }
 
+    @GetMapping("/home")
+    public String legacyHomeRedirect() {
+        return "redirect:/";
+    }
     @GetMapping("/admin-user/login")
     public String login(){ return "forward:/frontend/login.html"; }
 
