@@ -1,0 +1,15 @@
+User-agent: *
+# Saytning asosiy sahifalari ochiq bo‘lsin
+Allow: /
+
+# Backend API va ichki texnik yo'llarni indeks qilmasin
+Disallow: /api/
+Disallow: /frontend/
+Disallow: /error/
+
+# (Agar keyin alohida admin paneling bo‘lsa, masalan /admin yoki /panel – shu yerga qo‘shasan:)
+# Disallow: /admin/
+# Disallow: /panel/
+
+# Sitemap manzili
+Sitemap: https://mazmunedu.uz/sitemap.xml

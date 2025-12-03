@@ -51,6 +51,12 @@ public class SecurityConfig {
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/files/**", "/uploads/**", "/favicon.ico").permitAll()
 
+                        .requestMatchers(
+                                "/sitemap.xml",
+                                "/robots.txt",
+                                "/google*.html"   // verification fayllar
+                        ).permitAll()
+
                         // FRONTEND HTML — to'g'ridan-to'g'ri ochishni bloklaymiz (faqat GET)
                         .requestMatchers(new RegexRequestMatcher("^/frontend/.+\\.html$", "GET")).denyAll()
 
