@@ -923,6 +923,40 @@
         });
     }
 
+    function renderInlineMd(s = '') {
+        // apostroflarni normallashtiramiz
+        s = normalizeApostrophes(s);
+
+        // HTML escape
+        s = esc(s);
+
+        // inline code
+        s = s.replace(/`([^`\n]+?)`/g, (_, x) =>
+            `<code>${String(x)
+                .replace(/&/g,'&amp;')
+                .replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;')}</code>`
+        );
+
+        // highlight  ==text==
+        s = s.replace(/==([^=\n][\s\S]*?)==/g, '<mark>$1</mark>');
+
+        // bold / italic
+        s = s
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+            .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+            .replace(/_([^_]+)_/g, '<em>$1</em>');
+
+        // oddiy url-larni ham link qilamiz
+        s = autoLinkOutsideTags(s);
+
+        // ichidagi yangi satrlar <br> ga aylanadi
+        s = s.replace(/\r/g, '').replace(/\n/g, '<br>');
+
+        return s;
+    }
+
     function renderRichText(raw=''){
         if(!raw) return '';
 
@@ -952,7 +986,7 @@
 
         /* 1.1) Markdown LINK-lar ([matn](url)) */
         const links = [];
-        raw = raw.replace(/\[([^\]\n]+?)\]\((https?:\/\/[^\s)]+)\)/g, (_, txt, url)=>{
+        raw = raw.replace(/\[([^\]\n]+?)\]\s*\((https?:\/\/[^\s)]+)\)/g, (_, txt, url)=>{
             const i = links.push({ txt, url }) - 1;
             return `\uE000LNK${i}\uE000`;
         });
@@ -987,7 +1021,8 @@
 
         /* 2b) Blockquote — NESTED qo‘llab-quvvatlash */
         const quotes = [];
-        raw = raw.replace(/(?:^\s*>\s?.+(?:\n|$))+?/gm, (block)=>{
+        // YANGI — lazy emas, GREEDY bo‘lsin
+        raw = raw.replace(/(?:^\s*>\s?.+(?:\n|$))+/gm, (block)=>{
             const lines = block.replace(/\n$/, '').split('\n');
             const qLines = lines.map(ln=>{
                 const m = ln.match(/^\s*(>+)\s?(.*)$/);
@@ -1106,7 +1141,10 @@
             const close= n=>{ for(let i=0;i<n;i++){ out += '</blockquote>'; level--; } };
             qLines.forEach(({level:lv, text})=>{
                 if (lv>level) open(lv-level); else if (lv<level) close(level-lv);
-                out += `<p>${esc(normalizeApostrophes(text)).replace(/\n/g,'<br>')}</p>`;
+                // OLD:
+                // out += `<p>${esc(normalizeApostrophes(text)).replace(/\n/g,'<br>')}</p>`;
+                // NEW:
+                out += `<p>${renderInlineMd(text)}</p>`;
             });
             if (level>0) close(level);
             return out;
