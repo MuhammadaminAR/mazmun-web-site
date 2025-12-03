@@ -13,7 +13,7 @@ public class WebController {
     }
 
     @GetMapping("/home")
-    public String legacyHomeRedirect1() {
+    public String legacyHomeRedirect() {
         return "redirect:/";
     }
     @GetMapping("/home/")
