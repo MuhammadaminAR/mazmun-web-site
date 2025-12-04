@@ -665,7 +665,7 @@
 <section class="pb-0">
     <div class="container">
         <div class="hero-media">
-            <img id="projectMainImage" src="/files/team.jpg" alt="Project">
+            <img id="projectMainImage" src="/files/team.webp" alt="Project">
         </div>
 
         <div class="info-grid mt-3">
@@ -709,10 +709,10 @@
 
             <div class="col-lg-5">
                 <div class="img-grid">
-                    <div class="img-tile"><img id="g1" src="/files/team.jpg" alt=""></div>
-                    <div class="img-tile"><img id="g2" src="/files/team.jpg" alt=""></div>
-                    <div class="img-tile"><img id="g3" src="/files/team.jpg" alt=""></div>
-                    <div class="img-tile"><img id="g4" src="/files/team.jpg" alt=""></div>
+                    <div class="img-tile"><img id="g1" src="/files/team.webp" alt=""></div>
+                    <div class="img-tile"><img id="g2" src="/files/team.webp" alt=""></div>
+                    <div class="img-tile"><img id="g3" src="/files/team.webp" alt=""></div>
+                    <div class="img-tile"><img id="g4" src="/files/team.webp" alt=""></div>
                 </div>
             </div>
         </div>
@@ -789,7 +789,7 @@
             </div>
             <div class="col-lg-6 p-4 p-md-5">
                 <div class="cta-media">
-                    <img src="/files/cta.jpg" alt="">
+                    <img src="/files/cta.webp" alt="">
                 </div>
             </div>
         </div>
@@ -871,7 +871,7 @@
 
     /* ======= R2 media URL helper (home-page dagi bilan aynan bir xil) ======= */
     function getMediaUrl(media) {
-        if (!media) return '/files/team.jpg';
+        if (!media) return '/files/team.webp';
         if (typeof media === 'string') {
             if (/^https?:\/\//i.test(media)) return media;   // absolute
             if (media.startsWith('/'))        return media;   // relative (/api/media/123/view)
@@ -885,7 +885,7 @@
         if (media?.id)       return `/api/media/${media.id}/view`;
         if (media?.photoId)  return `/api/media/${media.photoId}/view`;
         if (media?.mediaId)  return `/api/media/${media.mediaId}/view`;
-        return '/files/team.jpg';
+        return '/files/team.webp';
     }
 
     /* ======= NAVBAR / FOOTER linklar ======= */

@@ -811,7 +811,7 @@
 
   // URL > KEY > ID tartibida
   function getMediaUrl(media){
-    if(!media) return '/files/team.jpg';
+    if(!media) return '/files/team.webp';
 
     if(typeof media === 'string'){
       if(/^https?:\/\//i.test(media)) return media;
@@ -829,14 +829,14 @@
       if (media.photoId)  return `/api/media/${media.photoId}/view`;
       if (media.mediaId)  return `/api/media/${media.mediaId}/view`;
     }
-    return '/files/team.jpg';
+    return '/files/team.webp';
   }
 
   function safeSetImg(img, src){
     img.loading = 'lazy';
     img.referrerPolicy = 'no-referrer';
-    img.onerror = ()=>{ img.src = '/files/team.jpg'; };
-    img.src = src || '/files/team.jpg';
+    img.onerror = ()=>{ img.src = '/files/team.webp'; };
+    img.src = src || '/files/team.webp';
   }
 
   function getParam(n){ const u=new URL(location.href); return u.searchParams.get(n); }

@@ -1670,7 +1670,7 @@
   }
 
   function getMediaUrl(media) {
-    if (!media) return '/files/team.jpg';
+    if (!media) return '/files/team.webp';
 
     if (typeof media === 'string') {
       if (/^https?:\/\//i.test(media)) return media;   // absolute
@@ -1690,7 +1690,7 @@
       if (media.mediaId)  return `/api/media/${media.mediaId}/view`;
     }
 
-    return '/files/team.jpg';
+    return '/files/team.webp';
   }
 
   function preview(inputEl, imgElId){
@@ -1732,7 +1732,7 @@
       <div class="col-12 col-md-6 col-lg-4">
         <article class="card h-100">
           <img src="${imgSrc}" class="card-img-top" alt="" loading="lazy"
-               onerror="this.src='/files/team.jpg'">
+               onerror="this.src='/files/team.webp'">
           <div class="card-body">
             <div class="small text-muted">${x.publishedAt || x.createdAt || ''}</div>
             <h6 class="fw-bold">${title}</h6>
@@ -1835,7 +1835,7 @@
 
         $tulTbody.insertAdjacentHTML('beforeend', `
         <tr class="row-click" data-id="${it.id}">
-          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.webp'"></td>
           <td class="fw-semibold">${it.username || '—'}</td>
           <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>
           <td class="td-actions">
@@ -2278,7 +2278,7 @@
         const txt  = isPub? 'Draftga qaytarish':'Publish';
         $tmTbody.insertAdjacentHTML('beforeend', `
         <tr>
-          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.webp'"></td>
           <td class="fw-semibold">${m.fullName||'—'}</td>
           <td>${m.roleTitle||'—'}</td>
           <td>${isPub?'<span class="badge bg-success">PUBLISHED</span>':'<span class="badge bg-secondary">DRAFT</span>'}</td>
@@ -2475,7 +2475,7 @@
 
         $postTbody.insertAdjacentHTML('beforeend', `
         <tr class="row-click" data-id="${p.id}" data-slug="${p.slug || ''}">
-          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.webp'"></td>
           <td class="fw-semibold post-title-line">${p.title || '—'}</td>
           <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>
           <td class="small">${pub}</td>
@@ -2736,7 +2736,7 @@
 
         $svcTbody.insertAdjacentHTML('beforeend', `
         <tr class="row-click" data-id="${s.id}" data-slug="${s.slug||''}">
-          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.webp'"></td>
           <td class="fw-semibold svc-title">${s.title||'—'}</td>
           <td>${isPub?'<span class="badge bg-success">PUBLISHED</span>':'<span class="badge bg-secondary">DRAFT</span>'}</td>
           <td class="small">${pub}</td>
@@ -3484,12 +3484,12 @@
         const pub   = p.publishedAt ? new Date(p.publishedAt).toLocaleString() : '';
 
         // ✱ MUHIM: coverUrl dan foydalanamiz (getMediaUrl https/http yoki / bilan boshlangan yo'llarni tushunadi)
-        const img   = getMediaUrl(p.coverUrl) || '/files/team.jpg';
+        const img   = getMediaUrl(p.coverUrl) || '/files/team.webp';
         const client= p.client || p.clientName || '—';
 
         $prjTbody.insertAdjacentHTML('beforeend', `
         <tr class="row-click" data-id="${p.id}" data-slug="${p.slug||''}">
-          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.jpg'"></td>
+          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.webp'"></td>
           <td class="fw-semibold prj-title">${p.title || '—'}</td>
           <td class="small">${client}</td>
           <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>

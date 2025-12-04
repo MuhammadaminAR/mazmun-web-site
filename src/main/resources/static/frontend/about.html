@@ -281,7 +281,7 @@
         /* ===== HERO ===== */
         header.hero{ position:relative; min-height:80vh; display:grid; place-items:center; color:#fff; overflow:hidden; }
         header.hero::before{
-            content:""; position:absolute; inset:0; background:url('/files/team.jpg') center/cover no-repeat;
+            content:""; position:absolute; inset:0; background:url('/files/team.webp') center/cover no-repeat;
             filter:brightness(.72); transform:scale(1); animation:zoomInOut 16s ease-in-out infinite;
         }
         @keyframes zoomInOut{0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)}}
@@ -672,7 +672,7 @@
                         </span>
                     </a>
                 </div>
-                <img src="/files/statistics-discussion.jpg" alt="" class="about-photo">
+                <img src="/files/statistics-discussion.webp" alt="" class="about-photo">
             </div>
         </div>
     </div>
@@ -688,7 +688,7 @@
         </h2>
 
         <div class="position-relative mt-4">
-            <img id="strategicPic" src="/files/team.jpg" class="shadow-smooth" alt="">
+            <img id="strategicPic" src="/files/team.webp" class="shadow-smooth" alt="">
             <div class="card strategy-bubble shadow-smooth">
                 <div class="card-body">
                     <div class="icon-pill mb-2"><i class="bi bi-pin-angle-fill"></i></div>
@@ -724,7 +724,7 @@
                 <a class="btn btn-primary rounded-pill mt-2" id="btnMission">Maslahat olish <i class="bi bi-arrow-up-right ms-1"></i></a>
             </div>
             <div class="col-lg-6">
-                <img class="about-photo" src="/files/discussion-on-board.jpg" alt="">
+                <img class="about-photo" src="/files/discussion-on-board.webp" alt="">
             </div>
         </div>
     </div>
@@ -752,7 +752,7 @@
                 <a class="btn btn-primary rounded-pill mt-2" id="btnVision">Maslahat olish <i class="bi bi-arrow-up-right ms-1"></i></a>
             </div>
             <div class="col-lg-6 order-lg-1">
-                <img class="about-photo" src="/files/explain-something.jpg" alt="">
+                <img class="about-photo" src="/files/explain-something.webp" alt="">
             </div>
         </div>
     </div>
@@ -800,7 +800,7 @@
                     barqaror natijaga olib chiqish.
                 </p>
                 <div class="about-photo-wrap">
-                    <img src="/files/data-tables.jpg" class="about-photo" alt="team">
+                    <img src="/files/data-tables.webp" class="about-photo" alt="team">
                 </div>
             </div>
         </div>
@@ -895,7 +895,7 @@
             <div class="col-lg-6 p-4 p-md-5">
                 <div class="cta-media">
                     <img
-                            src="/files/cta.jpg"
+                            src="/files/cta.webp"
                             alt="Consultation"
                             class="img-fluid"
                     />
@@ -1054,7 +1054,7 @@
     <!-- ===== TEAM MEMBERS (public) ===== -->
     // Rasm URL resolver (R2 key / id / to‘g‘ri URL / relative hammasini qo‘llaydi)
     function tmGetMediaUrl(media){
-        if (!media) return '/files/team.jpg';
+        if (!media) return '/files/team.webp';
         if (typeof media === 'string'){
             if (/^https?:\/\//i.test(media)) return media;
             if (media.startsWith('/')) return media;
@@ -1066,9 +1066,9 @@
                 || (media.key && `/api/media/url?key=${encodeURIComponent(media.key)}`)
                 || (media.id && `/api/media/${media.id}/view`)
                 || (media.photoId && `/api/media/${media.photoId}/view`)
-                || '/files/team.jpg';
+                || '/files/team.webp';
         }
-        return '/files/team.jpg';
+        return '/files/team.webp';
     }
 
     // Social links (0–4 ta)
@@ -1114,7 +1114,7 @@
                 grid.insertAdjacentHTML('beforeend', `
           <div class="col-12 col-md-6 col-lg-4">
             <div class="team-card shadow-smooth">
-              <img src="${photo}" alt="${name}" loading="lazy" onerror="this.src='/files/team.jpg'">
+              <img src="${photo}" alt="${name}" loading="lazy" onerror="this.src='/files/team.webp'">
               <div class="team-overlay">
                 <div>
                   <b>${name}</b>

@@ -349,7 +349,7 @@
       /* use gradient overlay instead of filter to avoid blur */
       background:
               linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.55)),
-              url('/files/team.jpg');
+              url('/files/team.webp');
       background-size: cover;
       background-position: var(--focal-x) var(--focal-y);
       background-repeat: no-repeat;
@@ -965,7 +965,7 @@
           <!-- Fallback rasm (link bo'lmaganda ko'rinadi) -->
           <img class="img-fluid rounded-3 shadow"
                style="margin-top:1.25rem; margin-left:0.75rem;"
-               src="/files/discussion.png"
+               src="/files/discussion.webp"
                alt="Hamkor jamoa">
         </div>
       </div>
@@ -1098,7 +1098,7 @@
       </div>
 
       <div class="col-lg-5">
-        <img src="/files/team-meeting.jpg"
+        <img src="/files/team-meeting.webp"
              class="img-fluid rounded-22 shadow-smooth" alt="">
       </div>
     </div>
@@ -1113,7 +1113,7 @@
       <!-- Left: Tall image with overlay CTA -->
       <div class="col-lg-5">
         <figure class="partner-visual shadow-smooth rounded-22">
-          <img src="/files/handshake.png" alt="Mazmun hamkorlik vizuali">
+          <img src="/files/handshake.webp" alt="Mazmun hamkorlik vizuali">
           <figcaption class="partner-overlay">
             <p class="partner-kicker h3 fw-bold mb-3">Birga nimalarga <br> erishamiz?</p>
             <a id="btnBoglanishMid"
@@ -1367,7 +1367,7 @@
       <div class="col-lg-6 order-lg-1 order-2">
         <div class="position-relative">
           <img class="img-fluid rounded-22 shadow-smooth w-100"
-               src="/files/appointment.jpg"
+               src="/files/appointment.webp"
                alt="Consultation">
           <!-- floating badge -->
           <div class="appointment-badge shadow-sm">
@@ -1505,7 +1505,7 @@
       <div class="col-lg-6 p-4 p-md-5">
         <div class="cta-media">
           <img
-                  src="/files/cta.jpg"
+                  src="/files/cta.webp"
                   alt="Consultation"
                   class="img-fluid"
           />
@@ -1700,7 +1700,7 @@
 
   // ======= Media URL helper (URL > RELATIVE > KEY > ID > OBJECT FIELDS) =======
   function getMediaUrl(media) {
-    if (!media) return '/files/team.jpg';
+    if (!media) return '/files/team.webp';
 
     // String: absolute URL, relative URL, or R2 key
     if (typeof media === 'string') {
@@ -1723,7 +1723,7 @@
       if (media.mediaId)  return `/api/media/${media.mediaId}/view`;
     }
 
-    return '/files/team.jpg';
+    return '/files/team.webp';
   }
 
   // ======= LINK HANDLERS =======
@@ -1907,7 +1907,7 @@
         const desc = node.querySelector('.proj-desc');
         const link = node.querySelector('.proj-link');
 
-        img.src = p.coverUrl || '/files/team.jpg';
+        img.src = p.coverUrl || '/files/team.webp';
         chip.textContent = p.title || '—';
         ttl.textContent  = p.title || '—';
 
@@ -1990,7 +1990,7 @@
         const imgSrc = getMediaUrl(p.coverUrl || p.cover || p.media || p.imageKey || p.coverKey || p.photo);
         img.loading = 'lazy';
         img.referrerPolicy = 'no-referrer';
-        img.onerror = ()=>{ img.src = '/files/team.jpg'; };
+        img.onerror = ()=>{ img.src = '/files/team.webp'; };
         img.src = imgSrc;
 
         // 🗓 sana (time-ago)
