@@ -832,6 +832,96 @@
       margin-left: 0.05em;      /* juda kichik bo'shliq */
     }
 
+    /* ===== HOME – MOBILE FINE TUNING ===== */
+
+    /* 0) KPI kartalaridagi + va % belgilarini ixcham qilish (barcha ekranlar) */
+    .stat-card small{
+      all: unset;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.65em;      /* raqamdan kichikroq */
+      line-height: 1;
+      color: inherit;
+      margin-left: 0.08em;
+    }
+
+    /* 1) Faqat mobil (≤576px) uchun */
+    @media (max-width: 575.98px){
+
+      /* 1.0 .no-wrap ni o‘chirib, matnga satr bo‘lib tushishga ruxsat beramiz */
+      .no-wrap{
+        white-space: normal;
+      }
+
+      /* 1.1 KPI bo‘limi (95% mijozlar...) sarlavha va matn */
+      section.section[style*="background:#f6f8fb"] .container-narrow .hero-title{
+        font-size: clamp(22px, 7vw, 28px);
+        line-height: 1.3;
+      }
+
+      section.section[style*="background:#f6f8fb"] .container-narrow h5{
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-top: .75rem;
+      }
+
+      /* KPI kartkalarini biroz ixcham qilish */
+      section.section[style*="background:#f6f8fb"] .row.g-3 .card.rounded-18{
+        padding: .75rem .9rem;
+      }
+      section.section[style*="background:#f6f8fb"] .row.g-3 .card .fs-3{
+        font-size: 1.6rem !important;
+        margin-bottom: .35rem !important;
+      }
+      section.section[style*="background:#f6f8fb"] .row.g-3 .stat-card{
+        justify-content: flex-start;
+      }
+      section.section[style*="background:#f6f8fb"] .row.g-3 .small.text-muted{
+        margin-top: .35rem;
+      }
+
+      /* 1.2 “Tizimli ravishda maktabingizni rivojlantiramiz” – button pastda, o‘ngda */
+      #tizim .d-flex.align-items-center.mb-3{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      #tizim .d-flex.align-items-center.mb-3 .btn.ms-auto{
+        margin-left: 0 !important;
+        align-self: flex-end;   /* pastda, o‘ng chekka */
+      }
+
+      /* 1.3 “Bizning loyihalar – natijalar o‘z so‘zini aytadi” – heading + Ko‘proq */
+      section.section[style*="background:#f6f8fb"]
+      .container:not(.container-narrow) .d-flex.align-items-center.mb-3{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      section.section[style*="background:#f6f8fb"]
+      .container:not(.container-narrow) .d-flex.align-items-center.mb-3 .btn{
+        margin-left: 0 !important;
+        align-self: flex-end;   /* Ko‘proq – pastda, o‘ng tomonda */
+      }
+
+      /* 1.4 “Yangiliklar va maqolalar” – 1 ustun, Ko‘proq pastda o‘ngda */
+      section.section[style*="background:#f8f9fb"] .d-grid.align-items-center.mb-4{
+        grid-template-columns: 1fr !important; /* inline style’ni bosish uchun */
+        row-gap: 10px;
+        justify-items: stretch;
+      }
+      section.section[style*="background:#f8f9fb"] .d-grid.align-items-center.mb-4 h5{
+        text-align: left;
+        justify-self: flex-start;
+      }
+      section.section[style*="background:#f8f9fb"] .d-grid.align-items-center.mb-4 a.btn{
+        justify-self: flex-end; /* pastda, o‘ng chekka */
+      }
+    }
+
+
+
+
   </style>
 
 </head>
