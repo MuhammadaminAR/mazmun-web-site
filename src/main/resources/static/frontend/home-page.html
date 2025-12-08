@@ -837,7 +837,7 @@
       font-size: 1.25em !important;            /* raqamdan ozgina kichik, lekin aniq ko‘rinadi */
       line-height: 1;
       color: inherit;
-      margin-left: -1em;
+      margin-left: 0.03em;
     }
 
     /* 1) Faqat telefon (≤576px) uchun sozlamalar */
@@ -940,6 +940,44 @@
       line-height: 1;
       color: inherit;
       margin-left: 0.08em;
+    }
+    /* ===== KPI – final tuning for number + plus ===== */
+
+    /* Kartkaning ichidagi raqam va + */
+    #kpiRow .stat-card{
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;              /* hamma ekranda – markazda */
+      gap: 0;
+      font-size: clamp(32px, 6vw, 56px);
+      line-height: 1;
+    }
+
+    /* Raqam */
+    #kpiRow .stat-card .counter{
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-weight: 750;
+      font-size: 1em;                       /* bazaviy o‘lcham */
+      letter-spacing: -0.01em;
+      margin-right: 0;                      /* oldingi minuslarni bekor qiladi */
+    }
+
+    /* + yoki % belgisi */
+    #kpiRow .stat-card small{
+      all: unset;                           /* eski global small’ni tozalash */
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.6em;                     /* raqamdan biroz kichik */
+      line-height: 1;
+      color: inherit;
+      margin-left: 0.12em;                  /* raqam va + orasidagi masofa */
+    }
+
+    /* Mobile’da ham markazda turishi uchun (oldingi flex-start’ni bosib ketadi) */
+    @media (max-width: 575.98px){
+      section[style*="background:#f6f8fb"] #kpiRow .stat-card{
+        justify-content: center !important;
+      }
     }
 
 

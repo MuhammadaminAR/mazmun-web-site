@@ -482,13 +482,16 @@
       /* 1) BIRINCHI HERO: "Maktablaringiz uchun tizimli konsalting xizmatlari" */
       .hero-top .hero-line{
         padding: 0 16px;
-        text-align: left;
+        text-align: center;
       }
 
       .hero-top .hero-rest,
       .hero-top .hero-accent{
         font-size: clamp(26px, 8vw, 34px);
         line-height: 1.15;
+      }
+      .hero-top .hero-img{
+        margin-top: 1.5rem;            /* kerak bo'lsa 1.5rem qilib ko'ring */
       }
 
       /* 2) "Mazmun taklif qiladigan xizmatlar" sarlavhasi */
@@ -521,6 +524,28 @@
       .section .text-center .hero-line .hero-accent{
         font-size: clamp(22px, 6.5vw, 26px);
         line-height: 1.15;
+      }
+
+      /* FAQ sarlavha – biroz kichikroq va chapga yaqin */
+      .faq-title{
+        text-align: center;
+        margin-bottom: 0.75rem;
+      }
+      .faq-title .hero-rest-message,
+      .faq-title .hero-accent-message{
+        font-size: clamp(35px, 6.5vw, 26px);
+        line-height: 1.15;
+      }
+
+      /* FAQ ichidagi kartani kichraytirish */
+      .faq-card{
+        padding: 1.25rem 1.35rem;
+      }
+      .faq-card .fw-semibold{
+        font-size: .95rem;
+      }
+      .faq-card .small{
+        font-size: .85rem;
       }
     }
 
@@ -691,7 +716,7 @@
   <div class="container">
     <div class="row g-4">
       <div class="col-lg-4">
-        <h2 class="hero-line">
+        <h2 class="hero-line faq-title">
           <span class="hero-rest-message">Ko‘p beriladigan</span>
           <span class="hero-accent-message">savollar</span>
         </h2>
