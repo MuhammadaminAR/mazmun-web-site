@@ -99,16 +99,6 @@ public class AdminController {
         return Map.of("id", p.getId(), "slug", p.getSlug());
     }
 
-//    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-//    @PutMapping("/posts/{id}")
-//    public Map<String,Object> updatePost(@PathVariable Integer id, @RequestBody PostUpdateDTO dto){
-//        var p = postService.update(id, dto);
-//        return Map.of("id", p.getId(), "slug", p.getSlug(), "status", p.getStatus());
-//    }
-//
-//    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-//    @DeleteMapping("/posts/{id}")
-//    public void deletePost(@PathVariable Integer id){ postService.delete(id); }
 
     // Projects
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")

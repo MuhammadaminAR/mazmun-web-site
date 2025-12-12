@@ -2189,11 +2189,17 @@
       return JSON.parse(atob(b64)) || {};
     }catch{ return {}; }
   }
+
   function extractRoles(p){
     let r = p.roles || p.authorities || p.scope || [];
-    if (typeof r === 'string') r = r.split(/\s+/);
+
+    if (typeof r === 'string') {
+      r = r.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+    }
+
     return Array.isArray(r) ? r.map(String) : [];
   }
+
 
   (async function showAdminCTA(){
     const token = localStorage.getItem('jwt');
