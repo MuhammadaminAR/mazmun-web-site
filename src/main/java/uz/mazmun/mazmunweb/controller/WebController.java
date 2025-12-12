@@ -45,7 +45,7 @@ public class WebController {
     public String privacy(){ return "forward:/frontend/privacy.html"; }
 
     @GetMapping("/post")
-    public String post(){ return "forward:/frontend/post.html"; }
+    public String post(){ return "redirect:/posts"; } // templates/post.html
 
     @GetMapping("/posts")
     public String posts(){ return "forward:/frontend/posts.html"; }
