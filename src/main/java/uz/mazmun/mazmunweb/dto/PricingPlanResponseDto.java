@@ -21,6 +21,8 @@ public class PricingPlanResponseDto {
     private boolean popular;
     private boolean custom;
     private boolean active;
+    private BigDecimal compareAtPriceAmount;
+
 
     private List<PlanFeatureAvailabilityDto> features;
 }

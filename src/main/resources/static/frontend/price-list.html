@@ -363,6 +363,27 @@
       color:#6b7280;
       margin-left:.25rem;
     }
+
+    .pricing-price .price-unit{
+      font-size:.9rem;
+      font-weight:500;
+      color:#6b7280;
+      margin-left:.25rem;
+    }
+    .pricing-price .price-old{
+      font-size:1rem;
+      font-weight:600;
+      text-decoration:line-through;
+      opacity:.6;
+      margin-right:.35rem;
+    }
+    .pricing-price .price-new{
+      font-size:1.6rem;
+      font-weight:800;
+      letter-spacing:-0.02em;
+      margin-right:.25rem;
+    }
+
     .pricing-list{
       list-style:none;
       padding:0;
@@ -612,6 +633,19 @@
       font-size:.8rem;
       color:#6b7280;
     }
+
+    .table-pricing .plan-price .price-old{
+      text-decoration:line-through;
+      opacity:.6;
+      margin-right:.25rem;
+    }
+    .table-pricing .plan-price .price-new{
+      font-weight:700;
+    }
+    .table-pricing .plan-price .price-unit{
+      margin-left:.15rem;
+    }
+
     .table-responsive{
       border-radius:18px;
       border:1px solid #e5e7eb;
@@ -987,17 +1021,41 @@
 
   /* ============ PRICE CARDS (PLANS + KONSTRUKTOR CARD) ============ */
 
-  function formatPlanPrice(plan){
+  function formatPlanPrice(plan) {
+    // Custom plan
     if (plan.custom) {
-      return plan.priceUnit || 'Kelishuv asosida';
+      return escapeHtml(plan.priceUnit || 'Kelishuv asosida');
     }
+
+    // No price
     if (plan.priceAmount == null) {
       return 'Kelishuv asosida';
     }
-    const amount = Number(plan.priceAmount).toLocaleString('en-US');
-    const unit   = plan.priceUnit ? ` <span>${escapeHtml(plan.priceUnit)}</span>` : '';
-    return amount + unit;
+
+    const amount = Number(plan.priceAmount);
+    const oldAmt = plan.compareAtPriceAmount != null ? Number(plan.compareAtPriceAmount) : null;
+
+    const unitTxt  = plan.priceUnit ? escapeHtml(plan.priceUnit) : '';
+    const unitHtml = unitTxt ? ` <span class="price-unit">${unitTxt}</span>` : '';
+
+    const hasDiscount = oldAmt != null && !Number.isNaN(oldAmt) && oldAmt > amount;
+
+    const newFmt = Number.isNaN(amount) ? String(plan.priceAmount) : amount.toLocaleString('en-US');
+
+    // No discount
+    if (!hasDiscount) {
+      return `<span class="price-new">${newFmt}</span>${unitHtml}`;
+    }
+
+    const oldFmt = oldAmt.toLocaleString('en-US');
+
+    // Discounted
+    return `
+    <span class="price-old">${oldFmt}</span>
+    <span class="price-new">${newFmt}</span>${unitHtml}
+  `;
   }
+
 
   function renderCards(plans, features, matrix){
     const cardsContainer = document.getElementById('pricingCards');

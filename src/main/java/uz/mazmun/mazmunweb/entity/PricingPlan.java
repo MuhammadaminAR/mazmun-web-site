@@ -59,6 +59,11 @@ public class PricingPlan {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PricingPlanFeature> featureMappings;
 
+    // PricingPlan.java
+    @Column(precision = 12, scale = 2)
+    private BigDecimal compareAtPriceAmount; // eski narx (ixtiyoriy, null bo‘lishi mumkin)
+
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

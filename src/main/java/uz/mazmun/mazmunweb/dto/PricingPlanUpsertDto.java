@@ -20,6 +20,8 @@ public class PricingPlanUpsertDto {
     private Boolean popular;
     private Boolean custom;
     private Boolean active;
+    private BigDecimal compareAtPriceAmount;
+
 
     private List<PlanFeatureAvailabilityDto> features;
 }

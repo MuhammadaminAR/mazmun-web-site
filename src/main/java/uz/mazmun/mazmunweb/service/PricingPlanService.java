@@ -90,6 +90,8 @@ public class PricingPlanService {
         plan.setPopular(dto.getPopular());
         plan.setCustom(dto.getCustom());
         plan.setActive(dto.getActive());
+        plan.setCompareAtPriceAmount(dto.getCompareAtPriceAmount());
+
     }
 
     private void syncPlanFeatures(PricingPlan plan, List<PlanFeatureAvailabilityDto> featureDtos) {
@@ -152,6 +154,8 @@ public class PricingPlanService {
         dto.setPopular(plan.isPopular());
         dto.setCustom(plan.isCustom());
         dto.setActive(plan.isActive());
+        dto.setCompareAtPriceAmount(plan.getCompareAtPriceAmount());
+
         try {
 
             List<PricingPlanFeature> mappings = mappingRepository.findByPlanId(plan.getId());

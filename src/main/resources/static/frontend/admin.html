@@ -1132,6 +1132,10 @@
               <input id="ppPriceAmount" type="number" step="0.01" class="form-control"
                      placeholder="2000000">
             </div>
+            <div class="col-md-6">
+              <label class="form-label">Eski narx (compare-at)</label>
+              <input id="ppCompareAtPriceAmount" type="number" step="0.01" class="form-control" placeholder="masalan: 2000">
+            </div>
             <div class="col-md-4">
               <label class="form-label">Narx birlik (priceUnit)</label>
               <input id="ppPriceUnit" class="form-control"
@@ -1351,6 +1355,10 @@
                 <div class="col-md-4">
                   <label class="form-label">Narx (priceAmount)</label>
                   <input id="ppEditPriceAmount" type="number" step="0.01" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Eski narx (compare-at)</label>
+                  <input id="ppEditCompareAtPriceAmount" type="number" step="0.01" class="form-control">
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Narx birlik (priceUnit)</label>
@@ -3017,6 +3025,7 @@
         code: v('Code') || null,
         tagline: v('Tagline') || null,
         priceAmount: num('PriceAmount'),
+        compareAtPriceAmount: num('CompareAtPriceAmount'),
         priceUnit: v('PriceUnit') || null,
         displayOrder: num('DisplayOrder'),
         popular: !!document.getElementById(prefix + 'Popular')?.checked,
@@ -3185,68 +3194,84 @@
 
     /* ====================== PLANS CRUD ====================== */
 
-    async function ppLoad() {
-      try {
-        const { data } = await api.get(PP_BASE);
-        const items = Array.isArray(data) ? data : [];
-        pricingPlans = items;
+  async function ppLoad() {
+    try {
+      const { data } = await api.get(PP_BASE);
+      const items = Array.isArray(data) ? data : [];
+      pricingPlans = items;
 
-        $ppTableWrap.classList.remove('d-none');
-        $ppTbody.innerHTML = '';
+      $ppTableWrap.classList.remove('d-none');
+      $ppTbody.innerHTML = '';
 
-        items
-                .slice()
-                .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))
-                .forEach(p => {
-                  const tr = document.createElement('tr');
+      items
+              .slice()
+              .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))
+              .forEach(p => {
+                const tr = document.createElement('tr');
 
-                  const price = p.custom
-                          ? (p.priceUnit || 'Kelishuv asosida')
-                          : (p.priceAmount != null
-                                  ? `${p.priceAmount} ${(p.priceUnit || '')}`
-                                  : '—');
+                // --- PRICE (with discount support) ---
+                const unit = (p.priceUnit || '').trim();
 
-                  const flags = [
-                    p.popular ? '<span class="badge bg-success me-1">Popular</span>' : '',
-                    p.custom ? '<span class="badge bg-dark me-1">Custom</span>' : '',
-                    p.active
-                            ? '<span class="badge bg-primary">Active</span>'
-                            : '<span class="badge bg-secondary">Inactive</span>'
-                  ].join(' ');
+                const hasDiscount =
+                        p.compareAtPriceAmount != null &&
+                        p.priceAmount != null &&
+                        Number(p.compareAtPriceAmount) > Number(p.priceAmount);
 
-                  tr.innerHTML = `
-            <td>
-              <div class="fw-semibold">${p.name || '—'}</div>
-              <div class="small text-muted">${p.tagline || ''}</div>
-            </td>
-            <td>${price}</td>
-            <td>${p.displayOrder ?? ''}</td>
-            <td>${flags}</td>
-            <td class="td-actions">
-              <button type="button" class="btn btn-sm btn-outline-primary me-1 pp-edit" data-id="${p.id}">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button type="button" class="btn btn-sm btn-outline-danger pp-del" data-id="${p.id}">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          `;
-                  $ppTbody.appendChild(tr);
-                });
+                const price = p.custom
+                        ? (p.priceUnit || 'Kelishuv asosida')
+                        : (p.priceAmount != null
+                                        ? (hasDiscount
+                                                        ? `<span class="text-muted text-decoration-line-through me-1">
+                       ${p.compareAtPriceAmount} ${unit}
+                     </span>
+                     <span class="fw-semibold">${p.priceAmount} ${unit}</span>`
+                                                        : `${p.priceAmount} ${unit}`.trim()
+                                        )
+                                        : '—'
+                        );
 
-        // handlers
-        $ppTbody.querySelectorAll('.pp-edit').forEach(btn => {
-          btn.onclick = () => ppOpenEdit(btn.dataset.id);
-        });
-        $ppTbody.querySelectorAll('.pp-del').forEach(btn => {
-          btn.onclick = () => ppDelete(btn.dataset.id);
-        });
-      } catch (e) {
-        console.error('[PP] load error', e);
-      }
+                const flags = [
+                  p.popular ? '<span class="badge bg-success me-1">Popular</span>' : '',
+                  p.custom ? '<span class="badge bg-dark me-1">Custom</span>' : '',
+                  p.active
+                          ? '<span class="badge bg-primary">Active</span>'
+                          : '<span class="badge bg-secondary">Inactive</span>'
+                ].join(' ');
+
+                tr.innerHTML = `
+          <td>
+            <div class="fw-semibold">${p.name || '—'}</div>
+            <div class="small text-muted">${p.tagline || ''}</div>
+          </td>
+          <td>${price}</td>
+          <td>${p.displayOrder ?? ''}</td>
+          <td>${flags}</td>
+          <td class="td-actions">
+            <button type="button" class="btn btn-sm btn-outline-primary me-1 pp-edit" data-id="${p.id}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger pp-del" data-id="${p.id}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+
+                $ppTbody.appendChild(tr);
+              });
+
+      // handlers
+      $ppTbody.querySelectorAll('.pp-edit').forEach(btn => {
+        btn.onclick = () => ppOpenEdit(btn.dataset.id);
+      });
+      $ppTbody.querySelectorAll('.pp-del').forEach(btn => {
+        btn.onclick = () => ppDelete(btn.dataset.id);
+      });
+    } catch (e) {
+      console.error('[PP] load error', e);
     }
+  }
 
-    $ppReloadBtn?.addEventListener('click', async () => {
+  $ppReloadBtn?.addEventListener('click', async () => {
       await pfLoadAll(); // selectlar uchun
       await ppLoad();
     });
@@ -3296,6 +3321,8 @@
       document.getElementById('ppEditTagline').value = plan.tagline || '';
       document.getElementById('ppEditPriceAmount').value =
               plan.priceAmount != null ? plan.priceAmount : '';
+      document.getElementById('ppEditCompareAtPriceAmount').value =
+              plan.compareAtPriceAmount != null ? plan.compareAtPriceAmount : '';
       document.getElementById('ppEditPriceUnit').value = plan.priceUnit || '';
       document.getElementById('ppEditDisplayOrder').value =
               plan.displayOrder != null ? plan.displayOrder : 0;
