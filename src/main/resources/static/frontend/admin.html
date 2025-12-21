@@ -1168,16 +1168,43 @@
             <!-- PLAN FEATURES (rows) -->
             <div class="col-12">
               <div class="d-flex align-items-center justify-content-between mb-1">
-                <label class="form-label m-0">Plan feature’lari</label>
-                <button id="ppAddFeatureRow" class="btn btn-sm btn-outline-secondary" type="button">
-                  <i class="bi bi-plus-lg me-1"></i> Feature qo‘shish
-                </button>
+                <div>
+                  <label class="form-label m-0">Plan feature’lari</label>
+                  <div id="ppFeatureSummary" class="small text-muted mt-1">
+                    —
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button
+                          id="ppToggleFeatures"
+                          class="btn btn-sm btn-outline-primary"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#ppFeaturesCollapse"
+                          aria-expanded="false"
+                          aria-controls="ppFeaturesCollapse"
+                  >
+                    <i class="bi bi-sliders me-1"></i> Featurelarni sozlash
+                  </button>
+
+                  <!-- endi kerakmas, xohlasangiz butunlay olib tashlang yoki disabled qiling -->
+                  <button id="ppAddFeatureRow" class="btn btn-sm btn-outline-secondary d-none" type="button">
+                    <i class="bi bi-plus-lg me-1"></i> Feature qo‘shish
+                  </button>
+                </div>
               </div>
-              <div id="ppFeatureRows" class="row g-2"></div>
-              <div class="form-text">
-                Har bir qator: Feature tanlash + Availability (INCLUDED / OPTIONAL / NOT_INCLUDED) + izoh (ixtiyoriy).
+
+              <div id="ppFeaturesCollapse" class="collapse">
+                <div class="border rounded-3 p-2 mt-2" style="max-height:420px; overflow:auto;">
+                  <div id="ppFeatureRows" class="row g-2"></div>
+                </div>
+                <div class="form-text mt-1">
+                  Har bir qator: Feature + Availability + izoh (ixtiyoriy).
+                </div>
               </div>
             </div>
+
 
             <div class="col-12 d-flex gap-2">
               <button class="btn btn-primary" type="submit">
@@ -3032,6 +3059,8 @@
     // Create formda "Feature qo‘shish" kerak emas (hammasi default keladi)
     const addBtn = document.getElementById('ppAddFeatureRow');
     if (addBtn) addBtn.disabled = true;
+    // ✅ Summary'ni yangilab qo'yamiz
+    ppUpdateFeatureSummary('ppFeatureRows', 'ppFeatureSummary');
   }
 
 
@@ -3086,12 +3115,41 @@
     }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    if (!document.getElementById('ppCreateForm') || !document.getElementById('ppFeatureRows')) return;
+    // Pricing bo'limi yo'q sahifalarda ishlamasin
+    const createForm = document.getElementById('ppCreateForm');
+    const rowsEl = document.getElementById('ppFeatureRows');
+    if (!createForm || !rowsEl) return;
+
+    // ✅ live summary update (availability o'zgarsa)
+    rowsEl.addEventListener('change', (e) => {
+      if (e.target?.classList?.contains('pp-feature-availability')) {
+        ppUpdateFeatureSummary('ppFeatureRows', 'ppFeatureSummary');
+      }
+    });
 
     await pfLoadAll();
     await ppEnsureCreateDefaultRows(true);
-    await ppLoad();
+    // await ppLoad();
+
+    // ✅ planlar jadvali default yopiq tursin
+    document.getElementById('ppTableWrap')?.classList.add('d-none');
   });
+  function ppUpdateFeatureSummary(containerId, summaryElId) {
+    const container = document.getElementById(containerId);
+    const el = document.getElementById(summaryElId);
+    if (!container || !el) return;
+
+    const avs = Array.from(container.querySelectorAll('.pp-feature-availability'))
+            .map(s => (s.value || '').trim());
+
+    const included = avs.filter(v => v === 'INCLUDED').length;
+    const optional = avs.filter(v => v === 'OPTIONAL').length;
+    const notInc   = avs.filter(v => v === 'NOT_INCLUDED').length;
+
+    el.textContent = `INCLUDED: ${included} · OPTIONAL: ${optional} · NOT_INCLUDED: ${notInc}`;
+  }
+
+
 
 
   /* ====================== FEATURES CRUD ====================== */
@@ -3326,13 +3384,32 @@
     }
   }
 
-  $ppReloadBtn?.addEventListener('click', async () => {
-    await pfLoadAll(); // selectlar uchun
-    await ppEnsureCreateDefaultRows(false);
-    await ppLoad();
-    });
+  let ppTableVisible = false;
 
-    /* CREATE PLAN */
+  $ppReloadBtn?.addEventListener('click', async () => {
+    // 2-marta bosilganda: yopish
+    if (ppTableVisible) {
+      $ppTableWrap?.classList.add('d-none');
+      $ppTbody.innerHTML = '';
+      ppTableVisible = false;
+
+      $ppReloadBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Planlarni ko‘rsatish';
+      return;
+    }
+
+    // 1-marta bosilganda: ko'rsatish (load)
+    try {
+      await ppLoad(); // ppLoad o'zi ppTableWrap'ni remove d-none qiladi
+      ppTableVisible = true;
+
+      $ppReloadBtn.innerHTML = '<i class="bi bi-x-lg me-1"></i> Planlarni yopish';
+    } catch (e) {
+      console.error('ppLoad error', e);
+    }
+  });
+
+
+  /* CREATE PLAN */
     document.getElementById('ppCreateForm')?.addEventListener('submit', async e => {
       e.preventDefault();
       const payload = ppCollectPlanPayload('pp', 'ppFeatureRows');
