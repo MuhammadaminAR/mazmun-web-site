@@ -2946,51 +2946,96 @@
       ).join('');
     }
 
-    /** Plan feature row (create & edit) — faqat feature + availability + note */
-    function ppCreateFeatureRow(containerId, rowData) {
-      const wrap = document.createElement('div');
-      wrap.className = 'col-12';
+  /** Plan feature row (create & edit) — feature + availability + note */
+  function ppCreateFeatureRow(containerId, rowData, opts = {}) {
+    const wrap = document.createElement('div');
+    wrap.className = 'col-12';
 
-      const selectedFeatureId = rowData?.featureId ? String(rowData.featureId) : '';
-      const selectedAvail     = rowData?.availability || '';
-      const noteVal           = rowData?.note || '';
+    const selectedFeatureId = rowData?.featureId ? String(rowData.featureId) : '';
+    const selectedAvail     = rowData?.availability || '';
+    const noteVal           = rowData?.note || '';
 
-      wrap.innerHTML = `
-      <div class="row g-2 align-items-center pp-feature-row">
-        <div class="col-md-5">
-          <select class="form-select pp-feature-select">
-            ${ppRenderFeatureOptions()}
-          </select>
-        </div>
-        <div class="col-md-3">
-          <select class="form-select pp-feature-availability">
-            <option value="">— Availability tanlang —</option>
-            ${renderAvailabilityOptions(selectedAvail)}
-          </select>
-        </div>
-        <div class="col-md-3">
-          <input class="form-control pp-feature-note"
-                 placeholder="Izoh (ixtiyoriy)">
-        </div>
-        <div class="col-md-1 d-flex justify-content-end">
-          <button type="button" class="btn btn-sm btn-outline-danger pp-feature-remove">
-            <i class="bi bi-x"></i>
-          </button>
-        </div>
+    const lockFeature = opts.lockFeature === true;       // create: true
+    const removable   = opts.removable !== false;        // create: false, edit: true (default)
+    const hideRemove  = !removable ? 'd-none' : '';
+
+    wrap.innerHTML = `
+    <div class="row g-2 align-items-center pp-feature-row">
+      <div class="col-md-5">
+        <select class="form-select pp-feature-select" ${lockFeature ? 'disabled' : ''}>
+          ${ppRenderFeatureOptions()}
+        </select>
       </div>
-    `;
+      <div class="col-md-3">
+        <select class="form-select pp-feature-availability">
+          ${renderAvailabilityOptions(selectedAvail)}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <input class="form-control pp-feature-note" placeholder="Izoh (ixtiyoriy)">
+      </div>
+      <div class="col-md-1 d-flex justify-content-end">
+        <button type="button" class="btn btn-sm btn-outline-danger pp-feature-remove ${hideRemove}">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+    </div>
+  `;
 
-      const sel       = wrap.querySelector('.pp-feature-select');
-      const noteInput = wrap.querySelector('.pp-feature-note');
+    const sel       = wrap.querySelector('.pp-feature-select');
+    const noteInput = wrap.querySelector('.pp-feature-note');
 
-      if (selectedFeatureId) sel.value = selectedFeatureId;
-      if (noteVal)           noteInput.value = noteVal;
+    if (selectedFeatureId) sel.value = selectedFeatureId;
+    if (noteVal)           noteInput.value = noteVal;
 
+    if (removable) {
       wrap.querySelector('.pp-feature-remove').onclick = () => wrap.remove();
-      document.getElementById(containerId).appendChild(wrap);
     }
 
-    function ppCollectFeatures(containerId) {
+    document.getElementById(containerId).appendChild(wrap);
+  }
+  function ppSortedFeatures() {
+    return pricingFeatures
+            .slice()
+            .sort((a, b) => {
+              const ca = (a.categoryName || '').toLowerCase();
+              const cb = (b.categoryName || '').toLowerCase();
+              if (ca !== cb) return ca.localeCompare(cb);
+              const oa = a.displayOrder ?? 999;
+              const ob = b.displayOrder ?? 999;
+              if (oa !== ob) return oa - ob;
+              const ta = (a.title || a.code || '').toLowerCase();
+              const tb = (b.title || b.code || '').toLowerCase();
+              return ta.localeCompare(tb);
+            });
+  }
+
+  async function ppEnsureCreateDefaultRows(force = false) {
+    if (!pricingFeatures.length) await pfLoadAll(); // features list bo‘lmasa yuklab olamiz
+
+    const container = document.getElementById('ppFeatureRows');
+    if (!container) return;
+
+    const existingRows = container.querySelectorAll('.pp-feature-row').length;
+    if (!force && existingRows > 0) return; // user already started editing, wipe qilmaymiz
+
+    container.innerHTML = '';
+
+    ppSortedFeatures().forEach(f => {
+      ppCreateFeatureRow(
+              'ppFeatureRows',
+              { featureId: f.id, availability: 'NOT_INCLUDED', note: null },
+              { lockFeature: true, removable: false }
+      );
+    });
+
+    // Create formda "Feature qo‘shish" kerak emas (hammasi default keladi)
+    const addBtn = document.getElementById('ppAddFeatureRow');
+    if (addBtn) addBtn.disabled = true;
+  }
+
+
+  function ppCollectFeatures(containerId) {
       const container = document.getElementById(containerId);
       if (!container) return [];
       const rows = Array.from(container.querySelectorAll('.pp-feature-row'));
@@ -3040,7 +3085,16 @@
       return payload;
     }
 
-    /* ====================== FEATURES CRUD ====================== */
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (!document.getElementById('ppCreateForm') || !document.getElementById('ppFeatureRows')) return;
+
+    await pfLoadAll();
+    await ppEnsureCreateDefaultRows(true);
+    await ppLoad();
+  });
+
+
+  /* ====================== FEATURES CRUD ====================== */
 
     async function pfLoadAll() {
       try {
@@ -3194,6 +3248,7 @@
 
     /* ====================== PLANS CRUD ====================== */
 
+
   async function ppLoad() {
     try {
       const { data } = await api.get(PP_BASE);
@@ -3272,8 +3327,9 @@
   }
 
   $ppReloadBtn?.addEventListener('click', async () => {
-      await pfLoadAll(); // selectlar uchun
-      await ppLoad();
+    await pfLoadAll(); // selectlar uchun
+    await ppEnsureCreateDefaultRows(false);
+    await ppLoad();
     });
 
     /* CREATE PLAN */
@@ -3291,6 +3347,8 @@
         document.getElementById('ppDisplayOrder').value = '0';
         document.getElementById('ppFeatureRows').innerHTML = '';
         document.getElementById('ppActive').checked = true;
+
+        await ppEnsureCreateDefaultRows(true);
         await ppLoad();
       } catch (e2) {
         console.error('[PP] create error', e2);
