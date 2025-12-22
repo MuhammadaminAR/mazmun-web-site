@@ -3154,56 +3154,76 @@
 
   /* ====================== FEATURES CRUD ====================== */
 
-    async function pfLoadAll() {
-      try {
-        const { data } = await api.get(PF_BASE);
-        const items = Array.isArray(data) ? data : [];
-        pricingFeatures = items;
+  async function pfLoadAll(showTable = true) {
+    try {
+      const { data } = await api.get(PF_BASE);
+      const items = Array.isArray(data) ? data : [];
+      pricingFeatures = items;
 
+      if (showTable) {
         $pfTableWrap.classList.remove('d-none');
-        $pfTbody.innerHTML = '';
-
-        items.forEach(f => {
-          const tr = document.createElement('tr');
-          const priceText = (f.basePriceAmount != null)
-                  ? `${f.basePriceAmount} ${(f.basePriceUnit || '')}`.trim()
-                  : '';
-
-          tr.innerHTML = `
-          <td>
-            <div class="fw-semibold">${f.title || ''}</div>
-          </td>
-          <td><code class="small-mono">${f.code || ''}</code></td>
-          <td>${f.categoryName || ''}</td>
-          <td>${typeof f.displayOrder === 'number' ? f.displayOrder : ''}</td>
-          <td>${priceText}</td>
-          <td class="td-actions" style="width:160px">
-            <button type="button" class="btn btn-sm btn-outline-primary me-1 pf-edit" data-id="${f.id}">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger pf-del" data-id="${f.id}">
-              <i class="bi bi-trash"></i>
-            </button>
-          </td>
-        `;
-          $pfTbody.appendChild(tr);
-        });
-
-        // handlers
-        $pfTbody.querySelectorAll('.pf-edit').forEach(btn => {
-          btn.onclick = () => pfOpenEdit(btn.dataset.id);
-        });
-        $pfTbody.querySelectorAll('.pf-del').forEach(btn => {
-          btn.onclick = () => pfDelete(btn.dataset.id);
-        });
-      } catch (e) {
-        console.error('[PF] load error', e);
       }
+
+      $pfTbody.innerHTML = '';
+
+      items.forEach(f => {
+        const tr = document.createElement('tr');
+        const priceText = (f.basePriceAmount != null)
+                ? `${f.basePriceAmount} ${(f.basePriceUnit || '')}`.trim()
+                : '';
+
+        tr.innerHTML = `
+        <td><div class="fw-semibold">${f.title || ''}</div></td>
+        <td><code class="small-mono">${f.code || ''}</code></td>
+        <td>${f.categoryName || ''}</td>
+        <td>${typeof f.displayOrder === 'number' ? f.displayOrder : ''}</td>
+        <td>${priceText}</td>
+        <td class="td-actions" style="width:160px">
+          <button type="button" class="btn btn-sm btn-outline-primary me-1 pf-edit" data-id="${f.id}">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-danger pf-del" data-id="${f.id}">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      `;
+        $pfTbody.appendChild(tr);
+      });
+
+      $pfTbody.querySelectorAll('.pf-edit').forEach(btn => {
+        btn.onclick = () => pfOpenEdit(btn.dataset.id);
+      });
+      $pfTbody.querySelectorAll('.pf-del').forEach(btn => {
+        btn.onclick = () => pfDelete(btn.dataset.id);
+      });
+
+    } catch (e) {
+      console.error('[PF] load error', e);
+    }
+  }
+
+
+  let pfTableVisible = false;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    $pfTableWrap?.classList.add('d-none'); // default yopiq
+    pfTableVisible = false;               // holat ham mos bo'lsin
+  });
+
+  $pfReloadBtn?.addEventListener('click', async () => {
+    if (pfTableVisible) {
+      $pfTableWrap?.classList.add('d-none');
+      $pfTbody.innerHTML = '';
+      pfTableVisible = false;
+      return;
     }
 
-    $pfReloadBtn?.addEventListener('click', pfLoadAll);
+    await pfLoadAll(true); // show qilib yuklaydi
+    pfTableVisible = true;
+  });
 
-    /* CREATE FEATURE */
+
+  /* CREATE FEATURE */
     document.getElementById('pfCreateForm')?.addEventListener('submit', async e => {
       e.preventDefault();
       const code         = (document.getElementById('pfCode').value || '').trim();
