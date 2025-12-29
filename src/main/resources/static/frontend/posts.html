@@ -755,6 +755,7 @@
     img.referrerPolicy = 'no-referrer';
     img.src = src;
   }
+
   // TZ qo‘shmaydigan normalizator
   function normalizeIso(s){
     if (s == null) return null;
@@ -794,7 +795,7 @@
       if (isNaN(d)) return "";
 
       let diffSec = Math.floor((Date.now() - d.getTime())/1000);
-      diffSec = Math.max(0, diffSec); // manfiy bo‘lsa 0 ga qirqamiz
+      diffSec = Math.max(0, diffSec);
 
       if (diffSec < 60)    return "Hozir";
       if (diffSec < 3600)  return `${Math.floor(diffSec/60)} minut oldin`;
@@ -809,7 +810,6 @@
     }
   }
 
-
   function excerpt(htmlOrText,len=200){ const txt=(htmlOrText||'').replace(/<[^>]+>/g,'').trim(); return txt.length>len?txt.slice(0,len).trim()+'…':txt; }
   function qs(name){ return new URL(location.href).searchParams.get(name); }
   function setQuery(params){
@@ -821,6 +821,16 @@
     history.pushState(null,'',url.toString());
   }
 
+  // slug/id normalizatsiya
+  function normalizeKey(v){
+    if (v == null) return '';
+    try { return decodeURIComponent(String(v)).trim(); }
+    catch { return String(v).trim(); }
+  }
+  function postKey(p){
+    return normalizeKey(p?.slug ?? p?.id);
+  }
+
   /* ===== STATE ===== */
   const state = {
     page: parseInt(qs('page')||'0',10),
@@ -829,6 +839,9 @@
     category: qs('category')||'',
     sort: qs('sort')||'publishedAt,desc'
   };
+
+  // HERO post key (takrorlanishni oldini olish uchun)
+  let latestHeroKey = '';
 
   /* ===== UI REFS ===== */
   const $frm   = document.getElementById('postFilterFrm');
@@ -868,6 +881,10 @@
       const {data} = await axios.get(API_LATEST);
       const it = Array.isArray(data?.content)?data.content[0]:(Array.isArray(data)?data[0]:data);
       if(!it){ document.getElementById('latestSkeleton')?.classList.add('d-none'); return; }
+
+      // HERO postni eslab qolamiz (gridda chiqarib tashlash uchun)
+      latestHeroKey = postKey(it);
+
       setBgWithFallback(document.getElementById('latestThumb'), getMediaUrl(it.coverUrl||it.cover||it.photo||it.media||it.imageKey||it.mediaId||it.photoId));
       document.getElementById('latestDate').textContent    = formatDate(it.publishedAtIso ||it.publishedAt||it.createdAt);
       document.getElementById('latestTitle').textContent   = it.title||'Untitled';
@@ -875,7 +892,9 @@
       document.getElementById('latestRead').href           = `/post?slug=${encodeURIComponent(it.slug||it.id)}`;
       document.getElementById('latestSkeleton')?.classList.add('d-none');
       document.getElementById('latestWrap')?.classList.remove('d-none');
-    }catch{ document.getElementById('latestSkeleton')?.classList.add('d-none'); }
+    }catch{
+      document.getElementById('latestSkeleton')?.classList.add('d-none');
+    }
   })();
 
   /* ===== GRID + PAGINATION ===== */
@@ -888,18 +907,36 @@
     grid.innerHTML = '<div class="col-12 text-center text-muted py-3">Yuklanmoqda…</div>';
     pager.innerHTML = ''; empty.classList.add('d-none');
 
+    // HERO bilan bir xil postni gridda ko‘rsatmaymiz.
+    // Faqat: 1-sahifa (page=0), default sort, filtr yo‘q paytda.
+    const shouldExcludeHero =
+            !!latestHeroKey &&
+            state.page === 0 &&
+            !state.q &&
+            !state.category &&
+            String(state.sort || '').toLowerCase() === 'publishedat,desc';
+
     const params = new URLSearchParams();
     params.set('page', state.page);
-    params.set('size', state.size);
+
+    // page=0 bo‘lsa 1 ta ko‘proq olib kelamiz, keyin hero postni olib tashlab yana 9 ta ko‘rsatamiz
+    params.set('size', shouldExcludeHero ? (state.size + 1) : state.size);
+
     params.set('sort', state.sort);
     if(state.q) params.set('q', state.q);
     if(state.category) params.set('category', state.category);
 
     const {data} = await axios.get(`${API_BASE}?${params.toString()}`);
-    const items = Array.isArray(data?.content)?data.content:(Array.isArray(data)?data:[]);
+
+    let items = Array.isArray(data?.content)?data.content:(Array.isArray(data)?data:[]);
     const total = data?.totalElements ?? items.length;
     const totalPages = data?.totalPages ?? 1;
     const number = data?.number ?? state.page;
+
+    // HERO postni griddan chiqarib tashlaymiz
+    if (shouldExcludeHero) {
+      items = items.filter(p => postKey(p) !== latestHeroKey).slice(0, state.size);
+    }
 
     grid.innerHTML = '';
     items.forEach(p=>{
@@ -911,7 +948,7 @@
           <article class="post-card h-100 d-flex flex-column">
             <a href="${href}" class="d-block"><div id="${cardId}" class="post-thumb"></div></a>
             <div class="p-3 d-flex flex-column flex-grow-1">
-              <div class="post-meta mb-1">${formatDate(p.publishedAtIso ||p.publishedAt||p.createdAt)} <!-- ·  ${(p.category||p.categories?.[0]||p.tags?.[0]||'Yangilik')} --> </div>
+              <div class="post-meta mb-1">${formatDate(p.publishedAtIso ||p.publishedAt||p.createdAt)} </div>
               <h5 class="fw-semibold line-clamp-2">${p.title||'Untitled'}</h5>
               <p class="text-muted small mt-1 line-clamp-3">${excerpt(p.summary||p.content||p.description,130)}</p>
               <div class="mt-auto">
@@ -927,7 +964,6 @@
     countInfo.textContent = `${(total||0).toLocaleString('ru-RU')} ta maqola`;
     if(items.length===0) empty.classList.remove('d-none'); else renderPager(pager, number, totalPages);
 
-    // filter chiplarni yangilab turamiz
     renderActiveChips();
   }
 
@@ -1002,6 +1038,7 @@
     loadGrid();
   })();
 </script>
+
 
 </body>
 </html>

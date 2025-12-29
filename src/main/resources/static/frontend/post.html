@@ -1448,11 +1448,28 @@
   (async function loadRecent(){
     const row = document.getElementById('newsRow');
     const tpl = document.getElementById('newsCardTpl');
+
+    // Hozir ochilgan post (URLdagi slug) — shuni pastdagi listdan chiqarib tashlaymiz
+    const normalizeKey = (v) => {
+      if (v == null) return '';
+      try { return decodeURIComponent(String(v)).trim(); }
+      catch { return String(v).trim(); }
+    };
+
+    const currentKey = normalizeKey(getParam('slug') || 'default-post');
+
     try{
       const {data} = await axios.get(API_RECENT_POSTS);
       const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
 
-      items.slice(0,4).forEach(p=>{
+      // current postni ro‘yxatdan olib tashlash (slug yoki id bo‘yicha)
+      const filtered = items.filter(p => {
+        const key = normalizeKey(p?.slug ?? p?.id);
+        return key && key !== currentKey;
+      });
+
+      // 4 ta kartochka chiqaramiz
+      filtered.slice(0, 4).forEach(p => {
         const node  = tpl.content.cloneNode(true);
         const img   = node.querySelector('img.thumb');
         const title = node.querySelector('.news-title');
@@ -1466,28 +1483,32 @@
         desc.textContent  = p.summary || '';
 
         const dateEl = node.querySelector('.date');
-        // Sana manbaini to‘liq qamrab olish
         const publishedAtRaw =
                 p.publishedAt ?? p.publishedAtIso ?? p.createdAt ?? p.createdAtIso ?? p.date ?? p.dateIso;
 
-        // Faqat sana/“time ago” ni ko‘rsatamiz (kategoriyasiz)
         if (dateEl) dateEl.textContent = timeAgoLabel(publishedAtRaw) || '';
 
-        // Agar templateda .cat bo‘lsa — olib tashlaymiz
+        // agar templateda .cat bo‘lsa — olib tashlaymiz
         const catEl = node.querySelector('.cat');
         if (catEl) catEl.remove();
 
-        btn.href = `/post?slug=${encodeURIComponent(p.slug || p.id)}`;
+        // link
+        const keyForLink = p.slug || p.id;
+        btn.href = `/post?slug=${encodeURIComponent(keyForLink)}`;
+
         row.appendChild(node);
       });
 
+      // hech narsa qolmasa
       if(!row.querySelector('.col-12'))
         row.insertAdjacentHTML('beforeend','<div class="text-muted">Yangiliklar hali yo‘q.</div>');
+
     }catch(e){
       console.error('[POST] recent posts error:', e);
       row.insertAdjacentHTML('beforeend','<div class="text-danger">Yangiliklarni yuklashda xatolik.</div>');
     }
   })();
+
 
   // Footer link
   document.getElementById('btnSubscribeTG')?.addEventListener('click', e => {
