@@ -876,11 +876,11 @@
   }
 
   /* ===== LATEST (hero) ===== */
-  (async function loadLatest(){
+  async function loadLatest(){
     try{
       const {data} = await axios.get(API_LATEST);
       const it = Array.isArray(data?.content)?data.content[0]:(Array.isArray(data)?data[0]:data);
-      if(!it){ document.getElementById('latestSkeleton')?.classList.add('d-none'); return; }
+      if(!it){ document.getElementById('latestSkeleton')?.classList.add('d-none'); return ''; }
 
       // HERO postni eslab qolamiz (gridda chiqarib tashlash uchun)
       latestHeroKey = postKey(it);
@@ -892,10 +892,14 @@
       document.getElementById('latestRead').href           = `/post?slug=${encodeURIComponent(it.slug||it.id)}`;
       document.getElementById('latestSkeleton')?.classList.add('d-none');
       document.getElementById('latestWrap')?.classList.remove('d-none');
+
+      return latestHeroKey;
     }catch{
       document.getElementById('latestSkeleton')?.classList.add('d-none');
+      return '';
     }
-  })();
+  }
+
 
   /* ===== GRID + PAGINATION ===== */
   async function loadGrid(){
@@ -1035,8 +1039,18 @@
   (async function init(){
     await loadCategories();
     if(state.category && $cat) $cat.value = state.category;
-    loadGrid();
+
+    await loadLatest();   // MUHIM: avval hero key chiqsin
+    await loadGrid();     // keyin grid hero'ni exclude qilsin
   })();
+
+  window.addEventListener('pageshow', async (e) => {
+    if (e.persisted) {
+      await loadLatest();
+      await loadGrid();
+    }
+  });
+
 </script>
 </body>
 </html>
