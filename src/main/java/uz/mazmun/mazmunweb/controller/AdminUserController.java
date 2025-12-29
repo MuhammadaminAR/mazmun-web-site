@@ -44,6 +44,7 @@ public class AdminUserController {
         u.setFullName(dto.getFullName());
         u.setEmail(dto.getEmail());
 //        u.setEnabled(true);
+//
 
         Role adminRole = roles.findByRoleName(RoleName.ROLE_ADMIN);
         System.out.println("role: "+adminRole.toString());
