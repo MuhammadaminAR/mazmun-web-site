@@ -530,7 +530,7 @@
       <!-- ==================== POSTS ==================== -->
       <section id="posts" class="mb-4">
         <div class="d-flex align-items-center mb-2">
-          <h4 class="section-title m-0">Create Post</h4>
+          <h4 class="section-title m-0">Post yaratish</h4>
           <div class="ms-auto small help">/api/admin/posts</div>
         </div>
 
@@ -572,16 +572,16 @@
             <div class="col-md-6">
               <label class="form-label">Publish now? <span class="text-danger" aria-hidden="true">*</span></label>
               <select id="postPublish" class="form-select" required>
-                <option value="no" selected>No (Draft)</option>
-                <option value="yes">Yes (Publish)</option>
+                <option value="DRAFT" selected>Draft</option>
+                <option value="PUBLISHED">Publish</option>
               </select>
             </div>
 
             <div class="col-12 d-flex gap-2">
               <button id="postCreateBtn" class="btn btn-primary" type="submit">
                 <i class="bi bi-plus-lg me-1"></i>Create post
-                <button id="postLoadBtn" class="btn btn-outline-secondary" type="button">Load posts</button>
-                <button id="postHideBtn" class="btn btn-outline-secondary d-none" type="button">Hide</button>
+                <button id="postLoadBtn" class="btn btn-outline-secondary" type="button">Postlar ro'yxati</button>
+                <button id="postHideBtn" class="btn btn-outline-secondary d-none" type="button">Yashirish</button>
               </button>
             </div>
           </form>
@@ -604,8 +604,8 @@
             </div>
 
             <div class="d-flex align-items-center gap-2 mt-2" id="postPager">
-              <button class="btn btn-sm btn-outline-secondary" id="postPrev">Prev</button>
-              <button class="btn btn-sm btn-outline-secondary" id="postNext">Next</button>
+              <button class="btn btn-sm btn-outline-secondary" id="postPrev">Oldingi</button>
+              <button class="btn btn-sm btn-outline-secondary" id="postNext">Keyingi</button>
               <span class="small ms-2" id="postPageInfo"></span>
             </div>
           </div>
@@ -617,7 +617,7 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Edit post</h5>
+              <h5 class="modal-title">Postlarni tahrirlash</h5>
               <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -2467,8 +2467,10 @@
         content: document.getElementById('postContent').value || null,
         categoryIds: catId ? [catId] : [],
         coverMediaId: coverId || null,
-        hashTag: emptyVal('pHash')
+        hashTag: emptyVal('pHash'),
+        status: document.getElementById('postPublish').value
       };
+
 
       const {data} = await api.post(POST_CREATE, payload);
       notify('Post yaratildi: #' + (data?.id ?? '—'));

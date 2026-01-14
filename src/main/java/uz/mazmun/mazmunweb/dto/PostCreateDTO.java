@@ -3,6 +3,7 @@ package uz.mazmun.mazmunweb.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uz.mazmun.mazmunweb.enums.Status;
 
 import java.util.List;
 
@@ -16,5 +17,6 @@ public class PostCreateDTO {
     private Integer coverMediaId;     // /api/media/commit dan keladi
     private List<Integer> categoryIds;
     private String hashTag;
+    private Status status;
 }
 

@@ -82,7 +82,7 @@ public class PostService {
         p.setSlug(generateUniqueSlug(dto.getTitle()));
         p.setSummary(dto.getSummary());
         p.setContent(dto.getContent() == null ? "" : dto.getContent());
-        p.setStatus(Status.PUBLISHED);
+        p.setStatus(dto.getStatus());
         p.setPublishedAt(LocalDateTime.now());
 
         if (dto.getCoverMediaId() != null) {
