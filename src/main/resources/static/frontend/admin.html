@@ -579,7 +579,7 @@
 
             <div class="col-12 d-flex gap-2">
               <button id="postCreateBtn" class="btn btn-primary" type="submit">
-                <i class="bi bi-plus-lg me-1"></i>Create post
+                <i class="bi bi-plus-lg me-1"></i>Post yaratish
                 <button id="postLoadBtn" class="btn btn-outline-secondary" type="button">Postlar ro'yxati</button>
                 <button id="postHideBtn" class="btn btn-outline-secondary d-none" type="button">Yashirish</button>
               </button>
@@ -2497,10 +2497,10 @@
 
   async function loadPosts(page=0){
     try{
-      postPage = page;
       const {data} = await api.get(POST_LIST(postPage, postSize));
       const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data)? data : []);
-      postTotalPages = (data?.totalPages ?? 1);
+      postPage = data?.page?.number ?? page;
+      postTotalPages = data?.page?.totalPages ?? 1;
 
       $postTbody.innerHTML = '';
       items.forEach(p=>{
