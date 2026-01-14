@@ -305,6 +305,11 @@
       }
     }
 
+    #gridSection{ scroll-margin-top: 110px; } /* navbar + spacer uchun */
+    @media (max-width: 991.98px){
+      #gridSection{ scroll-margin-top: 130px; }
+    }
+
 
     /* ===== PAGE HERO ===== */
     .page-hero{ background:#f7f7f7; }
@@ -590,7 +595,7 @@
 </section>
 
 <!-- ===== GRID ===== -->
-<section class="py-4">
+<section class="py-4" id="gridSection">
   <div class="container">
     <div class="d-flex align-items-center mb-2">
       <h2 class="hero-line">
@@ -909,97 +914,144 @@
     const countInfo = document.getElementById('countInfo');
 
     grid.innerHTML = '<div class="col-12 text-center text-muted py-3">Yuklanmoqda…</div>';
-    pager.innerHTML = ''; empty.classList.add('d-none');
-
-    // HERO bilan bir xil postni gridda ko‘rsatmaymiz.
-    // Faqat: 1-sahifa (page=0), default sort, filtr yo‘q paytda.
-    const shouldExcludeHero =
-            !!latestHeroKey &&
-            state.page === 0 &&
-            !state.q &&
-            !state.category &&
-            String(state.sort || '').toLowerCase() === 'publishedat,desc';
+    pager.innerHTML = '';
+    empty.classList.add('d-none');
 
     const params = new URLSearchParams();
-    params.set('page', state.page);
-
-    // page=0 bo‘lsa 1 ta ko‘proq olib kelamiz, keyin hero postni olib tashlab yana 9 ta ko‘rsatamiz
-    params.set('size', shouldExcludeHero ? (state.size + 1) : state.size);
-
+    params.set('page', String(state.page));
     params.set('sort', state.sort);
     if(state.q) params.set('q', state.q);
     if(state.category) params.set('category', state.category);
 
-    const {data} = await axios.get(`${API_BASE}?${params.toString()}`);
+    // ✅ Backendga tegmaymiz:
+    // page=0 bo‘lsa 1 ta ko‘proq olib kelamiz (hero'ni olib tashlab ham 9 ta qolsin)
+    const wantExcludeHero =
+            state.page === 0 && !state.q && !state.category && latestHeroKey;
 
-    let items = Array.isArray(data?.content)?data.content:(Array.isArray(data)?data:[]);
-    const total = data?.totalElements ?? items.length;
-    const totalPages = data?.totalPages ?? 1;
-    const number = data?.number ?? state.page;
+    const requestSize = wantExcludeHero ? (state.size + 1) : state.size;
+    params.set('size', String(requestSize));
 
-    // HERO postni griddan chiqarib tashlaymiz
-    if (shouldExcludeHero) {
-      items = items.filter(p => postKey(p) !== latestHeroKey).slice(0, state.size);
+    let data;
+    try {
+      const res = await axios.get(`${API_BASE}?${params.toString()}`);
+      data = res.data;
+    } catch (e) {
+      grid.innerHTML = '<div class="col-12 text-center text-danger py-3">Xatolik: postlar yuklanmadi.</div>';
+      return;
     }
 
+    let items = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+
+    // ✅ HERO postni frontda olib tashlaymiz
+    if (wantExcludeHero) {
+      items = items.filter(p => postKey(p) !== latestHeroKey);
+      // ✅ baribir 9 ta bo‘lsin
+      items = items.slice(0, state.size);
+    }
+
+    // totals (frontend-only bo‘lgani uchun bu 100% aniq bo‘lmasligi mumkin)
+    const total = data?.totalElements ?? data?.page?.totalElements ?? items.length;
+    const totalPages = data?.totalPages ?? data?.page?.totalPages ?? 1;
+    const number = data?.number ?? data?.page?.number ?? state.page;
+
     grid.innerHTML = '';
+
     items.forEach(p=>{
       const thumb = getMediaUrl(p.coverUrl||p.cover||p.photo||p.media||p.imageKey||p.mediaId||p.photoId);
       const href = `/post?slug=${encodeURIComponent(p.slug||p.id)}`;
       const cardId = `thumb-${(p.slug||p.id||Math.random()).toString().replace(/[^a-z0-9]/gi,'')}`;
+
       grid.insertAdjacentHTML('beforeend', `
-        <div class="col-12 col-md-6 col-lg-4">
-          <article class="post-card h-100 d-flex flex-column">
-            <a href="${href}" class="d-block"><div id="${cardId}" class="post-thumb"></div></a>
-            <div class="p-3 d-flex flex-column flex-grow-1">
-              <div class="post-meta mb-1">${formatDate(p.publishedAtIso ||p.publishedAt||p.createdAt)} </div>
-              <h5 class="fw-semibold line-clamp-2">${p.title||'Untitled'}</h5>
-              <p class="text-muted small mt-1 line-clamp-3">${excerpt(p.summary||p.content||p.description,130)}</p>
-              <div class="mt-auto">
-                <a class="btn btn-sm btn-outline-primary rounded-pill" href="${href}">Batafsil <i class="bi bi-arrow-up-right ms-1"></i></a>
-              </div>
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="post-card h-100 d-flex flex-column">
+          <a href="${href}" class="d-block"><div id="${cardId}" class="post-thumb"></div></a>
+          <div class="p-3 d-flex flex-column flex-grow-1">
+            <div class="post-meta mb-1">${formatDate(p.publishedAtIso || p.publishedAt || p.createdAt)} </div>
+            <h5 class="fw-semibold line-clamp-2">${p.title || 'Untitled'}</h5>
+            <p class="text-muted small mt-1 line-clamp-3">${excerpt(p.summary || p.content || p.description, 130)}</p>
+            <div class="mt-auto">
+              <a class="btn btn-sm btn-outline-primary rounded-pill" href="${href}">
+                Batafsil <i class="bi bi-arrow-up-right ms-1"></i>
+              </a>
             </div>
-          </article>
-        </div>
-      `);
+          </div>
+        </article>
+      </div>
+    `);
+
       setBgWithFallback(document.getElementById(cardId), thumb);
     });
 
-    countInfo.textContent = `${(total||0).toLocaleString('ru-RU')} ta maqola`;
-    if(items.length===0) empty.classList.remove('d-none'); else renderPager(pager, number, totalPages);
+    // ✅ Agar grid bo‘sh bo‘lsa (faqat 1 ta post bo‘lsa) — empty ko‘rsatamiz
+    if (items.length === 0) {
+      countInfo.textContent = '';
+      empty.classList.remove('d-none');
+      pager.innerHTML = '';
+    } else {
+      countInfo.textContent = `${(total||0).toLocaleString('ru-RU')} ta maqola`;
+      renderPager(pager, number, totalPages);
+    }
 
     renderActiveChips();
   }
 
+
+
   function renderPager(el, page, totalPages){
     el.innerHTML = '';
+
     const mk = (p, label, disabled=false, active=false)=>{
       const li = document.createElement('li');
       li.className = `page-item ${disabled?'disabled':''} ${active?'active':''}`;
+
       const a = document.createElement('a');
-      a.className = 'page-link'; a.href = '#'; a.textContent = label;
-      a.onclick = (e)=>{ e.preventDefault(); if(disabled) return; goPage(p); };
-      li.appendChild(a); el.appendChild(li);
+      a.className = 'page-link';
+      a.href = `?page=${p}`;   // 👈 MUHIM FIX
+      a.textContent = label;
+
+      a.onclick = (e)=>{
+        e.preventDefault();
+        if(disabled) return;
+        goPage(p);
+      };
+
+      li.appendChild(a);
+      el.appendChild(li);
     };
+
     mk(page-1,'«', page<=0);
-    for(let i=Math.max(0,page-2); i<Math.min(totalPages,page+3); i++) mk(i,(i+1),false,i===page);
+    for(let i=Math.max(0,page-2); i<Math.min(totalPages,page+3); i++){
+      mk(i,(i+1),false,i===page);
+    }
     mk(page+1,'»', page>=totalPages-1);
   }
-  function goPage(p){
-    state.page = Math.max(0,p);
+
+  async function goPage(p){
+    state.page = Math.max(0, p);
     setQuery({page:state.page,size:state.size,q:state.q,category:state.category,sort:state.sort});
-    loadGrid();
+
+    await loadGrid();
+
+    // ✅ Grid tepasiga qaytarish
+    const topEl = document.getElementById('gridSection');
+    if (topEl) topEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+
   /* ===== FILTER EVENTS ===== */
-  $frm?.addEventListener('submit', (e)=>{
+  $frm?.addEventListener('submit', async (e)=>{
     e.preventDefault();
     state.q = ($q?.value || '').trim();
     state.category = ($cat?.value || '');
     state.page = 0;
+
     setQuery({page:0,size:state.size,q:state.q,category:state.category,sort:state.sort});
-    loadGrid();
+
+    await loadGrid();
+
+    document.getElementById('gridSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+
   document.getElementById('postFilterReset')?.addEventListener('click', ()=>{
     if($q) $q.value = ''; if($cat) $cat.value = '';
     state.q=''; state.category=''; state.page=0;

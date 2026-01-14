@@ -580,10 +580,17 @@
             <div class="col-12 d-flex gap-2">
               <button id="postCreateBtn" class="btn btn-primary" type="submit">
                 <i class="bi bi-plus-lg me-1"></i>Post yaratish
-                <button id="postLoadBtn" class="btn btn-outline-secondary" type="button">Postlar ro'yxati</button>
-                <button id="postHideBtn" class="btn btn-outline-secondary d-none" type="button">Yashirish</button>
+              </button>
+
+              <button id="postLoadBtn" class="btn btn-outline-secondary" type="button">
+                Postlar ro'yxati
+              </button>
+
+              <button id="postHideBtn" class="btn btn-outline-secondary d-none" type="button">
+                Yashirish
               </button>
             </div>
+
           </form>
 
           <!-- table -->
@@ -2495,53 +2502,67 @@
     document.getElementById('postLoadBtn').classList.remove('d-none');
   };
 
-  async function loadPosts(page=0){
+  async function loadPosts(page = 0){
     try{
-      const {data} = await api.get(POST_LIST(postPage, postSize));
-      const items = Array.isArray(data?.content) ? data.content : (Array.isArray(data)? data : []);
-      postPage = data?.page?.number ?? page;
-      postTotalPages = data?.page?.totalPages ?? 1;
+      const { data } = await api.get(POST_LIST(page, postSize));
+      const items = Array.isArray(data?.content) ? data.content : [];
 
+      // 1️⃣ DOM tozalash
       $postTbody.innerHTML = '';
-      items.forEach(p=>{
-        const img  = getMediaUrl(p.coverUrl || p.coverMediaId || p.photo);
-        const pub  = p.publishedAt ? new Date(p.publishedAt).toLocaleString() : '';
-        const isPub= p.status === 'PUBLISHED';
-        const btn  = isPub ? 'btn-warning' : 'btn-success';
-        const txt  = isPub ? 'Draftga qaytarish' : 'Publish';
 
-        $postTbody.insertAdjacentHTML('beforeend', `
-        <tr class="row-click" data-id="${p.id}" data-slug="${p.slug || ''}">
-          <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.webp'"></td>
-          <td class="fw-semibold post-title-line">${p.title || '—'}</td>
-          <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>
-          <td class="small">${pub}</td>
-          <td class="td-actions">
-            <button class="btn btn-sm ${btn}" data-action="toggle" data-id="${p.id}" data-status="${p.status}">${txt}</button>
-            <button class="btn btn-sm btn-dark" data-action="edit" data-id="${p.id}">Edit</button>
-            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}">Delete</button>
+      // 2️⃣ Agar bo‘sh bo‘lsa
+      if(items.length === 0){
+        $postTbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center text-muted py-4">
+            Hali postlar yo‘q.
           </td>
-        </tr>
-      `);
-      });
+        </tr>`;
+      } else {
+        // 3️⃣ Render
+        items.forEach(p=>{
+          const img  = getMediaUrl(p.coverUrl || p.coverMediaId || p.photo);
+          const pub  = p.publishedAt ? new Date(p.publishedAt).toLocaleString() : '';
+          const isPub= p.status === 'PUBLISHED';
+          const btn  = isPub ? 'btn-warning' : 'btn-success';
+          const txt  = isPub ? 'Draftga qaytarish' : 'Publish';
 
-      if(items.length===0){
-        $postTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Hali postlar yo‘q.</td></tr>`;
+          $postTbody.insertAdjacentHTML('beforeend', `
+          <tr class="row-click" data-id="${p.id}" data-slug="${p.slug || ''}">
+            <td><img src="${img}" class="thumb-sm" onerror="this.src='/files/team.webp'"></td>
+            <td class="fw-semibold post-title-line">${p.title || '—'}</td>
+            <td>${isPub ? '<span class="badge bg-success">PUBLISHED</span>' : '<span class="badge bg-secondary">DRAFT</span>'}</td>
+            <td class="small">${pub}</td>
+            <td class="td-actions">
+              <button class="btn btn-sm ${btn}" data-action="toggle" data-id="${p.id}" data-status="${p.status}">${txt}</button>
+              <button class="btn btn-sm btn-dark" data-action="edit" data-id="${p.id}">Edit</button>
+              <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${p.id}">Delete</button>
+            </td>
+          </tr>
+        `);
+        });
       }
 
-      // show wrap + pager
+      // 4️⃣ STATE update
+      postPage = page;
+      postTotalPages = data?.page?.totalPages ?? 1;
+
+      // 5️⃣ Pager UI
+      $postPrev.disabled = (postPage <= 0);
+      $postNext.disabled = (postPage >= postTotalPages - 1);
+      $postPageInfo.textContent = `Page ${postPage + 1} / ${postTotalPages}`;
+
+      // show wrap
       $postTableWrap.classList.remove('d-none');
       document.getElementById('postHideBtn').classList.remove('d-none');
       document.getElementById('postLoadBtn').classList.add('d-none');
 
-      $postPrev.disabled = (postPage<=0);
-      $postNext.disabled = (postPage>=postTotalPages-1);
-      $postPageInfo.textContent = `Page ${postPage+1} / ${postTotalPages}`;
     }catch(e){
       console.error(e);
       alert('Postlarni yuklashda xato.');
     }
   }
+
 
   $postPrev.onclick = ()=> loadPosts(Math.max(0, postPage-1));
   $postNext.onclick = ()=> loadPosts(postPage+1);
