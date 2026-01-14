@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,12 +34,17 @@ public class PostAdminController {
     private final PostMapper postMapper;
 
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Page<PostResDTO> list(@RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "20") int size) {
-        var pr = PageRequest.of(page, size, org.springframework.data.domain.Sort.by("createdAt").descending());
-        return postService.listAll(pr).map(postMapper::toDto);
+    @GetMapping
+    public Page<PostResDTO> list(
+            @PageableDefault(
+                    size = 10,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable
+    ) {
+        return postService.listAll(pageable).map(postMapper::toDto);
     }
+
 
     @GetMapping(value="/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostResDTO> getOne(@PathVariable Integer id){

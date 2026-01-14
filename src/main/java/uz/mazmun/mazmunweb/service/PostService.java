@@ -58,8 +58,7 @@ public class PostService {
 
 
 
-    public Page<Post> listAll(org.springframework.data.domain.Pageable pageable){
-//        return postRepo.findAll(pageable);
+    public Page<Post> listAll(Pageable pageable) {
         return postRepo.findAllByDeletedFalse(pageable);
     }
     public Post get(Integer id){ return postRepo.findById(id).orElseThrow(); }
